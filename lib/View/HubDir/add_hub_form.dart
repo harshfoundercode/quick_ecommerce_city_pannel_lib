@@ -1,0 +1,441 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
+
+class AddHubForm extends StatefulWidget {
+  const AddHubForm({super.key});
+
+  @override
+  State<AddHubForm> createState() => _AddHubFormState();
+}
+
+class _AddHubFormState extends State<AddHubForm> {
+  final _formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AddHubViewModel>(
+      builder: (context, ahvm, child) {
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: Sizes.screenWidth * 0.02,
+            vertical: Sizes.screenHeight * 0.02,
+          ),
+          width: Sizes.screenWidth,
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Section
+                  CustomWidgets.pageHeader(
+                    title: "Add New Hub",
+                    subtitle:
+                    "Configure a new delivery hub and set its operational area in the city",
+                  ),
+
+                  CustomWidgets.verticalSpace(0.03),
+
+                  // Main Form Card
+                  _buildBasicInformationCard(ahvm),
+
+                  CustomWidgets.verticalSpace(0.02),
+
+                  // Location Card
+                  _buildLocationCard(ahvm),
+
+                  CustomWidgets.verticalSpace(0.03),
+
+                  // Action Buttons
+                  _buildActionButtons(ahvm),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBasicInformationCard(AddHubViewModel ahvm) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Card Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: ColorConst.primaryExtraLightGreen,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: ColorConst.primaryGreen.withValues(alpha:0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.info_outline,
+                    color: ColorConst.primaryGreen,
+                    size: 24,
+                  ),
+                ),
+                CustomWidgets.horizontalSpace(0.02),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText.bold(
+                        "Basic Information",
+                        fontSize: 18,
+                      ),
+                      CustomText.medium(
+                        "Essentials details to identify and manage this hub",
+                        color: ColorConst.textGrey,
+                        fontSize: 12,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Form Fields
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _buildField(
+                  label: "Hub Name",
+                  controller: ahvm.hubNameController,
+                  icon: Icons.hub,
+                  hint: "Enter hub name (e.g., Hub - Gomti Nagar)",
+
+                ),
+
+                CustomWidgets.verticalSpace(0.03),
+
+                _buildField(
+                  label: "Hub Manager Name",
+                  controller: ahvm.managerNameController,
+                  icon: Icons.manage_accounts,
+                  hint: "Enter full name of hub manager",),
+
+                CustomWidgets.verticalSpace(0.03),
+
+                _buildField(
+                  label: "Contact Number",
+                  controller: ahvm.managerContactController,
+                  icon: Icons.phone_outlined,
+                  hint: "Enter 10-digit contact number",
+                  keyboardType: TextInputType.phone,
+                  maxLength: 10,
+                ),
+
+                CustomWidgets.verticalSpace(0.03),
+
+                _buildDropdownField(ahvm),
+
+                CustomWidgets.verticalSpace(0.03),
+
+                _buildField(
+                  label: "Maximum Capacity (Orders/Day)",
+                  controller: ahvm.maxOrdersController,
+                  icon: Icons.speed_outlined,
+                  hint: "Enter maximum orders per day",
+                  keyboardType: TextInputType.number,
+                ),
+                CustomWidgets.verticalSpace(0.03),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationCard(AddHubViewModel ahvm) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Card Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: ColorConst.primaryExtraLightGreen,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: ColorConst.primaryGreen.withValues(alpha:0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.location_on_outlined,
+                    color: ColorConst.primaryGreen,
+                    size: 24,
+                  ),
+                ),
+                CustomWidgets.horizontalSpace(0.02),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText.bold(
+                        "Location & Coverage Area",
+                        fontSize: 18,
+                      ),
+                      CustomText.medium(
+                        "Physical address of the hub and the area it serves",
+                        color: ColorConst.textGrey,
+                        fontSize: 12,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Form Fields
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _buildField(
+                  label: "Street Address",
+                  controller: ahvm.locationController,
+                  icon: Icons.home_outlined,
+                  hint: "Enter complete street address",
+                ),
+
+                CustomWidgets.verticalSpace(0.03),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildField(
+                        label: "City",
+                        controller: ahvm.cityController,
+                        icon: Icons.location_city,
+                        hint: "Enter city",
+                      ),
+                    ),
+                    CustomWidgets.horizontalSpace(0.02),
+                    Expanded(
+                      child: _buildField(
+                        label: "State",
+                        controller: ahvm.stateController,
+                        icon: Icons.map_outlined,
+                        hint: "Enter state",
+                      ),
+                    ),
+                  ],
+                ),
+
+                CustomWidgets.verticalSpace(0.03),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildField(
+                        label: "Pincode",
+                        controller: ahvm.pincodeController,
+                        icon: Icons.numbers,
+                        hint: "Enter 6-digit pincode",
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                      ),
+                    ),
+                    CustomWidgets.horizontalSpace(0.02),
+                    Expanded(
+                      child: _buildField(
+                        label: "Coverage Radius (km)",
+                        controller: ahvm.coverageRadiusController,
+                        icon: Icons.radar_outlined,
+                        hint: "Enter coverage radius",
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                CustomWidgets.verticalSpace(0.03),
+              ],
+            ),
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    String? hint,
+    TextInputType? keyboardType,
+    int? maxLength,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(icon, size: 16, color: ColorConst.primaryGreen),
+              CustomWidgets.horizontalSpace(0.005),
+              CustomText.medium(label, fontSize: 14),
+              const Text(" *", style: TextStyle(color: Colors.red, fontSize: 14)),
+            ],
+          ),
+        ),
+        CustomTextField(
+          controller: controller,
+          hintText: hint ?? label,
+          keyboardType: keyboardType,
+          maxLength: maxLength,
+          validator: validator,
+          borderSide: BorderSide(color: ColorConst.borderColor),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          style: TextStyle(color: ColorConst.textGrey, fontSize: 10),
+          hintSize: 14,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField(AddHubViewModel ahvm) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(Icons.engineering_outlined, size: 16, color: ColorConst.primaryGreen),
+              CustomWidgets.horizontalSpace(0.005),
+              CustomText.medium("Operating Status", fontSize: 14),
+              const Text(" *", style: TextStyle(color: Colors.red, fontSize: 14)),
+            ],
+          ),
+        ),
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: ColorConst.borderColor),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              dropdownColor: ColorConst.white,
+              value: ahvm.selectedStatus,
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down, color: ColorConst.textGrey),
+              items: ahvm.statusOptions.map((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ahvm.getStatusColor(item),
+                        ),
+                      ),
+                      CustomWidgets.horizontalSpace(0.01),
+                      CustomText.medium(item, fontSize: 14),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) => ahvm.updateSelectedStatus(value),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(AddHubViewModel ahvm) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        AppBtn(
+          width: Sizes.screenWidth*0.1,
+          height: Sizes.screenHeight*0.05,
+          onTap: () {
+            _formKey.currentState?.reset();
+            ahvm.clearForm();
+          },
+          title:"Clear All",
+          titleColor: ColorConst.white,
+          color: ColorConst.textGrey,
+        ),
+        CustomWidgets.horizontalSpace(0.01),
+        AppBtn(
+          width: Sizes.screenWidth*0.1,
+          height: Sizes.screenHeight*0.05,
+
+          onTap: () {
+            if (_formKey.currentState!.validate()) {
+              ahvm.saveHub(context);
+            }
+          },
+          title: "Create Hub",
+        )
+      ],
+    );
+  }
+}
