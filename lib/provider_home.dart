@@ -1,14 +1,20 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_order_from_hub_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/auth_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_zone_list_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/create_zone_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/dispute_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/edit_hub_details_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_desktop_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/notification_veiw_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/order_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/profile_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/revenue_view_model.dart';
 
 class ProvidersHome{
@@ -23,5 +29,11 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => DisputeViewModel()),
     ChangeNotifierProvider(create: (context) => NotificationViewModel()),
     ChangeNotifierProvider(create: (context) => HubManagementViewModel()),
+    ChangeNotifierProvider(create: (context) => LoginViewModel()),
+    ChangeNotifierProvider(create: (context) => ProfileViewModel()),
+    ChangeNotifierProvider(create: (context) => CityZoneListViewModel()),
+    ChangeNotifierProvider(create: (context) => CreateZoneViewModel()),
+    ChangeNotifierProvider(create: (context) => UserViewModel()),
+    ChangeNotifierProvider(create: (context) => HubZoneListViewModel()),
   ];
 }

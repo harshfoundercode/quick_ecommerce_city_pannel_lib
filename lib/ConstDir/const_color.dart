@@ -27,4 +27,14 @@ class ColorConst {
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);
   static const Color info = Color(0xFF3B82F6);
+
+  static const  criticalRed = Color(0xffFF3B30);
+  static const  criticalRedLight = Color(0xffFFF6F7);
+  static const  criticalRedLightText = Color(0xffFF3B30);
+  static const  criticalYellow = Color(0xffFFCC00);
+  static const  criticalYellowLight = Color(0xffFFFDF6);
+  static const  criticalYellowLightText = Color(0xffBC9704);
+  static const  criticalBlue = Color(0xff007AFF);
+  static const  criticalBlueLight = Color(0xffF5FAFE);
+  static const  criticalBlueLightText = Color(0xff007AFF);
 }

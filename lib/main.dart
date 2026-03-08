@@ -6,7 +6,10 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/splash_services.dart';
 import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +29,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
+  final SplashServices _splashServices = SplashServices();
+
+  @override
+  void initState() {
+    _splashServices.checkAuthentication(context);
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Sizes.init(context);
@@ -39,6 +51,7 @@ class _MyAppState extends State<MyApp> {
           scaffoldBackgroundColor: ColorConst.bgColor,
           fontFamily: "Poppins"
         ),
+        navigatorKey: navigatorKey,
         initialRoute: RoutesName.adminLoginScreen,
         onGenerateRoute: (settings) {
           if (settings.name != null) {

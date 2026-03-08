@@ -6,6 +6,7 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.da
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/MapDir/map_picker.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
 
 class AddHubForm extends StatefulWidget {
@@ -15,9 +16,11 @@ class AddHubForm extends StatefulWidget {
   State<AddHubForm> createState() => _AddHubFormState();
 }
 
+
 class _AddHubFormState extends State<AddHubForm> {
   final _formKey = GlobalKey<FormState>();
   final ScrollController _scrollController = ScrollController();
+  bool isZoneCreated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,25 +47,134 @@ class _AddHubFormState extends State<AddHubForm> {
                   ),
 
                   CustomWidgets.verticalSpace(0.03),
+                  /// STEP 1 : ZONE SETUP
+                  if (!isZoneCreated) _buildZoneSetup(ahvm),
 
-                  // Main Form Card
-                  _buildBasicInformationCard(ahvm),
-
-                  CustomWidgets.verticalSpace(0.02),
-
-                  // Location Card
-                  _buildLocationCard(ahvm),
-
-                  CustomWidgets.verticalSpace(0.03),
-
-                  // Action Buttons
-                  _buildActionButtons(ahvm),
+                  /// STEP 2 : HUB FORM
+                  if (isZoneCreated) ...[
+                    _buildBasicInformationCard(ahvm),
+                    CustomWidgets.verticalSpace(0.02),
+                    _buildLocationCard(ahvm),
+                    CustomWidgets.verticalSpace(0.03),
+                    _buildActionButtons(ahvm),
+                  ],
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildZoneSetup(AddHubViewModel ahvm) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          CustomText.bold("Create Delivery Zone", fontSize: 18),
+
+          CustomWidgets.verticalSpace(0.02),
+
+          _buildField(
+            label: "Hub Name",
+            controller: ahvm.hubNameController,
+            icon: Icons.hub,
+            hint: "Enter hub name",
+          ),
+
+          CustomWidgets.verticalSpace(0.02),
+
+          _buildField(
+            label: "Radius (KM)",
+            controller: ahvm.coverageRadiusController,
+            icon: Icons.radar,
+            hint: "Enter radius",
+            keyboardType: TextInputType.number,
+          ),
+
+          CustomWidgets.verticalSpace(0.02),
+
+          /// MAP PICKER BUTTON
+          GestureDetector(
+            onTap: () async {
+
+              final result = await showDialog(
+                context: context,
+                builder: (_) => const MapPickerPopup(),
+              );
+
+              if (result != null) {
+                ahvm.locationController.text = result["address"];
+                ahvm.latitudeController.text = result["lat"].toString();
+                ahvm.longitudeController.text = result["lng"].toString();
+              }
+            },
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: ColorConst.borderColor),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: const Row(
+                children: [
+                  Icon(Icons.map),
+                  SizedBox(width: 10),
+                  Text("Select Address From Map"),
+                ],
+              ),
+            ),
+          ),
+
+          CustomWidgets.verticalSpace(0.02),
+
+          _buildField(
+            label: "Latitude",
+            controller: ahvm.latitudeController,
+            icon: Icons.location_on,
+          ),
+
+          CustomWidgets.verticalSpace(0.02),
+
+          _buildField(
+            label: "Longitude",
+            controller: ahvm.longitudeController,
+            icon: Icons.location_on,
+          ),
+
+          CustomWidgets.verticalSpace(0.03),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppBtn(
+              width: Sizes.screenWidth * 0.1,
+              height: Sizes.screenHeight * 0.05,
+              title: "Next",
+              onTap: () {
+                ahvm.hubZoneCreateApi(context).whenComplete((){
+                  setState(() {
+                    isZoneCreated = true;
+                  });
+                });
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
