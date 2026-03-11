@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/orders_details_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/orders_model.dart';
 
 class AllOrdersList extends StatefulWidget {
-  const AllOrdersList({super.key});
+  final List<Orders>? pvm;
+  const AllOrdersList({super.key, this.pvm});
 
   @override
   State<AllOrdersList> createState() => AllOrdersListState();
@@ -15,17 +15,35 @@ class AllOrdersList extends StatefulWidget {
 class AllOrdersListState extends State<AllOrdersList> {
   @override
   Widget build(BuildContext context) {
+    final orders = widget.pvm ?? [];
+    if (orders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.pending_actions_rounded, size: 48, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              "No Orders Found",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.all(16),
-      itemCount: 10,
+      itemCount: widget.pvm?.length,
       itemBuilder: (context, index) {
-        return _buildOrderListItem(index);
+        final data = widget.pvm![index];
+        return _buildOrderListItem(index,data);
       },
     );
   }
 
-  Widget _buildOrderListItem(int index) {
+  Widget _buildOrderListItem(int index, Orders data) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
@@ -35,26 +53,15 @@ class AllOrdersListState extends State<AllOrdersList> {
         children: [
           Expanded(
             flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText.semiBold(
-                  "#ORD-${2024000 + index}",
-                  fontSize: 13,
-                  color: Colors.grey.shade900,
-                ),
-                CustomWidgets.verticalSpace(0.01),
-                CustomText.medium(
-                  "2 items",
-                  fontSize: 11,
-                  color: Colors.grey.shade500,
-                ),
-              ],
+            child: CustomText.semiBold(
+              data.orderNo ?? "-",
+              fontSize: 13,
+              color: Colors.grey.shade900,
             ),
           ),
           Expanded(
             child: CustomText.semiBold(
-              "Rahul Sharma",
+              data.customerName ?? "-",
               fontSize: 13,
               overflow: TextOverflow.ellipsis,
             ),
@@ -70,13 +77,13 @@ class AllOrdersListState extends State<AllOrdersList> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
               decoration: BoxDecoration(
-                color: _getStatusColor(index).withValues(alpha:0.1),
+                color: _getStatusColor(data.status ?? "0").withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: CustomText.semiBold(
-                _getStatusText(index),
+                _getStatusText(data.status ?? "0"),
                 fontSize: 11,
-                color: _getStatusColor(index),
+                color: _getStatusColor(data.status ?? "0"),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -88,7 +95,7 @@ class AllOrdersListState extends State<AllOrdersList> {
                 IconButton(
                   icon: Icon(CupertinoIcons.eye_fill, size: 18, color: Colors.grey.shade600),
                   onPressed: () {
-                    openRightDrawer(context, OrderDetailsView(index:index));
+                    // openRightDrawer(context, OrderDetailsView(index:index));
                   },
                 ),
               ],
@@ -109,6 +116,10 @@ class AllOrdersListState extends State<AllOrdersList> {
         return const Color(0xFFF59E0B);
       case 3:
         return const Color(0xFFEF4444);
+      case 4:
+        return Colors.teal;
+      case 5:
+        return Colors.orange;
       default:
         return Colors.grey;
     }
@@ -117,15 +128,19 @@ class AllOrdersListState extends State<AllOrdersList> {
   String _getStatusText(int index) {
     switch (index % 4) {
       case 0:
-        return "Delivered";
+        return "Placed";
       case 1:
-        return "In Transit";
+        return "Confirmed";
       case 2:
-        return "Pending";
+        return "Packed";
       case 3:
-        return "Cancelled";
+        return "Dispatched";
+      case 4:
+        return "Out for Delivery";
+      case 5:
+        return "Delivered";
       default:
-        return "Unknown";
+        return "Cancelled";
     }
   }
 }

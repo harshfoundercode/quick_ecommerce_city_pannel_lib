@@ -10,5 +10,6 @@ class ApiUrl {
   static const String hubManagerCreateUrl = "${baseurl}citymanagerapi/hubmanager/create";
   static const String hubProfileUrl = "${baseurl}api/hubprofile";
   static const String hubZoneListUrl = "${baseurl}api/hubzone_list";
+  static const String orderListUrl = "${baseurl}api/orders";
 
 }

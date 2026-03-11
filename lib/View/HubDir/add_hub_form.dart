@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/MapDir/map_picker.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
@@ -20,7 +22,6 @@ class AddHubForm extends StatefulWidget {
 class _AddHubFormState extends State<AddHubForm> {
   final _formKey = GlobalKey<FormState>();
   final ScrollController _scrollController = ScrollController();
-  bool isZoneCreated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +49,10 @@ class _AddHubFormState extends State<AddHubForm> {
 
                   CustomWidgets.verticalSpace(0.03),
                   /// STEP 1 : ZONE SETUP
-                  if (!isZoneCreated) _buildZoneSetup(ahvm),
+                  if (!ahvm.isZoneCreated) _buildZoneSetup(ahvm),
 
                   /// STEP 2 : HUB FORM
-                  if (isZoneCreated) ...[
+                  if (ahvm.isZoneCreated) ...[
                     _buildBasicInformationCard(ahvm),
                     CustomWidgets.verticalSpace(0.02),
                     _buildLocationCard(ahvm),
@@ -165,12 +166,17 @@ class _AddHubFormState extends State<AddHubForm> {
               height: Sizes.screenHeight * 0.05,
               title: "Next",
               onTap: () {
-                ahvm.hubZoneCreateApi(context).whenComplete((){
-                  setState(() {
-                    isZoneCreated = true;
-                  });
-                });
-              },
+                if(ahvm.hubNameController.text.isEmpty){
+                  CustomSnackBar.show(context, message: "Enter Hub Name", type: SnackBarType.error);
+                } else if(ahvm.coverageRadiusController.text.isEmpty){
+                  CustomSnackBar.show(context, message: "Enter hub coverage radius", type: SnackBarType.error);
+                } else if(ahvm.latitudeController.text.isEmpty){
+                  CustomSnackBar.show(context, message: "Enter latitude coordinates", type: SnackBarType.error);
+                } else if(ahvm.longitudeController.text.isEmpty){
+                  CustomSnackBar.show(context, message: "Enter longitude coordinates", type: SnackBarType.error);
+                } else {
+                ahvm.hubZoneCreateApi(context);
+              }}
             ),
           ),
         ],
@@ -248,6 +254,7 @@ class _AddHubFormState extends State<AddHubForm> {
                   label: "Hub Name",
                   controller: ahvm.hubNameController,
                   icon: Icons.hub,
+
                   hint: "Enter hub name (e.g., Hub - Gomti Nagar)",
 
                 ),
@@ -273,23 +280,140 @@ class _AddHubFormState extends State<AddHubForm> {
 
                 CustomWidgets.verticalSpace(0.03),
 
-                _buildDropdownField(ahvm),
+                _buildField(
+                  label: "Aadhaar Number",
+                  controller: ahvm.managerAdharNumber,
+                  icon: Icons.post_add_sharp,
+                  hint: "Enter manager aadhaar number",
+                  keyboardType: TextInputType.phone,
+                  maxLength: 15,
+                ),
+
+                CustomWidgets.verticalSpace(0.03),
+                _buildField(
+                  label: "PanCard Number",
+                  controller: ahvm.managerPanNumber,
+                  icon: Icons.post_add_sharp,
+                  hint: "Enter manager pancard number",
+                  maxLength: 15,
+                ),
+
+                CustomWidgets.verticalSpace(0.03),
+                _buildField(
+                  label: "Manager Email",
+                  controller: ahvm.managerEmailController,
+                  icon: Icons.post_add_sharp,
+                  hint: "Enter manager email credential",
+                ),
 
                 CustomWidgets.verticalSpace(0.03),
 
                 _buildField(
-                  label: "Maximum Capacity (Orders/Day)",
-                  controller: ahvm.maxOrdersController,
-                  icon: Icons.speed_outlined,
-                  hint: "Enter maximum orders per day",
-                  keyboardType: TextInputType.number,
+                  label: "Manager Email Password",
+                  controller: ahvm.managerPasswordController,
+                  icon: Icons.post_add_sharp,
+                  hint: "Enter manager email password credential",
                 ),
+
                 CustomWidgets.verticalSpace(0.03),
+
+                _buildManagerImagePicker(ahvm),
+
+                CustomWidgets.verticalSpace(0.03),
+                // _buildDropdownField(ahvm),
+                //
+                // CustomWidgets.verticalSpace(0.03),
+
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+  Widget _buildManagerImagePicker(AddHubViewModel ahvm) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        Row(
+          children: [
+            Icon(Icons.image, size: 16, color: ColorConst.primaryGreen),
+            CustomWidgets.horizontalSpace(0.005),
+            CustomText.medium("Manager Image", fontSize: 14),
+          ],
+        ),
+
+        CustomWidgets.verticalSpace(0.01),
+
+        Row(
+          children: [
+
+            /// IMAGE PREVIEW
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: ColorConst.borderColor),
+              ),
+              child: ahvm.managerImageFile != null
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.file(
+                  ahvm.managerImageFile!,
+                  fit: BoxFit.cover,
+                ),
+              )
+                  : const Icon(Icons.person,size:30),
+            ),
+
+            CustomWidgets.horizontalSpace(0.02),
+
+            /// PICK IMAGE BUTTON
+            ElevatedButton.icon(
+              icon: const Icon(Icons.upload),
+              label: const Text("Upload Image"),
+              onPressed: () {
+                _showImagePicker(context, ahvm);
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  void _showImagePicker(BuildContext context, AddHubViewModel ahvm) {
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+
+        return SafeArea(
+          child: Wrap(
+            children: [
+
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Camera"),
+                onTap: () {
+                  ahvm.pickManagerImage(ImageSource.camera);
+                  Navigator.pop(context);
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Gallery"),
+                onTap: () {
+                  ahvm.pickManagerImage(ImageSource.gallery);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -457,7 +581,7 @@ class _AddHubFormState extends State<AddHubForm> {
           validator: validator,
           borderSide: BorderSide(color: ColorConst.borderColor),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          style: TextStyle(color: ColorConst.textGrey, fontSize: 10),
+          style: TextStyle(color: ColorConst.textDark, fontSize: 14),
           hintSize: 14,
         ),
       ],

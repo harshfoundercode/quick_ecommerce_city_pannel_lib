@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/user_data_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserViewModel with ChangeNotifier {
@@ -22,5 +23,26 @@ class UserViewModel with ChangeNotifier {
   Future<String?> getToken() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     return sp.getString('token');
+  }
+
+
+  ///==========================================================================
+  Future<bool> saveUser(token) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setString('user_id', token);
+    notifyListeners();
+    return true;
+  }
+
+  Future<User> getUser() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String userId = sp.getString('user_id') ?? "0";
+    return User(id: userId.toString());
+  }
+
+  Future<bool> remove() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    bool userIdRemoved = await sp.remove('user_id');
+    return userIdRemoved;
   }
 }

@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
@@ -17,7 +21,6 @@ class AddHubViewModel extends ChangeNotifier {
   final TextEditingController managerNameController = TextEditingController();
   final TextEditingController managerContactController =
       TextEditingController();
-  final TextEditingController maxOrdersController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
   final TextEditingController pincodeController = TextEditingController();
   final TextEditingController coverageRadiusController =
@@ -114,7 +117,6 @@ class AddHubViewModel extends ChangeNotifier {
     managerContactController.clear();
     cityController.clear();
     pincodeController.clear();
-    maxOrdersController.clear();
     coverageRadiusController.clear();
     stateController.clear();
   }
@@ -129,6 +131,14 @@ class AddHubViewModel extends ChangeNotifier {
     coverageRadiusController.dispose();
     stateController.dispose();
     super.dispose();
+  }
+
+  bool _isZoneCreated = false;
+  bool get isZoneCreated => _isZoneCreated;
+
+  void setZoneCreated(bool value) {
+    _isZoneCreated = value;
+    notifyListeners();
   }
 
   final HubZoneCreateRepo _hubZoneCreateRepo = HubZoneCreateRepo();
@@ -182,6 +192,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        setZoneCreated(true);
       } else {
         CustomSnackBar.show(
           context,
@@ -213,6 +224,28 @@ class AddHubViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  File? _managerImageFile;
+  File? get managerImageFile => _managerImageFile;
+
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> pickManagerImage(ImageSource source) async {
+    final picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 70,
+    );
+
+    if (picked != null) {
+      _managerImageFile = File(picked.path);
+
+      /// convert to base64
+      final bytes = await _managerImageFile!.readAsBytes();
+      managerImage.text = base64Encode(bytes);
+
+      notifyListeners();
+    }
+  }
+
   Future<void> hubManagerApi(BuildContext context) async {
     if (!context.mounted) return;
 
@@ -224,7 +257,7 @@ class AddHubViewModel extends ChangeNotifier {
       "address": managerAddressController.text.trim(),
       "adharno": managerAdharNumber.text.trim(),
       "panno": managerPanNumber.text.trim(),
-      "img": managerImage.toString(),
+      "img":  managerImage.text,
       "email": managerEmailController.text.trim(),
       "password": managerPasswordController.text.trim(),
     };

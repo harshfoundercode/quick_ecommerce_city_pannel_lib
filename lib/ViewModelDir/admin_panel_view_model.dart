@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DisputeDir/dispute_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/add_hub_form.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
@@ -67,6 +68,7 @@ class AdminViewModel extends ChangeNotifier {
         SubMenuItem(title: "All Hubs", screen: AllHubScreen()),
         SubMenuItem(title: "Add Hub", screen:  AddHubForm()),
         SubMenuItem(title: "Hub Performance", screen:  AllHubsPerformanceScreen()),
+        SubMenuItem(title: "Hub Zone", screen:  HubZoneListScreen()),
       ],
     ),
     MenuItem(

@@ -73,6 +73,7 @@ class LoginViewModel extends ChangeNotifier {
 
         final userPref = Provider.of<UserViewModel>(context, listen: false);
         await userPref.saveToken(authModel.data!.token.toString());
+        await userPref.saveUser(authModel.data!.user!.id.toString());
 
         if (!context.mounted) {
           _setLoginLoading(false);

@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
           fontFamily: "Poppins"
         ),
         navigatorKey: navigatorKey,
-        initialRoute: RoutesName.adminLoginScreen,
+        initialRoute: RoutesName.splashScreen,
         onGenerateRoute: (settings) {
           if (settings.name != null) {
             return CupertinoPageRoute(

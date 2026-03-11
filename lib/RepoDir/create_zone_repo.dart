@@ -4,9 +4,10 @@ import 'package:quick_ecommerce_city_panel_redefined/helper/network/base_api_ser
 import 'package:quick_ecommerce_city_panel_redefined/helper/network/network_api_service.dart';
 
 class CreateZoneRepo {
-  final BaseApiServices _apiServices = NetworkApiServices();
+  final NetworkApiServices _apiServices = NetworkApiServices();
 
   Future<dynamic> createZoneApi(dynamic data) async {
+    await _apiServices.initializeToken();
     try {
       dynamic response = await _apiServices.getPostApiResponse(
         ApiUrl.createZoneUrl,

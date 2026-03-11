@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/AdminLayoutDir/admin_panel_layout.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/AuthDir/login_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/AuthDir/splash_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/SpecificHubPerformanceDir/view_hub_details.dart';
 
 class Routers {
@@ -9,6 +10,8 @@ class Routers {
     switch (routeName) {
       case RoutesName.adminSliderLayoutScreen:
         return (context) => const AdminMainLayout();
+        case RoutesName.splashScreen:
+        return (context) => const SplashScreen();
       case RoutesName.viewHubDetailsScreen:
         return (context) {
           final args =

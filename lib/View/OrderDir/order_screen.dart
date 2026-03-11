@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/all_order_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/cancelled_order_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/completed_order_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/pending_order_list.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/order_view_model.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({super.key});
@@ -25,6 +27,10 @@ class _OrderScreenState extends State<OrderScreen>
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      final ordersData = Provider.of<OrderDetailsViewModel>(context,listen: false);
+      ordersData.getOrdersListDataApi(context);
+    });
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
   }
@@ -38,82 +44,86 @@ class _OrderScreenState extends State<OrderScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildEnhancedHeader(),
-            const SizedBox(height: 24),
+    return Consumer<OrderDetailsViewModel>(
+      builder: (context,pvm,child) {
+        return Scaffold(
+          backgroundColor: Colors.grey.shade50,
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildEnhancedHeader(pvm),
+                const SizedBox(height: 24),
 
-            _buildSearchAndFilterBar(),
-            const SizedBox(height: 20),
+                _buildSearchAndFilterBar(),
+                const SizedBox(height: 20),
 
-            _buildEnhancedTabBar(),
-            const SizedBox(height: 20),
+                _buildEnhancedTabBar(pvm),
+                const SizedBox(height: 20),
 
 
 
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha:0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha:0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                          child: Row(
+                            children: [
+                              _buildTableHeader("Order ID", Icons.receipt_outlined),
+                              CustomWidgets.horizontalSpace(0.23),
+                              _buildTableHeader("Customer", Icons.person_outlined),
+                              CustomWidgets.horizontalSpace(0.075),
+                              _buildTableHeader("Amount", Icons.currency_rupee),
+                              CustomWidgets.horizontalSpace(0.14),
+                              _buildTableHeader("Status", Icons.circle_outlined),
+                            ],
+                          ),
+                        ),
+
+                        Container(
+                          height: 1,
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          color: Colors.grey.shade200,
+                        ),
+
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            children:  [
+                              AllOrdersList(pvm:pvm.orderDataModel?.data?.orders),
+                              PendingOrdersList(),
+                              CompletedOrdersList(),
+                              CancelledOrdersList(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                      child: Row(
-                        children: [
-                          _buildTableHeader("Order ID", Icons.receipt_outlined),
-                          CustomWidgets.horizontalSpace(0.23),
-                          _buildTableHeader("Customer", Icons.person_outlined),
-                          CustomWidgets.horizontalSpace(0.075),
-                          _buildTableHeader("Amount", Icons.currency_rupee),
-                          CustomWidgets.horizontalSpace(0.14),
-                          _buildTableHeader("Status", Icons.circle_outlined),
-                        ],
-                      ),
-                    ),
-
-                    Container(
-                      height: 1,
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      color: Colors.grey.shade200,
-                    ),
-
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children:  [
-                          AllOrdersList(),
-                          PendingOrdersList(),
-                          CompletedOrdersList(),
-                          CancelledOrdersList(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }
     );
   }
 
-  Widget _buildEnhancedHeader() {
+  Widget _buildEnhancedHeader(OrderDetailsViewModel pvm) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -183,9 +193,9 @@ class _OrderScreenState extends State<OrderScreen>
           ),
           Row(
             children: [
-              _buildHeaderStat("Total Orders", allOrdersCount.toString(), Icons.receipt_long),
+              _buildHeaderStat("Total Orders", pvm.orderDataModel?.data?.total.toString() ?? "0", Icons.receipt_long),
               const SizedBox(width: 20),
-              _buildHeaderStat("Revenue", "₹12,450", Icons.currency_rupee),
+              _buildHeaderStat("Revenue", "₹${pvm.orderDataModel?.data?.totalRevenue.toString() ?? "0"}", Icons.currency_rupee),
             ],
           ),
         ],
@@ -233,7 +243,6 @@ class _OrderScreenState extends State<OrderScreen>
   Widget _buildSearchAndFilterBar() {
     return Row(
       children: [
-        // Search Field
         Expanded(
           child: Container(
             decoration: BoxDecoration(
@@ -258,8 +267,9 @@ class _OrderScreenState extends State<OrderScreen>
                   color: Colors.grey.shade400,
                   size: 22,
                 ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
+                suffixIcon:
+                _searchController.text.isNotEmpty ?
+                    IconButton(
                   icon: Icon(
                     Icons.close_rounded,
                     color: Colors.grey.shade400,
@@ -268,17 +278,7 @@ class _OrderScreenState extends State<OrderScreen>
                   onPressed: () {
                     _searchController.clear();
                   },
-                )
-                    : IconButton(
-                  icon: Icon(
-                    Icons.tune_rounded,
-                    color: Colors.grey.shade500,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    _showFilterDialog();
-                  },
-                ),
+                ):SizedBox(),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -292,110 +292,7 @@ class _OrderScreenState extends State<OrderScreen>
     );
   }
 
-  void _showFilterDialog() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Filter Orders",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildFilterOption("Payment Status", ["All", "Paid", "Unpaid"]),
-              const SizedBox(height: 12),
-              _buildFilterOption("Delivery Type", ["All", "Standard", "Express"]),
-              const SizedBox(height: 12),
-              _buildFilterOption("Date Range", ["Today", "This Week", "This Month"]),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text("Reset"),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorConst.primaryGreen,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text("Apply"),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFilterOption(String title, List<String> options) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade700,
-          ),
-        ),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: options.map((option) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(option),
-                  selected: option == "All",
-                  onSelected: (value) {},
-                  backgroundColor: Colors.grey.shade100,
-                  selectedColor: ColorConst.primaryGreen.withValues(alpha:0.1),
-                  checkmarkColor: ColorConst.primaryGreen,
-                  labelStyle: TextStyle(
-                    color: option == "All" ? ColorConst.primaryGreen : Colors.grey.shade700,
-                    fontSize: 12,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEnhancedTabBar() {
+  Widget _buildEnhancedTabBar(OrderDetailsViewModel pvm) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -414,10 +311,10 @@ class _OrderScreenState extends State<OrderScreen>
         labelColor: ColorConst.primaryGreen,
         unselectedLabelColor: Colors.grey.shade600,
         tabs: [
-          _buildEnhancedTab("All Orders", allOrdersCount, Icons.view_list_rounded),
-          _buildEnhancedTab("Pending", pendingOrdersCount, Icons.pending_actions_rounded),
-          _buildEnhancedTab("Completed", completedOrdersCount, Icons.check_circle_rounded),
-          _buildEnhancedTab("Cancelled", cancelledOrdersCount, Icons.cancel_rounded),
+          _buildEnhancedTab("All Orders", pvm.orderDataModel?.data?.total ?? 0, Icons.view_list_rounded),
+          _buildEnhancedTab("Pending", pvm.orderDataModel?.data?.placed ?? 0, Icons.pending_actions_rounded),
+          _buildEnhancedTab("Completed", pvm.orderDataModel?.data?.completed ?? 0, Icons.check_circle_rounded),
+          _buildEnhancedTab("Cancelled", pvm.orderDataModel?.data?.cancelled ?? 0, Icons.cancel_rounded),
         ],
       ),
     );
