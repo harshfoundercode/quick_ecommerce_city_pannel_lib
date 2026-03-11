@@ -55,6 +55,7 @@ class _HubZoneListScreenState extends State<HubZoneListScreen> {
                 pinned: true,
                 backgroundColor: Colors.white,
                 elevation: 0,
+                automaticallyImplyLeading: false,
                 title: const Text(
                   'Hub Zones',
                   style: TextStyle(

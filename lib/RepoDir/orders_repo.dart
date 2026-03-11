@@ -19,5 +19,18 @@ class OrdersRepo {
       rethrow;
     }
   }
+
+  Future<dynamic> ordersViewDetailsApi(dynamic data) async {
+    await _apiServices.initializeToken();
+    try {
+      dynamic response = await _apiServices.getPostApiResponse(ApiUrl.orderDetailsUrl, data);
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred during orderDetailsUrl api: $e');
+      }
+      rethrow;
+    }
+  }
 }
 

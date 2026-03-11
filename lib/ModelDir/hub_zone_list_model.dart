@@ -28,13 +28,13 @@ class HubZoneListDataModel {
 }
 
 class HubZoneListData {
-  int? id;
-  int? cityzoneid;
-  String? name;
-  String? radiuskm;
-  String? lat;
-  String? long;
-  String? status;
+  dynamic id;
+  dynamic cityzoneid;
+  dynamic name;
+  dynamic radiuskm;
+  dynamic lat;
+  dynamic long;
+  dynamic status;
 
   HubZoneListData({
     this.id,
@@ -70,13 +70,13 @@ class HubZoneListData {
 
   /// Creates a copy of this HubZoneListData with the given fields replaced
   HubZoneListData copyWith({
-    int? id,
-    int? cityzoneid,
-    String? name,
-    String? radiuskm,
-    String? lat,
-    String? long,
-    String? status
+    dynamic id,
+    dynamic cityzoneid,
+    dynamic name,
+    dynamic radiuskm,
+    dynamic lat,
+    dynamic long,
+    dynamic status
   }) {
     return HubZoneListData(
       id: id ?? this.id,

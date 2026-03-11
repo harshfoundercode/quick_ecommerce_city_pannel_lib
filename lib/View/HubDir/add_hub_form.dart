@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
@@ -105,6 +106,10 @@ class _AddHubFormState extends State<AddHubForm> {
             icon: Icons.radar,
             hint: "Enter radius",
             keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+            maxLength: 3
           ),
 
           CustomWidgets.verticalSpace(0.02),
@@ -147,6 +152,7 @@ class _AddHubFormState extends State<AddHubForm> {
             label: "Latitude",
             controller: ahvm.latitudeController,
             icon: Icons.location_on,
+            readOnly: true
           ),
 
           CustomWidgets.verticalSpace(0.02),
@@ -155,6 +161,8 @@ class _AddHubFormState extends State<AddHubForm> {
             label: "Longitude",
             controller: ahvm.longitudeController,
             icon: Icons.location_on,
+              readOnly: true
+
           ),
 
           CustomWidgets.verticalSpace(0.03),
@@ -558,6 +566,8 @@ class _AddHubFormState extends State<AddHubForm> {
     TextInputType? keyboardType,
     int? maxLength,
     String? Function(String?)? validator,
+    bool readOnly = false,
+    List<TextInputFormatter>? inputFormatters
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,6 +593,8 @@ class _AddHubFormState extends State<AddHubForm> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           style: TextStyle(color: ColorConst.textDark, fontSize: 14),
           hintSize: 14,
+          readOnly: readOnly,
+          inputFormatters: inputFormatters,
         ),
       ],
     );
