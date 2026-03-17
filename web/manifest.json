@@ -1,6 +1,6 @@
 {
-    "name": "quick_ecommerce_city_panel_redefined",
-    "short_name": "quick_ecommerce_city_panel_redefined",
+    "name": "Fasto City Panel",
+    "short_name": "Fasto City Panel",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

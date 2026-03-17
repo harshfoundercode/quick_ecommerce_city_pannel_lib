@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       providers: ProvidersHome().providers,
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Quick Mart City Panel',
+        title: 'Fasto City Panel',
         theme: ThemeData(
           scaffoldBackgroundColor: ColorConst.bgColor,
           fontFamily: "Poppins"
