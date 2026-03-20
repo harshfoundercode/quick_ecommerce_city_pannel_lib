@@ -1,4 +1,4 @@
-package com.fc.quick_ecommerce_city_panel_redefined
+package com.fc.fastocitypanel
 
 import io.flutter.embedding.android.FlutterActivity
 

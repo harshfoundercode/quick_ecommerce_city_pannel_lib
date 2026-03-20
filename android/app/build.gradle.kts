@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.fc.quick_ecommerce_city_panel_redefined"
+    namespace = "com.fc.fastocitypanel"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.fc.quick_ecommerce_city_panel_redefined"
+        applicationId = "com.fc.fastocitypanel"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
