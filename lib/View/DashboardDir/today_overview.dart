@@ -4,9 +4,11 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.d
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
 
 class TodayOverviewCard extends StatefulWidget {
-  const TodayOverviewCard({super.key});
+  final Summary? dashboardSummaryData;
+  const TodayOverviewCard({super.key, this.dashboardSummaryData});
 
   @override
   State<TodayOverviewCard> createState() => _TodayOverviewCardState();
@@ -49,32 +51,28 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
       children: [
         overViewItem(
           title: "Total Orders",
-          value: "257",
-          subtitle: "+18 vs yesterday",
+          value: widget.dashboardSummaryData!.totalOrders.toString(),
           icon: Icons.receipt_long_outlined,
           iconBg: Color(0xFFD1FAE5),
           iconColor: Color(0xFF16A34A),
         ),
         overViewItem(
           title: "Delivered",
-          value: "189",
-          subtitle: "73.5% success",
+          value:  widget.dashboardSummaryData!.deliveredOrders.toString(),
           icon: Icons.check_circle_outline,
           iconBg: Color(0xFFD1FAE5),
           iconColor: Color(0xFF059669),
         ),
         overViewItem(
           title: "Pending",
-          value: "68",
-          subtitle: "12 orders delayed",
+          value: widget.dashboardSummaryData!.pendingOrders.toString(),
           icon: Icons.access_time,
           iconBg: Color(0xFFFFEDD5),
           iconColor: Color(0xFFEA580C),
         ),
         overViewItem(
           title: "Revenue",
-          value: "₹38.2K",
-          subtitle: "+₹4.1K this week",
+          value: "₹${widget.dashboardSummaryData!.revenue.toString()}",
           icon: Icons.currency_rupee,
           iconBg: Color(0xFFEDE9FE),
           iconColor: Color(0xFF7C3AED),
@@ -86,7 +84,6 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
   Widget overViewItem({
     required final String title,
     required final String value,
-    required final String subtitle,
     required final IconData icon,
     required final Color iconBg,
     required final Color iconColor,}
@@ -124,11 +121,6 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
             value,
             fontSize: 20,
             color:ColorConst.black
-          ),
-          CustomWidgets.verticalSpace(0.01),
-          CustomText.medium(
-            subtitle,
-              color: ColorConst.textGrey, fontSize: 13
           ),
         ],
       ),

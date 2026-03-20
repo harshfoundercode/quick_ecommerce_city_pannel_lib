@@ -4,9 +4,11 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.d
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
 
 class CityCard extends StatefulWidget {
-  const CityCard({super.key});
+  final Summary? dashboardSummaryData;
+  const CityCard({super.key, required this.dashboardSummaryData});
 
   @override
   State<CityCard> createState() => _CityCardState();
@@ -61,7 +63,7 @@ class _CityCardState extends State<CityCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomText.bold(
-          "Lucknow",
+          widget.dashboardSummaryData?.cityName,
           color: Colors.white,
           fontSize: mobileSize ? 25 : 38,
           letterSpacing: 1,
@@ -89,6 +91,7 @@ class _CityCardState extends State<CityCard> {
     );
   }
 
+
   Widget _buildStatsRow() {
     final verticalDivider = Container(
       height: 40,
@@ -109,21 +112,21 @@ class _CityCardState extends State<CityCard> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildStatItem(
-            "04",
+            widget.dashboardSummaryData!.totalHubs.toString(),
             "Total Hubs",
             Icons.account_tree_outlined,
             Colors.white,
           ),
           verticalDivider,
           _buildStatItem(
-            "36",
+            widget.dashboardSummaryData!.deliveryBoys.toString(),
             "Delivery Boys",
             Icons.pedal_bike_outlined,
             Colors.white,
           ),
           verticalDivider,
           _buildStatItem(
-            "92",
+            widget.dashboardSummaryData!.activeOrders.toString(),
             "Active Orders",
             Icons.receipt_long_outlined,
             Colors.white,
