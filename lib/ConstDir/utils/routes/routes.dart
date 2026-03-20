@@ -18,7 +18,8 @@ class Routers {
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>?;
           final name = args?['name'];
-          return ViewHubDetails(name: name);
+          final id = args?['id'];
+          return ViewHubDetails(name: name, id: id,);
         };
       case RoutesName.adminLoginScreen:
         return (context)=>AdminLoginScreen();

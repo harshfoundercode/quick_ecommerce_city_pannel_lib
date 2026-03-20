@@ -32,22 +32,22 @@ class _SearchFilterSectionState extends State<SearchFilterSection> {
             fillColor: Colors.white,
           ),
           const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              CustomWidgets.ghostButton(
-                text: "Filter",
-                icon: Icons.filter_alt_outlined,
-                onPressed: viewModel.onFilterPressed,
-              ),
-              SizedBox(width: Sizes.screenWidth * 0.01),
-              CustomWidgets.ghostButton(
-                text: "Sort",
-                icon: Icons.swap_vert,
-                onPressed: viewModel.onSortPressed,
-              ),
-            ],
-          )
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.end,
+          //   children: [
+          //     CustomWidgets.ghostButton(
+          //       text: "Filter",
+          //       icon: Icons.filter_alt_outlined,
+          //       onPressed: viewModel.onFilterPressed,
+          //     ),
+          //     SizedBox(width: Sizes.screenWidth * 0.01),
+          //     CustomWidgets.ghostButton(
+          //       text: "Sort",
+          //       icon: Icons.swap_vert,
+          //       onPressed: viewModel.onSortPressed,
+          //     ),
+          //   ],
+          // )
 
         ],
       ),
@@ -60,18 +60,18 @@ class _SearchFilterSectionState extends State<SearchFilterSection> {
           ),
         ),
         const Spacer(),
-        CustomWidgets.ghostButton(
-          text: "Filter",
-          icon: Icons.filter_alt_outlined,
-          onPressed: viewModel.onFilterPressed,
-        ),
-
-        SizedBox(width: Sizes.screenWidth * 0.01),
-        CustomWidgets.ghostButton(
-          text: "Sort",
-          icon: Icons.swap_vert,
-          onPressed: viewModel.onSortPressed,
-        ),
+        // CustomWidgets.ghostButton(
+        //   text: "Filter",
+        //   icon: Icons.filter_alt_outlined,
+        //   onPressed: viewModel.onFilterPressed,
+        // ),
+        //
+        // SizedBox(width: Sizes.screenWidth * 0.01),
+        // CustomWidgets.ghostButton(
+        //   text: "Sort",
+        //   icon: Icons.swap_vert,
+        //   onPressed: viewModel.onSortPressed,
+        // ),
       ],
     );
   }

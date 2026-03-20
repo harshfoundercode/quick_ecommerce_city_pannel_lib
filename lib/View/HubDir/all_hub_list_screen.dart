@@ -5,6 +5,7 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/SpecificHubPerformanceDir/view_hub_details.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/edit_hub_details.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/filter_hub_screen.dart';
@@ -18,10 +19,20 @@ class AllHubScreen extends StatefulWidget {
 }
 
 class _AllHubScreenState extends State<AllHubScreen> {
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      final hubListProvider = Provider.of<AllHubViewModel>(context,listen: false);
+      hubListProvider.getHubListDataApi(context);
+    });
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final mobile = Responsive.isMobile(context);
-
     return Consumer<AllHubViewModel>(
       builder: (context, vm, child) {
         return SingleChildScrollView(
@@ -61,22 +72,22 @@ class _AllHubScreenState extends State<AllHubScreen> {
     final stats = [
       {
         'title': "Total Hubs",
-        'value': vm.totalHubs.toString(),
+        'value': vm.hubListModel?.data?.summary?.totalHubs.toString(),
         'icon': Icons.hub_outlined,
       },
       {
         'title': "Active Hubs",
-        'value': vm.activeHubs.toString(),
+        'value': vm.hubListModel?.data?.summary?.activeHubs.toString(),
         'icon': Icons.check_circle_outline,
       },
       {
         'title': "Total Delivery Boys",
-        'value': vm.totalDeliveryBoys.toString(),
+        'value': vm.hubListModel?.data?.summary?.totalDeliveryBoys.toString(),
         'icon': Icons.pedal_bike_outlined,
       },
       {
         'title': "Total Active Orders",
-        'value': vm.totalActiveOrders.toString(),
+        'value': vm.hubListModel?.data?.summary?.totalActiveOrders.toString(),
         'icon': Icons.receipt_long_outlined,
       },
     ];
@@ -99,10 +110,10 @@ class _AllHubScreenState extends State<AllHubScreen> {
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: vm.paginatedHubs.length,
+            itemCount: vm.hubListModel?.data?.hubs?.length,
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
-              final hub = vm.paginatedHubs[index];
+              final hub = vm.hubListModel?.data?.hubs?[index];
 
               return mobile
                   ? hubMobileCard(hub)
@@ -110,11 +121,11 @@ class _AllHubScreenState extends State<AllHubScreen> {
             },
           ),
 
-          Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: paginationSection(vm),
-          ),
+          // Padding(
+          //   padding:
+          //   const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          //   child: paginationSection(vm),
+          // ),
         ],
       ),
     );
@@ -122,7 +133,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
 
   // ===================== MOBILE CARD =====================
 
-  Widget hubMobileCard(HubModel hub) {
+  Widget hubMobileCard(Hubs? hub) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(14),
@@ -144,7 +155,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
           Row(
             children: [
               Expanded(child: hubCell(hub)),
-              CustomWidgets.statusBadge(isActive: hub.isActive,width: Sizes.screenWidth*0.2),
+              CustomWidgets.statusBadge(isActive: hub!.status==1?true:false,width: Sizes.screenWidth*0.2),
             ],
           ),
 
@@ -157,7 +168,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _mobileMetric("${hub.workforce}", "Delivery Boys",),
+              _mobileMetric("${hub.deliveryBoys}", "Delivery Boys",),
               _mobileMetric("${hub.activeOrders}", "Active Orders",),
             ],
           ),
@@ -169,7 +180,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
             child: actionButtons(
                   () => openRightDrawer(
                 context,
-                ViewHubDetails(name: hub.name),
+                ViewHubDetails(name: hub.hubName,id:hub.hubId.toString()),
               ),
                   () => openRightDrawer(context, EditCityDrawer()),
             ),
@@ -195,26 +206,26 @@ class _AllHubScreenState extends State<AllHubScreen> {
 
   // ===================== PAGINATION =====================
 
-  Widget paginationSection(AllHubViewModel vm) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        IconButton(
-          onPressed: vm.currentPage == 1 ? null : vm.previousPage,
-          icon: const Icon(Icons.chevron_left),
-        ),
-        CustomText.medium(
-          "Page ${vm.currentPage} of ${vm.totalPages}",
-          fontSize: 13,
-        ),
-        IconButton(
-          onPressed:
-          vm.currentPage == vm.totalPages ? null : vm.nextPage,
-          icon: const Icon(Icons.chevron_right),
-        ),
-      ],
-    );
-  }
+  // Widget paginationSection(AllHubViewModel vm) {
+  //   return Row(
+  //     mainAxisAlignment: MainAxisAlignment.end,
+  //     children: [
+  //       IconButton(
+  //         onPressed: vm.currentPage == 1 ? null : vm.previousPage,
+  //         icon: const Icon(Icons.chevron_left),
+  //       ),
+  //       CustomText.medium(
+  //         "Page ${vm.currentPage} of ${vm.totalPages}",
+  //         fontSize: 13,
+  //       ),
+  //       IconButton(
+  //         onPressed:
+  //         vm.currentPage == vm.totalPages ? null : vm.nextPage,
+  //         icon: const Icon(Icons.chevron_right),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   // ===================== TABLE HEADER =====================
 
@@ -233,7 +244,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
 
   // ===================== DESKTOP ROW =====================
 
-  Widget hubTableRow(HubModel hub) {
+  Widget hubTableRow(Hubs? hub) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -242,15 +253,15 @@ class _AllHubScreenState extends State<AllHubScreen> {
           CustomWidgets.horizontalSpace(0.05),
           Expanded(child: managerCell(hub)),
           CustomWidgets.horizontalSpace(0.04),
-          Expanded(child: CustomText.medium("${hub.workforce} Boys")),
+          Expanded(child: CustomText.medium("${hub!.deliveryBoys} Boys")),
           Expanded(
             child: CustomText.medium("${hub.activeOrders} Active Orders"),
           ),
-          Expanded(child: CustomWidgets.statusBadge(isActive: hub.isActive)),
+          Expanded(child: CustomWidgets.statusBadge(isActive: hub.status==1?true:false)),
           actionButtons(
                 () => openRightDrawer(
               context,
-              ViewHubDetails(name: hub.name),
+              ViewHubDetails(name: hub.hubName, id: hub.hubId.toString(),),
             ),
                 () => openRightDrawer(context, EditCityDrawer()),
           ),
@@ -261,16 +272,16 @@ class _AllHubScreenState extends State<AllHubScreen> {
 
   // ===================== COMMON CELLS =====================
 
-  Widget hubCell(HubModel hub) {
+  Widget hubCell(Hubs? hub) {
     return CustomWidgets.hubCell(
-      name: hub.name,
-      location: hub.location,
+      name: hub!.hubName,
+      location: hub.address,
     );
   }
 
-  Widget managerCell(HubModel hub) {
+  Widget managerCell(Hubs? hub) {
     return CustomWidgets.managerCell(
-      name: hub.managerName,
+      name: hub!.managerName,
       phone: hub.managerPhone,
     );
   }

@@ -15,5 +15,8 @@ class ApiUrl {
   static const String hubZoneListUrl = "${configUrl1}hubzone_list";
   static const String orderListUrl = "${configUrl1}orders";
   static const String orderDetailsUrl = "${configUrl1}orderprofile";
+  static const String hubListUrl = "${configUrl1}hub_list";
+  static String hubListDetailsUrl(String hubId) => "${configUrl1}hub_details/$hubId";
+  static String dashboardUrl = "${configUrl1}dashboard";
 
 }

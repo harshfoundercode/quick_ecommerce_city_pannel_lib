@@ -1,153 +1,109 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_details_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_list_repo.dart';
+
+import '../ModelDir/hub_list_model.dart';
 
 class AllHubViewModel extends ChangeNotifier {
+  final HubListRepo _hubListRepo = HubListRepo();
+
   final TextEditingController searchController = TextEditingController();
 
-  final List<HubModel> _hubs = [
-    HubModel(
-      id: '1',
-      name: 'Hub - Gomti Nagar',
-      location: 'Gomti Nagar, Lucknow',
-      managerName: 'Rahul Sharma',
-      managerPhone: '+91 98765 43210',
-      workforce: 12,
-      activeOrders: 34,
-      isActive: true,
-    ),
-    HubModel(
-      id: '2',
-      name: 'Hub - Hazratganj',
-      location: 'Hazratganj, Lucknow',
-      managerName: 'Priya Singh',
-      managerPhone: '+91 98765 43211',
-      workforce: 8,
-      activeOrders: 22,
-      isActive: true,
-    ),
-    HubModel(
-      id: '3',
-      name: 'Hub - Alambagh',
-      location: 'Alambagh, Lucknow',
-      managerName: 'Amit Kumar',
-      managerPhone: '+91 98765 43212',
-      workforce: 6,
-      activeOrders: 15,
-      isActive: false,
-    ),
-    HubModel(
-      id: '4',
-      name: 'Hub - Chowk',
-      location: 'Chowk, Lucknow',
-      managerName: 'Vikram Yadav',
-      managerPhone: '+91 98765 43213',
-      workforce: 10,
-      activeOrders: 28,
-      isActive: true,
-    ),
-    HubModel(
-      id: '5',
-      name: 'Hub - Chowk',
-      location: 'Chowk, Lucknow',
-      managerName: 'Vikram Yadav',
-      managerPhone: '+91 98765 43213',
-      workforce: 10,
-      activeOrders: 28,
-      isActive: true,
-    ),
+  HubListModel? _hubListModel;
+  HubListModel? get hubListModel => _hubListModel;
 
-  ];
-
-  List<HubModel> get hubs => _hubs;
-
-  int get totalHubs => _hubs.length;
-  int get activeHubs => _hubs.where((h) => h.isActive).length;
-  int get totalDeliveryBoys => _hubs.fold(0, (sum, h) => sum + h.workforce);
-  int get totalActiveOrders => _hubs.fold(0, (sum, h) => sum + h.activeOrders);
-
-  void onAddHubPressed() {
-    // Navigate to add hub screen or show dialog
-    debugPrint('Add hub pressed');
+  void setHubListDataModel(HubListModel data) {
+    _hubListModel = data;
+    notifyListeners();
   }
 
-  int _currentPage = 1;
-  final int _itemsPerPage = 7;
+  Future<void> getHubListDataApi(BuildContext context) async {
+    _hubListModel = null;
+    notifyListeners();
 
-  int get currentPage => _currentPage;
-  int get itemsPerPage => _itemsPerPage;
+    try {
+      final value = await _hubListRepo.hubListApi();
 
-  int get totalPages {
-    if (hubs.isEmpty) return 1;
-    return (hubs.length / _itemsPerPage).ceil();
-  }
-  List<HubModel> get paginatedHubs {
-    final startIndex = (_currentPage - 1) * _itemsPerPage;
-    final endIndex = startIndex + _itemsPerPage;
+      int statusCode = value['statusCode'] ?? 0;
+      Map<String, dynamic> body = value['body'] ?? {};
 
-    if (startIndex >= hubs.length) return [];
+      if (statusCode == 200) {
+        final hubListDataModel = HubListModel.fromJson(body);
+        setHubListDataModel(hubListDataModel);
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body["message"] ?? "Something went wrong",
+          title: 'Error',
+          type: SnackBarType.error,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("API ERROR: $e");
+      }
 
-    return hubs.sublist(
-      startIndex,
-      endIndex > hubs.length ? hubs.length : endIndex,
-    );
-  }
-  void nextPage() {
-    if (_currentPage < totalPages) {
-      _currentPage++;
-      notifyListeners();
+      CustomSnackBar.show(
+        context,
+        message: "Something went wrong",
+        title: 'Error',
+        type: SnackBarType.error,
+      );
     }
   }
 
-  void previousPage() {
-    if (_currentPage > 1) {
-      _currentPage--;
-      notifyListeners();
+
+  ///=================== HUB LIST DETAILS API ============================
+
+  HubDetailsModel? _hubDetailsModel;
+  HubDetailsModel? get hubDetailsModel => _hubDetailsModel;
+
+  void setHubDetailsListModel(HubDetailsModel data){
+    _hubDetailsModel = data;
+    notifyListeners();
+  }
+
+  Future<void> getHubDetailsDataApi(BuildContext context,String hubId) async {
+    _hubDetailsModel = null;
+    notifyListeners();
+
+    try {
+      final value = await _hubListRepo.hubListDetailsApi(hubId);
+
+      int statusCode = value['statusCode'] ?? 0;
+      Map<String, dynamic> body = value['body'] ?? {};
+
+      if (statusCode == 200) {
+        final hubDetailsDataModel = HubDetailsModel.fromJson(body);
+        setHubDetailsListModel(hubDetailsDataModel);
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body["message"] ?? "Something went wrong",
+          title: 'Error',
+          type: SnackBarType.error,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("API ERROR: $e");
+      }
+
+      CustomSnackBar.show(
+        context,
+        message: "Something went wrong",
+        title: 'Error',
+        type: SnackBarType.error,
+      );
     }
   }
 
-  void goToPage(int page) {
-    if (page >= 1 && page <= totalPages) {
-      _currentPage = page;
-      notifyListeners();
-    }
-  }
-  void onFilterPressed() {
-    debugPrint('Filter pressed');
-  }
-
-  void onSortPressed() {
-    debugPrint('Sort pressed');
-  }
-
-  void onViewHub(String hubId) {
-    debugPrint('View hub: $hubId');
-
-  }
 
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
   }
-}
-
-class HubModel {
-  final String id;
-  final String name;
-  final String location;
-  final String managerName;
-  final String managerPhone;
-  final int workforce;
-  final int activeOrders;
-  final bool isActive;
-
-  HubModel({
-    required this.id,
-    required this.name,
-    required this.location,
-    required this.managerName,
-    required this.managerPhone,
-    required this.workforce,
-    required this.activeOrders,
-    required this.isActive,
-  });
 }
