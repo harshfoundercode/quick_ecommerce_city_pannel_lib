@@ -311,10 +311,28 @@ class _OrderScreenState extends State<OrderScreen>
         labelColor: ColorConst.primaryGreen,
         unselectedLabelColor: Colors.grey.shade600,
         tabs: [
-          _buildEnhancedTab("All Orders", pvm.orderDataModel?.data?.total ?? 0, Icons.view_list_rounded),
-          _buildEnhancedTab("Pending", pvm.orderDataModel?.data?.placed ?? 0, Icons.pending_actions_rounded),
-          _buildEnhancedTab("Completed", pvm.orderDataModel?.data?.completed ?? 0, Icons.check_circle_rounded),
-          _buildEnhancedTab("Cancelled", pvm.orderDataModel?.data?.cancelled ?? 0, Icons.cancel_rounded),
+          _buildEnhancedTab(
+            "All Orders",
+            int.tryParse(pvm.orderDataModel?.data?.total.toString() ?? "0") ?? 0,
+            Icons.view_list_rounded,
+          ),
+          _buildEnhancedTab(
+            "Pending",
+            int.tryParse(pvm.orderDataModel?.data?.placed.toString() ?? "0") ?? 0,
+            Icons.pending_actions_rounded,
+          ),
+
+          _buildEnhancedTab(
+            "Completed",
+            int.tryParse(pvm.orderDataModel?.data?.completed.toString() ?? "0") ?? 0,
+            Icons.check_circle_rounded,
+          ),
+
+          _buildEnhancedTab(
+            "Cancelled",
+            int.tryParse(pvm.orderDataModel?.data?.cancelled.toString() ?? "0") ?? 0,
+            Icons.cancel_rounded,
+          ),
         ],
       ),
     );
