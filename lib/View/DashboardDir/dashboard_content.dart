@@ -38,6 +38,18 @@ class _DashboardContentState extends State<DashboardContent> {
         final dashboardHubData = dvm.dashboardDetailsModel?.data?.hubs;
         final dashboardSummaryData = dvm.dashboardDetailsModel?.data?.summary;
 
+        if (dvm.dashboardDetailsModel == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (dashboardSummaryData == null) {
+          return const Center(
+            child: Text("No Data Available"),
+          );
+        }
+
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

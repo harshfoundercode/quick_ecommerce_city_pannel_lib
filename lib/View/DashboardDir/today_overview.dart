@@ -47,7 +47,7 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
       crossAxisSpacing: 16,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: mobileSize?1.13:1.7,
+      childAspectRatio: mobileSize?1.13:1.8,
       children: [
         overViewItem(
           title: "Total Orders",
