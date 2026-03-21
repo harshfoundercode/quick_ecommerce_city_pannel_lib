@@ -32,7 +32,7 @@ class _CityCardState extends State<CityCard> {
             : Sizes.screenHeight * 0.03,
       ),
       decoration: BoxDecoration(
-        color: ColorConst.primaryGreen,
+        color: ColorConst.error,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
