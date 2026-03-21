@@ -1,72 +1,44 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-enum NotificationType { finance, onboarding, system }
-enum NotificationStatus { unread, read }
-
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/notification_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/RepoDir/notification_repo.dart';
 
 class NotificationViewModel extends ChangeNotifier {
-  List<NotificationItem> notifications = [
-    NotificationItem(
-      title: "Settlement Transfer Failed",
-      message:
-      "The NEFT transfer of ₹1,96,100 to Hub - Gomti Nagar (HB-01) failed due to invalid beneficiary details.",
-      time: "10:42 AM",
-      type: NotificationType.finance,
-      status: NotificationStatus.unread,
-      tags: ["Finance", "HB-01"],
-      isToday: true,
-    ),
-    NotificationItem(
-      title: "New Hub Successfully Onboarded",
-      message:
-      "Hub - Ashiyana (HB-05) has completed verification and is now active.",
-      time: "09:15 AM",
-      type: NotificationType.onboarding,
-      status: NotificationStatus.read,
-      tags: ["Onboarding"],
-      isToday: true,
-    ),
-    NotificationItem(
-      title: "High Order Volume Alert",
-      message:
-      "Hub - Indira Nagar is experiencing unusually high order volume.",
-      time: "08:30 AM",
-      type: NotificationType.system,
-      status: NotificationStatus.read,
-      tags: ["System Alert", "HB-64"],
-      isToday: false,
-    ),
-  ];
 
-  List<NotificationItem> get todayList =>
-      notifications.where((e) => e.isToday).toList();
+  final _notificationRepo = NotificationRepo();
 
-  List<NotificationItem> get yesterdayList =>
-      notifications.where((e) => !e.isToday).toList();
+  NotificationModel? _notificationModel;
+  NotificationModel? get notificationModel => _notificationModel;
 
-  void markAllRead() {
-    for (var n in notifications) {
-      n.status = NotificationStatus.read;
-    }
+  void setNotificationDataModel(NotificationModel data) {
+    _notificationModel = data;
     notifyListeners();
   }
-}
-class NotificationItem {
-  final String title;
-  final String message;
-  final String time;
-  final NotificationType type;
-  NotificationStatus status;
-  final List<String> tags;
-  final bool isToday;
 
-  NotificationItem({
-    required this.title,
-    required this.message,
-    required this.time,
-    required this.type,
-    required this.status,
-    required this.tags,
-    required this.isToday,
-  });
+  Future<void> getNotificationDataApi(context) async {
+    _notificationModel = null;
+    notifyListeners();
+    try {
+      final value = await _notificationRepo.notificationApi();
+      int statusCode = value['statusCode'] ?? 0;
+      Map<String, dynamic> body = value['body'] ?? {};
+
+      if (statusCode == 200) {
+        final notificationDataModel = NotificationModel.fromJson(body);
+        setNotificationDataModel(notificationDataModel);
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body["message"],
+          title: 'Error',
+          type: SnackBarType.error,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
 }

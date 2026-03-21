@@ -14,7 +14,6 @@ class NoPreviewScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated error icon with background
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(

@@ -25,14 +25,14 @@ class _CityCardState extends State<CityCard> {
           : Sizes.screenHeight * 0.53,
       padding: EdgeInsets.symmetric(
         horizontal: mobileSize
-            ? Sizes.screenWidth * 0.035
+            ? Sizes.screenWidth * 0.038
             : Sizes.screenWidth * 0.02,
         vertical: mobileSize
-            ? Sizes.screenHeight * 0.01
+            ? Sizes.screenHeight * 0.025
             : Sizes.screenHeight * 0.03,
       ),
       decoration: BoxDecoration(
-        color: ColorConst.error,
+        color: ColorConst.primaryGreen,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(

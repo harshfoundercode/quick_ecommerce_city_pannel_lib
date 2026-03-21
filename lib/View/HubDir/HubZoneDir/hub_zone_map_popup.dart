@@ -5,8 +5,6 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'dart:math';
 
-import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_model_list.dart';
-
 
 class HubZoneMapPopup extends StatefulWidget {
   final VoidCallback onEdit;
@@ -30,17 +28,7 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
 
   bool _isMapReady = false;
   double _currentZoom = 12.0;
-  bool _showGrid = false;
-  bool _showHeatMap = false;
 
-  // Colors for different radius indicators
-  final List<Color> _radiusColors = [
-    Colors.blue.withOpacity(0.1),
-    Colors.green.withOpacity(0.1),
-    Colors.orange.withOpacity(0.1),
-    Colors.red.withOpacity(0.1),
-    Colors.purple.withOpacity(0.1),
-  ];
 
   @override
   void initState() {
@@ -71,7 +59,7 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
         circleId: const CircleId('coverage_radius_main'),
         center: center,
         radius: radiusInMeters.toDouble(),
-        fillColor: ColorConst.primaryGreen.withOpacity(0.15),
+        fillColor: ColorConst.primaryGreen.withValues(alpha: 0.15),
         strokeColor: ColorConst.primaryGreen,
         strokeWidth: 3,
       ),
@@ -147,7 +135,7 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
           Polyline(
             polylineId: PolylineId('grid_$i$j'),
             points: [point1, point2],
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withValues(alpha:0.3),
             width: 1,
           ),
         );
@@ -196,7 +184,7 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
       Polygon(
         polygonId: const PolygonId('heat_map'),
         points: polygonPoints,
-        fillColor: Colors.red.withOpacity(0.05),
+        fillColor: Colors.red.withValues(alpha:0.05),
         strokeColor: Colors.transparent,
         strokeWidth: 0,
       ),
@@ -326,7 +314,7 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: ColorConst.primaryGreen.withOpacity(0.1),
+              color: ColorConst.primaryGreen.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -459,7 +447,7 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildLegendItem('Hub Center', ColorConst.primaryGreen, Icons.location_on_rounded),
-                _buildLegendItem('Coverage Area', ColorConst.primaryGreen.withOpacity(0.15), Icons.circle_rounded),
+                _buildLegendItem('Coverage Area', ColorConst.primaryGreen.withValues(alpha:0.15), Icons.circle_rounded),
                 _buildLegendItem('Inner Zone', Colors.blue, Icons.circle_outlined),
                 _buildLegendItem('Buffer Zone', Colors.orange, Icons.remove),
                 _buildLegendItem('Direction Points', Colors.blue, Icons.navigation_rounded),
@@ -520,10 +508,10 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha:0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: color.withValues(alpha:0.2),
         ),
       ),
       child: Row(
@@ -600,10 +588,10 @@ class _HubZoneMapPopupState extends State<HubZoneMapPopup> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: (color ?? Colors.grey).withOpacity(0.1),
+            color: (color ?? Colors.grey).withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: (color ?? Colors.grey).withOpacity(0.3),
+              color: (color ?? Colors.grey).withValues(alpha:0.3),
             ),
           ),
           child: Row(

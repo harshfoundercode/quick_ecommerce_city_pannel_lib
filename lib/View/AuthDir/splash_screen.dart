@@ -10,17 +10,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
 
-  final SplashServices splashServices = SplashServices();
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      splashServices.checkAuthentication(context);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold(

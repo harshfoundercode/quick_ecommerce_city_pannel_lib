@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_model_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_card.dart';
@@ -16,7 +17,6 @@ class HubZoneListScreen extends StatefulWidget {
 }
 
 class _HubZoneListScreenState extends State<HubZoneListScreen> {
-  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -26,20 +26,14 @@ class _HubZoneListScreenState extends State<HubZoneListScreen> {
       hubZoneData.getHubZoneListDataApi(context);
     });
     super.initState();
-    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
-    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    context.read<HubZoneViewModel>().setSearchQuery(_searchController.text);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +44,7 @@ class _HubZoneListScreenState extends State<HubZoneListScreen> {
             controller: _scrollController,
             slivers: [
               SliverAppBar(
-                expandedHeight: 120,
+                expandedHeight: Sizes.screenHeight*0.03,
                 floating: true,
                 pinned: true,
                 backgroundColor: Colors.white,
@@ -64,59 +58,12 @@ class _HubZoneListScreenState extends State<HubZoneListScreen> {
                     fontSize: 20,
                   ),
                 ),
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(60),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search zones by name, code, city...',
-                              hintStyle: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 14,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                color: Colors.grey.shade500,
-                                size: 20,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ),
-                ),
               ),
 
               // Stats Cards
               SliverToBoxAdapter(
                 child: const HubZoneStatsCards(),
               ),
-
-              // Filters
-              SliverToBoxAdapter(
-                child: HubZoneFilters(
-                  onStatusChanged: (status) => hvm.setStatusFilter(status),
-                  onCityChanged: (city) => hvm.setCityFilter(city),
-                ),
-              ),
-
               // Zones List/Grid
               hvm.isLoading
                   ? const SliverFillRemaining(
@@ -142,10 +89,7 @@ class _HubZoneListScreenState extends State<HubZoneListScreen> {
                         zone: zone,
                         onTap: (){},
                         onEdit: (){},
-                        // onTap: () => _navigateToDetail(context, zone),
-                        // onEdit: () => _navigateToEditZone(context, zone),
                         onDelete: () => _showDeleteDialog(context, zone.id.toString()),
-                        onStatusToggle: (isActive) => _handleStatusToggle(zone, isActive),
                       ),
                     );
                   },
@@ -159,22 +103,6 @@ class _HubZoneListScreenState extends State<HubZoneListScreen> {
     );
   }
 
-  void _handleStatusToggle(HubZoneListData zone, bool isActive) {
-    // context.read<HubZoneViewModel>().toggleZoneStatus(zone.id.toString(), isActive);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${zone.name} is now ${isActive ? 'Active' : 'Inactive'}',
-        ),
-        backgroundColor: isActive ? Colors.green : Colors.orange,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
   Widget _buildEmptyState() {
     return Center(
       child: Column(

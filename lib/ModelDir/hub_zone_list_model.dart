@@ -53,7 +53,9 @@ class HubZoneListData {
     radiuskm = json['radiuskm'];
     lat = json['lat'];
     long = json['long'];
-    status = json['status'];
+    status: json['status'] == 1
+        ? HubZoneStatus.active
+        : HubZoneStatus.inactive;
   }
 
   Map<String, dynamic> toJson() {

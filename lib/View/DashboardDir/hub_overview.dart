@@ -4,10 +4,13 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/view_all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_desktop_view_model.dart';
 
 class HubManagementTable extends StatefulWidget {
-  const HubManagementTable({super.key});
+  final List<Hubs>? dashboardHubData;
+  const HubManagementTable({super.key, required this.dashboardHubData});
 
   @override
   State<HubManagementTable> createState() => _HubManagementTableState();
@@ -15,41 +18,65 @@ class HubManagementTable extends StatefulWidget {
 
 class _HubManagementTableState extends State<HubManagementTable> {
 
+  final searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final mobileSize = Responsive.isMobile(context);
 
-    return Consumer<HubManagementViewModel>(
-      builder: (context,hvm,child) {
-        return CustomWidgets.cardWrapper(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTopBar(mobileSize,hvm),
-              CustomWidgets.verticalSpace(0.02),
-              if (!mobileSize) hubTableHeader(),
-              CustomWidgets.verticalSpace(0.01),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount:hvm.filteredHubs.length,
-                itemBuilder: (context, index) {
-                  final hub = hvm.filteredHubs[index];
-                  return mobileSize
-                      ? _buildHubMobileCard(hub)
-                      : _buildHubRow(hub, index);
-                },
-              ),
+    final hubs = widget.dashboardHubData ?? [];
+    final showLimited = hubs.length > 3;
+    final displayList = showLimited ? hubs.take(3).toList() : hubs;
 
-              _buildPaginationFooter(hvm),
-            ],
+    return CustomWidgets.cardWrapper(
+      height: mobileSize ? Sizes.screenHeight:null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTopBar(mobileSize,widget.dashboardHubData),
+          CustomWidgets.verticalSpace(0.02),
+          if (!mobileSize) hubTableHeader(),
+          CustomWidgets.verticalSpace(0.01),
+          Container(
+            height: mobileSize ?Sizes.screenHeight*0.65:Sizes.screenHeight*0.35,
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount:displayList.length,
+              itemBuilder: (context, index) {
+                final hub = displayList[index];
+                return mobileSize
+                    ? _buildHubMobileCard(hub)
+                    : _buildHubRow(hub, index);
+              },
+            ),
           ),
-        );
-      }
+          if (showLimited)
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ViewAllHubsScreen(hubs: hubs),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "View All",
+                  style: TextStyle(
+                    color: ColorConst.primaryGreen,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
-  void _showHubDetails(HubModel hub) {
+  void _showHubDetails(Hubs hub) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -66,19 +93,19 @@ class _HubManagementTableState extends State<HubManagementTable> {
                   backgroundColor: ColorConst.primaryGreen.withValues(
                     alpha: 0.1,
                   ),
-                  child: Icon(hub.icon, color: ColorConst.primaryGreen),
+                  child: Icon(Icons.dashboard, color: ColorConst.primaryGreen),
                 ),
-                title: Text(hub.name),
-                subtitle: Text(hub.location),
+                title: Text(hub.hubName),
+                subtitle: Text(hub.address),
               ),
               const Divider(),
               _buildDetailRow("Delivery Boys", hub.deliveryBoys.toString()),
               _buildDetailRow(
                 "Orders in Progress",
-                hub.ordersInProgress.toString(),
+                hub.inProgress.toString(),
               ),
               _buildDetailRow("Completed Today", hub.completedToday.toString()),
-              _buildDetailRow("Status", hub.isActive ? "Active" : "Inactive"),
+              _buildDetailRow("Status", hub.status==1 ? "Active" : "Inactive"),
             ],
           ),
         );
@@ -102,7 +129,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
 
   // ================= TOP BAR =================
 
-  Widget _buildTopBar(bool isMobile, HubManagementViewModel hvm) {
+  Widget _buildTopBar(bool isMobile, List<Hubs>? dashboardHubData) {
     if (isMobile) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,9 +143,9 @@ class _HubManagementTableState extends State<HubManagementTable> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: CustomWidgets.searchField(controller: hvm.searchController,width: double.infinity)),
+              Expanded(child: CustomWidgets.searchField(controller: searchController,width: double.infinity)),
               const SizedBox(width: 8),
-              _buildFilterDropdown(hvm),
+              // _buildFilterDropdown(dashboardHubData),
             ],
           ),
         ],
@@ -133,9 +160,9 @@ class _HubManagementTableState extends State<HubManagementTable> {
             titleSize: 18,
             subtitleSize: 10
         )),
-        CustomWidgets.searchField(controller: hvm.searchController,width: 200),
+        CustomWidgets.searchField(controller: searchController,width: 200),
         SizedBox(width: Sizes.screenWidth * 0.01),
-        _buildFilterDropdown(hvm),
+        // _buildFilterDropdown(dashboardHubData),
       ],
     );
   }
@@ -143,26 +170,26 @@ class _HubManagementTableState extends State<HubManagementTable> {
 
   // ================= FILTER =================
 
-  Widget _buildFilterDropdown(HubManagementViewModel hvm) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorConst.borderColor),
-      ),
-      child: DropdownButton<String>(
-        value: hvm.filterStatus,
-        onChanged: (val) => hvm.updateFilter(val!),
-        underline: const SizedBox(),
-        items: [
-          'All',
-          'Active',
-          'Inactive',
-        ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-      ),
-    );
-  }
+  // Widget _buildFilterDropdown(List<Hubs>? hvm) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.grey.shade50,
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: ColorConst.borderColor),
+  //     ),
+  //     child: DropdownButton<String>(
+  //       value: hvm.filterStatus,
+  //       onChanged: (val) => hvm.updateFilter(val!),
+  //       underline: const SizedBox(),
+  //       items: [
+  //         'All',
+  //         'Active',
+  //         'Inactive',
+  //       ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+  //     ),
+  //   );
+  // }
 
   // ================= TABLE HEADER =================
 
@@ -176,7 +203,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
 
   // ================= DESKTOP ROW =================
 
-  Widget _buildHubRow(HubModel hub, int index) {
+  Widget _buildHubRow(Hubs hub, int index) {
     return InkWell(
       onTap: (){
         _showHubDetails(hub);
@@ -195,9 +222,9 @@ class _HubManagementTableState extends State<HubManagementTable> {
               flex: 3,
               child: Row(
                 children: [
-                  hubIcon(icon: hub.icon),
+                  hubIcon(icon: Icons.dashboard),
                   const SizedBox(width: 12),
-                  hubText(name: hub.name, location: hub.location),
+                  hubText(name: hub.hubName, location: hub.address),
                 ],
               ),
             ),
@@ -210,7 +237,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
             ),
             Expanded(
               child: metric(
-                value: hub.ordersInProgress.toString(),
+                value: hub.inProgress.toString(),
                 label: "Orders in progress",
                 color: Colors.orange,
               ),
@@ -222,7 +249,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
                 color: Colors.green,
               ),
             ),
-            Expanded(child: CustomWidgets.statusBadge(isActive: hub.isActive)),
+            Expanded(child: CustomWidgets.statusBadge(isActive: hub.status==1?true:false)),
             _buildArrowButton(),
           ],
         ),
@@ -232,7 +259,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
 
   // ================= MOBILE CARD =================
 
-  Widget _buildHubMobileCard(HubModel hub) {
+  Widget _buildHubMobileCard(Hubs hub) {
     return InkWell(
       onTap: (){
         _showHubDetails(hub);
@@ -250,12 +277,12 @@ class _HubManagementTableState extends State<HubManagementTable> {
           children: [
             Row(
               children: [
-                hubIcon(icon: hub.icon),
+                hubIcon(icon: Icons.dashboard_customize_sharp),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: hubText(name: hub.name, location: hub.location),
+                  child: hubText(name: hub.hubName, location: hub.address),
                 ),
-                CustomWidgets.statusBadge(isActive: hub.isActive,width: Sizes.screenWidth*0.18)
+                CustomWidgets.statusBadge(isActive: hub.status==1?true:false,width: Sizes.screenWidth*0.18)
               ],
             ),
             const SizedBox(height: 12),
@@ -266,7 +293,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
               children: [
                 _mobileMetric(hub.deliveryBoys.toString(), "Boys", Colors.blue),
                 _mobileMetric(
-                  hub.ordersInProgress.toString(),
+                  hub.inProgress.toString(),
                   "Progress",
                   Colors.orange,
                 ),
@@ -313,14 +340,6 @@ class _HubManagementTableState extends State<HubManagementTable> {
       borderRadius: BorderRadius.circular(10),
     ),
     child: const Icon(Icons.chevron_right, color: ColorConst.primaryGreen),
-  );
-
-  Widget _buildPaginationFooter(HubManagementViewModel hvm) => Padding(
-    padding: const EdgeInsets.only(top: 16),
-    child: Text(
-      'Showing ${hvm.filteredHubs.length} of ${hvm.hubs.length} hubs',
-      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-    ),
   );
 
   Widget hubIcon({required IconData icon}) => Container(

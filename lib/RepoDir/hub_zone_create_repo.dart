@@ -18,5 +18,18 @@ class HubZoneCreateRepo {
       rethrow;
     }
   }
+
+  Future<dynamic> hubZoneEditApi(dynamic data) async {
+    await _apiServices.initializeToken();
+    try {
+      dynamic response = await _apiServices.getPostApiResponse(ApiUrl.hubZoneEditUrl, data);
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred during hubZoneEditUrl: $e');
+      }
+      rethrow;
+    }
+  }
 }
 

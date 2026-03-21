@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/notification_veiw_model.dart';
 
 class NotificationView extends StatefulWidget {
@@ -12,21 +14,71 @@ class NotificationView extends StatefulWidget {
 }
 
 class _NotificationViewState extends State<NotificationView> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      Provider.of<NotificationViewModel>(context, listen: false)
+          .getNotificationDataApi(context);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<NotificationViewModel>(context);
+    final mobileSize = Responsive.isMobile(context);
 
     return Material(
       color: Colors.white,
-      child: SizedBox(
-        width: Sizes.screenWidth*0.32,
+      child: Container(
+        width: mobileSize?Sizes.screenWidth:Sizes.screenWidth*0.4,
         child: Column(
           children: [
-            SizedBox(height: Sizes.screenHeight*0.024),
-            _header(vm),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Expanded(child: _notificationList(vm)),
+            SizedBox(height: Sizes.screenHeight*0.05,),
+            Row(
+              children: [
+                AppBackBtn(color: Colors.black,),
+                SizedBox(width: Sizes.screenWidth*0.03,),
+                CustomText.bold("Notification",fontSize: 20,),
+              ],
+            ),
+
+            Consumer<NotificationViewModel>(
+              builder: (context, nvm, child) {
+
+                // 🔹 Loading
+                if (nvm.notificationModel == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final data = nvm.notificationModel!.data;
+                final notifications = data?.notifications;
+
+                // 🔹 No Data
+                if (notifications == null ||
+                    (notifications.today!.isEmpty &&
+                        notifications.yesterday!.isEmpty &&
+                        notifications.earlier!.isEmpty)) {
+                  return Padding(
+                    padding:  EdgeInsets.symmetric(vertical: Sizes.screenHeight*0.4),
+                    child: Center(child: CustomText.bold("No Notifications")),
+                  );
+                }
+
+                return ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(12),
+                  children: [
+                    if (notifications.today!.isNotEmpty)
+                      _buildSection("Today", notifications.today!),
+                    if (notifications.yesterday!.isNotEmpty)
+                      _buildSection("Yesterday", notifications.yesterday!),
+                    if (notifications.earlier!.isNotEmpty)
+                      _buildSection("Earlier", notifications.earlier!),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -34,106 +86,101 @@ class _NotificationViewState extends State<NotificationView> {
     );
   }
 
-  Widget _header(NotificationViewModel vm) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+  Widget _buildSection(String title, List list) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppBackBtn(color: Colors.black,),
-        SizedBox(width: Sizes.screenWidth*0.01,),
-        Text("Notifications",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        ...list.map((item) => _notificationTile(item)).toList(),
+
+        const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _notificationList(NotificationViewModel vm) {
-    final items = [
-      if (vm.todayList.isNotEmpty) "TODAY",
-      ...vm.todayList,
-      if (vm.yesterdayList.isNotEmpty) "YESTERDAY",
-      ...vm.yesterdayList,
-    ];
-
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-
-        if (item is String) {
-          return _sectionTitle(item);
-        }
-
-        return _notificationTile(item as NotificationItem);
-      },
-    );
-  }
-
-  Widget _notificationTile(NotificationItem item) {
-    Color iconColor;
-    IconData icon;
-
-    switch (item.type) {
-      case NotificationType.finance:
-        icon = Icons.error_outline;
-        iconColor = Colors.red;
-        break;
-      case NotificationType.onboarding:
-        icon = Icons.check_circle_outline;
-        iconColor = Colors.green;
-        break;
-      default:
-        icon = Icons.trending_up;
-        iconColor = Colors.orange;
-    }
+  Widget _notificationTile(item) {
+    final isRead = item.isRead == 1;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isRead ? Colors.grey.shade100 : Colors.blue.shade50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xffe5e7eb)),
+        border: Border.all(
+          color: isRead ? Colors.grey.shade300 : Colors.blue.shade200,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: iconColor.withValues(alpha: .1),
-            child: Icon(icon, color: iconColor,size: 18,),
+
+          // 🔵 Indicator
+          Container(
+            height: 10,
+            width: 10,
+            margin: const EdgeInsets.only(top: 6),
+            decoration: BoxDecoration(
+              color: isRead ? Colors.grey : Colors.blue,
+              shape: BoxShape.circle,
+            ),
           ),
-           SizedBox(width: Sizes.screenWidth*0.012),
+
+          const SizedBox(width: 10),
+
+          // 🔹 Content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 16)),
+
+                Text(
+                  item.title ?? "",
+                  style: TextStyle(
+                    fontWeight:
+                    isRead ? FontWeight.normal : FontWeight.bold,
+                  ),
+                ),
+
                 const SizedBox(height: 4),
-                Text(item.message,
-                    style: const TextStyle(color: Colors.grey,fontSize: 12)),
-                const SizedBox(height: 8),
+
+                Text(
+                  item.message ?? "",
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  _formatDate(item.datetime),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
               ],
             ),
-          ),
-          Text(item.time,
-              style: const TextStyle(fontSize: 10, color: Colors.grey)),
+          )
         ],
       ),
     );
   }
 
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.grey,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
+  String _formatDate(String? dateTime) {
+    if (dateTime == null) return "";
+    final dt = DateTime.tryParse(dateTime);
+    if (dt == null) return "";
+
+    return "${dt.day}/${dt.month}/${dt.year}  ${dt.hour}:${dt.minute}";
   }
 }

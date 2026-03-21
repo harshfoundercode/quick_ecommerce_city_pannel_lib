@@ -18,7 +18,7 @@ class _DisputeCardState extends State<DisputeCard> {
   Widget build(BuildContext context) {
     final mobileSize = Responsive.isMobile(context);
     return CustomWidgets.cardWrapper(
-      height: mobileSize?Sizes.screenHeight*0.3903:Sizes.screenHeight*0.5,
+      height: mobileSize?Sizes.screenHeight*0.5:Sizes.screenHeight*0.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

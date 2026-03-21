@@ -203,6 +203,7 @@ class CustomWidgets {
               title: stat['title'] as String,
               value: stat['value'] as String,
               icon: stat['icon'] as IconData,
+
             ),
           );
         }).toList(),
@@ -217,8 +218,8 @@ class CustomWidgets {
           child: Padding(
             padding: EdgeInsets.only(right: isLast ? 0 : spacing),
             child: statCard(
-              title: entry.value['title'] as String,
-              value: entry.value['value'] as String,
+              title: entry.value['title']?.toString() ?? '',
+              value: entry.value['value']?.toString() ?? '',
               icon: entry.value['icon'] as IconData,
             ),
           ),
@@ -244,8 +245,8 @@ class CustomWidgets {
       child: Row(
         children: [
           Container(
-            height: 42,
-            width: 42,
+            height: 40,
+            width: 40,
             decoration: BoxDecoration(
               color: iconBgColor,
               borderRadius: BorderRadius.circular(10),
@@ -262,7 +263,7 @@ class CustomWidgets {
               children: [
                 CustomText.bold(
                   title,
-                  fontSize: 14,
+                  fontSize: 13,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
@@ -426,6 +427,7 @@ class CustomWidgets {
               location,
               color: ColorConst.textGrey,
               fontSize: 12,
+              maxLines: 2,
             ),
           ],
         ),
@@ -451,6 +453,7 @@ class CustomWidgets {
           phone,
           color: ColorConst.textGrey,
           fontSize: phoneSize,
+          maxLines: 2,
         ),
       ],
     );
