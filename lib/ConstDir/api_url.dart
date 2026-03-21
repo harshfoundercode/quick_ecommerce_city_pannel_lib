@@ -20,5 +20,6 @@ class ApiUrl {
   static String dashboardUrl = "${configUrl1}dashboard";
   static String notificationUrl = "${configUrl1}notifications";
   static String hubZoneEditUrl = "${configUrl1}hubzone/update";
+  static String hubManagerEditUrl = "${configUrl1}hubmanager/update";
 
 }

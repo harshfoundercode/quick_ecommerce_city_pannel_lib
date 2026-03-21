@@ -105,6 +105,7 @@ class _AddHubFormState extends State<AddHubForm> {
             controller: ahvm.coverageRadiusController,
             icon: Icons.radar,
             hint: "Enter radius",
+            readOnly: true,
             keyboardType: TextInputType.number,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -127,6 +128,7 @@ class _AddHubFormState extends State<AddHubForm> {
                 ahvm.locationController.text = result["address"];
                 ahvm.latitudeController.text = result["lat"].toString();
                 ahvm.longitudeController.text = result["lng"].toString();
+                ahvm.coverageRadiusController.text = result['radius'].toString();
               }
             },
             child: Container(
