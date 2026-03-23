@@ -115,6 +115,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
+import 'package:quick_ecommerce_city_panel_redefined/View/MapDir/google_search_box.dart';
 
 class MapPickerPopup extends StatefulWidget {
   const MapPickerPopup({super.key});
@@ -184,10 +185,8 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
       setState(() => searchResults = []);
       return;
     }
-
     final url =
         "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&key=$apiKey";
-
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -198,10 +197,11 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
     }
   }
 
+
+
   Future<void> selectPlace(String placeId) async {
     final url =
         "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey";
-
     final response = await http.get(Uri.parse(url));
     final data = jsonDecode(response.body);
 
@@ -258,19 +258,35 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
             ),
 
             /// 🔍 SEARCH BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: "Search location...",
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onChanged: onSearchChanged,
-              ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 10),
+            //   child: TextField(
+            //     controller: searchController,
+            //     decoration: InputDecoration(
+            //       hintText: "Search location...",
+            //       prefixIcon: const Icon(Icons.search),
+            //       border: OutlineInputBorder(
+            //         borderRadius: BorderRadius.circular(10),
+            //       ),
+            //     ),
+            //     onChanged: onSearchChanged,
+            //   ),
+            // ),
+            GoogleSearchBox(
+              onSelected: (lat, lng, address) async {
+                final latLng = LatLng(lat, lng);
+
+                setState(() {
+                  selectedLocation = latLng;
+                  this.address = address;
+                });
+
+                updateCircle();
+
+                mapController?.animateCamera(
+                  CameraUpdate.newLatLng(latLng),
+                );
+              },
             ),
 
             /// 🔍 SEARCH RESULTS

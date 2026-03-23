@@ -8,6 +8,7 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_sc
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/RevenueDir/revenue_dashboard_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/stock_screen.dart';
 
 class AdminViewModel extends ChangeNotifier {
   Widget _currentScreen = const DashboardContent();
@@ -81,16 +82,13 @@ class AdminViewModel extends ChangeNotifier {
       //   SubMenuItem(title: "Completed Orders", screen: const AllHubScreen()),
       // ],
     ),
-    // MenuItem(
-    //   icon: Icons.analytics,
-    //   title: "Analytics",
-    //   // subItems: [
-    //   //   SubMenuItem(title: "Sales Analytics", screen: AllHubScreen()),
-    //   //   SubMenuItem(title: "User Analytics", screen: const AllHubScreen()),
-    //   //   SubMenuItem(title: "Product Analytics", screen: const AllHubScreen()),
-    //   //   SubMenuItem(title: "Traffic Reports", screen: const AllHubScreen()),
-    //   // ],
-    // ),
+    MenuItem(
+      icon: Icons.analytics,
+      title: "City Stocks",
+      subItems: [
+        SubMenuItem(title: "City Stocks", screen: CityStockScreen()),
+      ],
+    ),
     MenuItem(
       icon: Icons.attach_money,
       title: "Revenue",

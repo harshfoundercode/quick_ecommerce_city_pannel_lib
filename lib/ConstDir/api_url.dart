@@ -21,5 +21,8 @@ class ApiUrl {
   static String notificationUrl = "${configUrl1}notifications";
   static String hubZoneEditUrl = "${configUrl1}hubzone/update";
   static String hubManagerEditUrl = "${configUrl1}hubmanager/update";
+  static String cityStockListUrl = "${configUrl1}cityStock";
+  static String cityTransferToHubUrl = "${configUrl1}citytransfer-to-hub";
+  static String cityRequestInventoryUrl = "${configUrl1}cityRequests";   ///city saman lene ke liye reuwst krega uska h yeh
 
 }

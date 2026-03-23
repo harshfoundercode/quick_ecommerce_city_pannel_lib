@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/constant_popup.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
@@ -378,119 +380,125 @@ class NetworkApiServices extends BaseApiServices {
   }
 
   @override
-  Future<dynamic> postFormDataResponse(
-      String url,
-      Map<String, dynamic> fields,
-      Map<String, dynamic> files,
-      ) async {
-    try {
-      final headers = _formHeaders();
-
-      var request = http.MultipartRequest('POST', Uri.parse(url));
-      request.headers.addAll(headers);
-
-      // ---------------- ADD FIELDS ----------------
-      // fields.forEach((key, value) {
-      //   if (value.isNotEmpty) {
-      //     request.fields[key] = value;
-      //   }
-      // });
-
-      fields.forEach((key, value) {
-        if (value == null) return;
-
-        // String
-        if (value is String) {
-          if (value.trim().isEmpty) return;
-          request.fields[key] = value;
-        }
-
-        // int, bool, double
-        else if (value is int || value is bool || value is double) {
-          request.fields[key] = value.toString();
-        }
-
-        // List (rare but safe)
-        else if (value is List && value.isNotEmpty) {
-          request.fields[key] = value.join(',');
-        }
-      });
-
-
-      // ---------------- ADD FILES (SINGLE + MULTIPLE) ----------------
-      int filesAdded = 0;
-
-      for (final entry in files.entries) {
-        final fieldName = entry.key;
-        final value = entry.value;
-
-        // ---------- CASE 1: MULTIPLE FILES ----------
-        if (value is List<File>) {
-          for (final file in value) {
-            if (file.existsSync()) {
-              final mimeType = _getMimeType(file.path);
-
-              request.files.add(
-                await http.MultipartFile.fromPath(
-                  fieldName, // IMPORTANT for backend
-                  file.path,
-                  contentType:
-                  mimeType != null ? http.MediaType.parse(mimeType) : null,
-                ),
-              );
-              filesAdded++;
-            }
-          }
-        }
-
-        // ---------- CASE 2: SINGLE FILE ----------
-        else if (value is File && value.existsSync()) {
-          final mimeType = _getMimeType(value.path);
-
-          request.files.add(
-            await http.MultipartFile.fromPath(
-              fieldName,
-              value.path,
-              contentType:
-              mimeType != null ? http.MediaType.parse(mimeType) : null,
-            ),
-          );
-          filesAdded++;
-        }
-      }
-
-      if (kDebugMode) {
-        print("📤 FORM-DATA POST → $url");
-        print("📝 Fields (${request.fields.length}): ${request.fields}");
-        print("📎 Files Added: $filesAdded");
-        print("📎 File Fields: ${request.files.map((f) => f.field).toList()}");
-      }
-
-      // ---------------- SEND ----------------
-      final streamedResponse = await request.send().timeout(
-        const Duration(seconds: 120),
-        onTimeout: () {
-          throw FetchDataException(
-            'Request timeout - file upload took too long',
-          );
-        },
-      );
-
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (kDebugMode) {
-        print('📥 Response Status: ${response.statusCode}');
-        print('📦 Response Body: ${response.body}');
-      }
-
-      return _returnResponse(response, url);
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Form Data Error: $e');
-      }
-      rethrow;
-    }
+  Future<dynamic> postFormDataResponse(String url, Map<String, String> fields, Map<String, dynamic> files) {
+    // TODO: implement postFormDataResponse
+    throw UnimplementedError();
   }
+
+  // @override
+  // Future<dynamic> postFormDataResponse(
+  //     String url,
+  //     Map<String, dynamic> fields,
+  //     Map<String, dynamic> files,
+  //     ) async {
+  //   try {
+  //     final headers = _formHeaders();
+  //
+  //     var request = http.MultipartRequest('POST', Uri.parse(url));
+  //     request.headers.addAll(headers);
+  //
+  //     // ---------------- ADD FIELDS ----------------
+  //     // fields.forEach((key, value) {
+  //     //   if (value.isNotEmpty) {
+  //     //     request.fields[key] = value;
+  //     //   }
+  //     // });
+  //
+  //     fields.forEach((key, value) {
+  //       if (value == null) return;
+  //
+  //       // String
+  //       if (value is String) {
+  //         if (value.trim().isEmpty) return;
+  //         request.fields[key] = value;
+  //       }
+  //
+  //       // int, bool, double
+  //       else if (value is int || value is bool || value is double) {
+  //         request.fields[key] = value.toString();
+  //       }
+  //
+  //       // List (rare but safe)
+  //       else if (value is List && value.isNotEmpty) {
+  //         request.fields[key] = value.join(',');
+  //       }
+  //     });
+  //
+  //
+  //     // ---------------- ADD FILES (SINGLE + MULTIPLE) ----------------
+  //     int filesAdded = 0;
+  //
+  //     for (final entry in files.entries) {
+  //       final fieldName = entry.key;
+  //       final value = entry.value;
+  //
+  //       // ---------- CASE 1: MULTIPLE FILES ----------
+  //       if (value is List<File>) {
+  //         for (final file in value) {
+  //           if (file.existsSync()) {
+  //             final mimeType = _getMimeType(file.path);
+  //
+  //             request.files.add(
+  //               await http.MultipartFile.fromPath(
+  //                 fieldName, // IMPORTANT for backend
+  //                 file.path,
+  //                 contentType:
+  //                 mimeType != null ? http.MediaType.parse(mimeType) : null,
+  //               ),
+  //             );
+  //             filesAdded++;
+  //           }
+  //         }
+  //       }
+  //
+  //       // ---------- CASE 2: SINGLE FILE ----------
+  //       else if (value is File && value.existsSync()) {
+  //         final mimeType = _getMimeType(value.path);
+  //
+  //         request.files.add(
+  //           await http.MultipartFile.fromPath(
+  //             fieldName,
+  //             value.path,
+  //             contentType:
+  //             mimeType != null ? http.MediaType.parse(mimeType) : null,
+  //           ),
+  //         );
+  //         filesAdded++;
+  //       }
+  //     }
+  //
+  //     if (kDebugMode) {
+  //       print("📤 FORM-DATA POST → $url");
+  //       print("📝 Fields (${request.fields.length}): ${request.fields}");
+  //       print("📎 Files Added: $filesAdded");
+  //       print("📎 File Fields: ${request.files.map((f) => f.field).toList()}");
+  //     }
+  //
+  //     // ---------------- SEND ----------------
+  //     final streamedResponse = await request.send().timeout(
+  //       const Duration(seconds: 120),
+  //       onTimeout: () {
+  //         throw FetchDataException(
+  //           'Request timeout - file upload took too long',
+  //         );
+  //       },
+  //     );
+  //
+  //     final response = await http.Response.fromStream(streamedResponse);
+  //
+  //     if (kDebugMode) {
+  //       print('📥 Response Status: ${response.statusCode}');
+  //       print('📦 Response Body: ${response.body}');
+  //     }
+  //
+  //     return _returnResponse(response, url);
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('❌ Form Data Error: $e');
+  //     }
+  //     rethrow;
+  //   }
+  // }
 
 }
 
