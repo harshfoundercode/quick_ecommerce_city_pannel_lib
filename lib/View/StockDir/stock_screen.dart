@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/utils.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_stock_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
@@ -141,7 +140,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
             child: Container(
               height: 42,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
@@ -164,7 +163,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
             height: 42,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha:0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: DropdownButtonHideUnderline(
@@ -212,7 +211,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
           _buildSummaryCard('Products', '$totalProducts',
               Icons.inventory_2_outlined, const Color(0xFF2563EB)),
           const SizedBox(width: 10),
-          _buildSummaryCard('Total Stock', '${totalStock.toString()}',
+          _buildSummaryCard('Total Stock', totalStock.toString(),
               Icons.stacked_bar_chart_rounded, const Color(0xFF059669)),
           const SizedBox(width: 10),
           _buildSummaryCard('Low Stock', '$lowStock',
@@ -232,7 +231,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha:0.05),
                 blurRadius: 6,
                 offset: const Offset(0, 2))
           ],
@@ -242,7 +241,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
             Container(
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -326,13 +325,13 @@ class _CityStockScreenState extends State<CityStockScreen> {
                     ),
                     ...subEntry.value
                         .map((item) => _buildStockCard(item, vm))
-                        .toList(),
+                        ,
                   ],
                 );
-              }).toList(),
+              }),
             ],
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -356,11 +355,11 @@ class _CityStockScreenState extends State<CityStockScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: isLow
-            ? Border.all(color: const Color(0xFFDC2626).withOpacity(0.3))
+            ? Border.all(color: const Color(0xFFDC2626).withValues(alpha:0.3))
             : null,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha:0.05),
               blurRadius: 8,
               offset: const Offset(0, 2))
         ],
@@ -519,9 +518,9 @@ class _CityStockScreenState extends State<CityStockScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha:0.08),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.25)),
+          border: Border.all(color: color.withValues(alpha:0.25)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -936,7 +935,7 @@ class _BottomSheetWrapper extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.1),
+                    color: iconColor.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: iconColor, size: 22),

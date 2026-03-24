@@ -73,6 +73,7 @@ class OrderDetailsViewModel extends ChangeNotifier {
       Map<String, dynamic> body = value['body'] ?? {};
 
       if (statusCode == 200) {
+        print("swnfdnf");
         final orderViewDataModel = OrderViewDataModel.fromJson(body);
         setOrderViewDataModel(orderViewDataModel);
       } else {

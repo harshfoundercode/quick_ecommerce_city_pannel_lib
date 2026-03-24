@@ -44,5 +44,32 @@ class CityStockListRepo {
       rethrow;
     }
   }
+
+  Future<dynamic> cityRequestInventoryHistoryApi() async {
+    await _apiServices.initializeToken();
+    try {
+      dynamic response = await _apiServices.getGetApiResponse(ApiUrl.cityRequestInventoryUrl);
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred during cityRequestInventoryHistoryApi api: $e');
+      }
+      rethrow;
+    }
+  }
+
+
+  Future<dynamic> cityHubHistoryApi() async {
+    await _apiServices.initializeToken();
+    try {
+      dynamic response = await _apiServices.getGetApiResponse(ApiUrl.cityHubHistoryUrl);
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred during cityHubHistoryUrl api: $e');
+      }
+      rethrow;
+    }
+  }
 }
 

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
+
+import '../../ViewModelDir/dashboard_view_model.dart';
 
 class DisputeCard extends StatefulWidget {
-  const DisputeCard({super.key});
+  final List<RecentDisputes>? dashboardRecentDisputeData;
+  const DisputeCard({super.key, required this.dashboardRecentDisputeData});
 
   @override
   State<DisputeCard> createState() => _DisputeCardState();
@@ -14,8 +19,14 @@ class DisputeCard extends StatefulWidget {
 
 class _DisputeCardState extends State<DisputeCard> {
 
+
   @override
   Widget build(BuildContext context) {
+    final hubsDispute = widget.dashboardRecentDisputeData ?? [];
+
+    final showLimited = hubsDispute.length > 3;
+    final displayList = showLimited ? hubsDispute.take(3).toList() : hubsDispute;
+
     final mobileSize = Responsive.isMobile(context);
     return CustomWidgets.cardWrapper(
       height: mobileSize?Sizes.screenHeight*0.5:Sizes.screenHeight*0.5,
@@ -30,12 +41,12 @@ class _DisputeCardState extends State<DisputeCard> {
           ),
           CustomWidgets.verticalSpace(0.03),
           ListView.builder(
-            itemCount: 3,
+            itemCount: displayList.length,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemBuilder: (BuildContext context,int i){
             return _disputeItem(
-              title: "Order #ORD-5524",
+              title: displayList[i].orderNo,
               subtitle: "Customer reported missing items",
               status: "Open",
               color: Colors.red,

@@ -1,8 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/orders_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/orders_details_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/order_view_model.dart';
+
+import '../../ConstDir/widgets/dialog_box.dart';
 
 class AllOrdersList extends StatefulWidget {
   final List<Orders>? pvm;
@@ -13,6 +19,7 @@ class AllOrdersList extends StatefulWidget {
 }
 
 class AllOrdersListState extends State<AllOrdersList> {
+
   @override
   Widget build(BuildContext context) {
     final orders = widget.pvm ?? [];
@@ -88,17 +95,14 @@ class AllOrdersListState extends State<AllOrdersList> {
               ),
             ),
           ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(CupertinoIcons.eye_fill, size: 18, color: Colors.grey.shade600),
-                  onPressed: () {
-                    // openRightDrawer(context, OrderDetailsView(index:index));
-                  },
-                ),
-              ],
+          Container(
+            width: Sizes.screenWidth*0.12,
+            child: InkWell(
+              onTap: (){
+                openRightDrawer(context, OrderDetailsView(index:index,orderId:data.id.toString()));
+                print("dediubekdbe");
+              },
+              child: Icon(CupertinoIcons.eye_fill, size: 18, color: Colors.grey.shade600),
             ),
           ),
         ],

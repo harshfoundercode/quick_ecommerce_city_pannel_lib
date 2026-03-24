@@ -24,5 +24,9 @@ class ApiUrl {
   static String cityStockListUrl = "${configUrl1}cityStock";
   static String cityTransferToHubUrl = "${configUrl1}citytransfer-to-hub";
   static String cityRequestInventoryUrl = "${configUrl1}cityRequests";   ///city saman lene ke liye reuwst krega uska h yeh
+  static String cityHubHistoryUrl = "${configUrl1}cityhub-history";
+  static String hubPerformanceUrl = "${configUrl1}performance_hubs";
+  static String hubPerformanceOrderListUrl(String hubId) => "${configUrl1}hubs/$hubId/orders";
+  static String hubPerformanceViewOrderDetailsUrl(String orderId) => "${configUrl1}orders/$orderId";
 
 }

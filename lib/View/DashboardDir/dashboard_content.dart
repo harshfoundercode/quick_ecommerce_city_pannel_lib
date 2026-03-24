@@ -37,6 +37,7 @@ class _DashboardContentState extends State<DashboardContent> {
       builder: (context,dvm,child) {
         final dashboardHubData = dvm.dashboardDetailsModel?.data?.hubs;
         final dashboardSummaryData = dvm.dashboardDetailsModel?.data?.summary;
+        final dashboardRecentDisputeData = dvm.dashboardDetailsModel?.data?.recentDisputes;
 
         if (dvm.dashboardDetailsModel == null) {
           return const Center(
@@ -69,9 +70,9 @@ class _DashboardContentState extends State<DashboardContent> {
                               CustomWidgets.verticalSpace(0.02),
                               TodayOverviewCard(dashboardSummaryData: dashboardSummaryData),
                               CustomWidgets.verticalSpace(0.02),
-                              RevenueCard(),
+                              RevenueCard(dashboardHubData:dashboardHubData,dashboardSummaryData:dashboardSummaryData),
                               CustomWidgets.verticalSpace(0.02),
-                              DisputeCard(),
+                              DisputeCard(dashboardRecentDisputeData:dashboardRecentDisputeData),
                               CustomWidgets.verticalSpace(0.02),
                               HubManagementTable(dashboardHubData:dashboardHubData),
                               CustomWidgets.verticalSpace(0.16),
@@ -95,9 +96,9 @@ class _DashboardContentState extends State<DashboardContent> {
                           SizedBox(height: Sizes.screenHeight * 0.03),
                           Row(
                             children: [
-                              Expanded(child: RevenueCard()),
+                              Expanded(child: RevenueCard(dashboardHubData:dashboardHubData,dashboardSummaryData:dashboardSummaryData)),
                               SizedBox(width: Sizes.screenWidth * 0.01),
-                              Expanded(child: DisputeCard()),
+                              Expanded(child: DisputeCard(dashboardRecentDisputeData:dashboardRecentDisputeData)),
                             ],
                           ),
                           SizedBox(height: Sizes.screenHeight * 0.03),

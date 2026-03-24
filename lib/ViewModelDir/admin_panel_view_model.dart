@@ -8,7 +8,8 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_sc
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/RevenueDir/revenue_dashboard_screen.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/stock_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_screen.dart';
 
 class AdminViewModel extends ChangeNotifier {
   Widget _currentScreen = const DashboardContent();
@@ -87,16 +88,17 @@ class AdminViewModel extends ChangeNotifier {
       title: "City Stocks",
       subItems: [
         SubMenuItem(title: "City Stocks", screen: CityStockScreen()),
+        SubMenuItem(title: "City Stocks History", screen: CityHubHistoryScreen()),
       ],
     ),
-    MenuItem(
-      icon: Icons.attach_money,
-      title: "Revenue",
-      subItems: [
-        SubMenuItem(title: "Revenue", screen: RevenueView()),
-        SubMenuItem(title: "Dispute", screen: DisputeScreen()),
-      ],
-    ),
+    // MenuItem(
+    //   icon: Icons.attach_money,
+    //   title: "Revenue",
+    //   subItems: [
+    //     SubMenuItem(title: "Revenue", screen: RevenueView()),
+    //     SubMenuItem(title: "Dispute", screen: DisputeScreen()),
+    //   ],
+    // ),
   ];
 
   Future<void> performLogout(BuildContext context) async {

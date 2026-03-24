@@ -1,12 +1,12 @@
-class OrderViewDataModel {
+class HubPerformanceViewOrderDetailsModel {
   String? message;
-  Data? data;
+  HubPerformanceViewOrderDetailsData? data;
 
-  OrderViewDataModel({this.message, this.data});
+  HubPerformanceViewOrderDetailsModel({this.message, this.data});
 
-  OrderViewDataModel.fromJson(Map<String, dynamic> json) {
+  HubPerformanceViewOrderDetailsModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    data = json['data'] != null ? Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? HubPerformanceViewOrderDetailsData.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -19,15 +19,16 @@ class OrderViewDataModel {
   }
 }
 
-class Data {
+class HubPerformanceViewOrderDetailsData {
   Order? order;
   List<Items>? items;
-  Payment? payment;
-  List<Tracking>? tracking;
+  // List<Null>? timeline;
 
-  Data({this.order, this.items, this.payment, this.tracking});
+  HubPerformanceViewOrderDetailsData({this.order, this.items,
+    // this.timeline
+  });
 
-  Data.fromJson(Map<String, dynamic> json) {
+  HubPerformanceViewOrderDetailsData.fromJson(Map<String, dynamic> json) {
     order = json['order'] != null ? Order.fromJson(json['order']) : null;
     if (json['items'] != null) {
       items = <Items>[];
@@ -35,14 +36,12 @@ class Data {
         items!.add(Items.fromJson(v));
       });
     }
-    payment =
-    json['payment'] != null ? Payment.fromJson(json['payment']) : null;
-    if (json['tracking'] != null) {
-      tracking = <Tracking>[];
-      json['tracking'].forEach((v) {
-        tracking!.add(Tracking.fromJson(v));
-      });
-    }
+    // if (json['timeline'] != null) {
+    //   timeline = <Null>[];
+    //   json['timeline'].forEach((v) {
+    //     timeline!.add(new Null.fromJson(v));
+    //   });
+    // }
   }
 
   Map<String, dynamic> toJson() {
@@ -53,42 +52,36 @@ class Data {
     if (items != null) {
       data['items'] = items!.map((v) => v.toJson()).toList();
     }
-    if (payment != null) {
-      data['payment'] = payment!.toJson();
-    }
-    if (tracking != null) {
-      data['tracking'] = tracking!.map((v) => v.toJson()).toList();
-    }
+    // if (this.timeline != null) {
+    //   data['timeline'] = this.timeline!.map((v) => v.toJson()).toList();
+    // }
     return data;
   }
 }
 
 class Order {
-  dynamic id;
-  dynamic orderNo;
-  dynamic couponid;
-  dynamic userid;
-  dynamic citymanagerid;
-  dynamic hubmanagerid;
-  dynamic deliverypartnerid;
-  dynamic totalAmount;
-  dynamic deliveryCharge;
-  dynamic finalAmount;
-  dynamic paymentMethod;
-  dynamic paymentStatus;
-  dynamic status;
-  dynamic createdAt;
-  dynamic updatedAt;
-  dynamic deliveredAt;
-  dynamic customerName;
-  dynamic customerPhone;
-  dynamic hubName;
-  dynamic deliveryName;
-  dynamic deliveryPhone;
-  dynamic address;
-  dynamic city;
-  dynamic pincode;
-  dynamic landmark;
+  int? id;
+  String? orderNo;
+  int? couponid;
+  int? userid;
+  int? citymanagerid;
+  int? hubmanagerid;
+  int? deliverypartnerid;
+  String? totalAmount;
+  String? deliveryCharge;
+  String? finalAmount;
+  String? paymentMethod;
+  int? paymentStatus;
+  int? status;
+  String? createdAt;
+  String? updatedAt;
+  Null deliveredAt;
+  String? customerName;
+  String? phone;
+  String? address;
+  String? pincode;
+  String? landmark;
+  String? deliveryBoy;
 
   Order(
       {this.id,
@@ -108,14 +101,11 @@ class Order {
         this.updatedAt,
         this.deliveredAt,
         this.customerName,
-        this.customerPhone,
-        this.hubName,
-        this.deliveryName,
-        this.deliveryPhone,
+        this.phone,
         this.address,
-        this.city,
         this.pincode,
-        this.landmark});
+        this.landmark,
+        this.deliveryBoy});
 
   Order.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -135,14 +125,11 @@ class Order {
     updatedAt = json['updated_at'];
     deliveredAt = json['delivered_at'];
     customerName = json['customer_name'];
-    customerPhone = json['customer_phone'];
-    hubName = json['hub_name'];
-    deliveryName = json['delivery_name'];
-    deliveryPhone = json['delivery_phone'];
+    phone = json['phone'];
     address = json['address'];
-    city = json['city'];
     pincode = json['pincode'];
     landmark = json['landmark'];
+    deliveryBoy = json['delivery_boy'];
   }
 
   Map<String, dynamic> toJson() {
@@ -164,99 +151,36 @@ class Order {
     data['updated_at'] = updatedAt;
     data['delivered_at'] = deliveredAt;
     data['customer_name'] = customerName;
-    data['customer_phone'] = customerPhone;
-    data['hub_name'] = hubName;
-    data['delivery_name'] = deliveryName;
-    data['delivery_phone'] = deliveryPhone;
+    data['phone'] = phone;
     data['address'] = address;
-    data['city'] = city;
     data['pincode'] = pincode;
     data['landmark'] = landmark;
+    data['delivery_boy'] = deliveryBoy;
     return data;
   }
 }
 
 class Items {
-  dynamic id;
-  dynamic productid;
-  dynamic productName;
-  dynamic price;
-  dynamic qty;
-  dynamic totalPrice;
-  dynamic img;
+  String? productName;
+  String? price;
+  int? qty;
+  String? totalPrice;
 
-  Items(
-      {this.id,
-        this.productid,
-        this.productName,
-        this.price,
-        this.qty,
-        this.totalPrice,
-        this.img});
+  Items({this.productName, this.price, this.qty, this.totalPrice});
 
   Items.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    productid = json['productid'];
     productName = json['product_name'];
     price = json['price'];
     qty = json['qty'];
     totalPrice = json['total_price'];
-    img = json['img'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['productid'] = productid;
     data['product_name'] = productName;
     data['price'] = price;
     data['qty'] = qty;
     data['total_price'] = totalPrice;
-    data['img'] = img;
-    return data;
-  }
-}
-
-class Payment {
-  dynamic transactionId;
-  dynamic paymentMethod;
-  dynamic amount;
-  dynamic status;
-
-  Payment({this.transactionId, this.paymentMethod, this.amount, this.status});
-
-  Payment.fromJson(Map<String, dynamic> json) {
-    transactionId = json['transaction_id'];
-    paymentMethod = json['payment_method'];
-    amount = json['amount'];
-    status = json['status'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['transaction_id'] = transactionId;
-    data['payment_method'] = paymentMethod;
-    data['amount'] = amount;
-    data['status'] = status;
-    return data;
-  }
-}
-
-class Tracking {
-  dynamic status;
-  dynamic createdAt;
-
-  Tracking({this.status, this.createdAt});
-
-  Tracking.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    createdAt = json['created_at'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    data['created_at'] = createdAt;
     return data;
   }
 }

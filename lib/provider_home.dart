@@ -14,6 +14,7 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/dispute_view_m
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/edit_hub_details_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_desktop_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_manager_edit_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_edit_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/notification_veiw_model.dart';
@@ -43,5 +44,6 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => HubZoneEditViewModel()),
     ChangeNotifierProvider(create: (context) => HubManagerEditViewModel()),
     ChangeNotifierProvider(create: (context) => CityStockViewModel()),
+    ChangeNotifierProvider(create: (context) => HubPerformanceViewModel()),
   ];
 }

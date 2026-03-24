@@ -258,36 +258,36 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
             ),
 
             /// 🔍 SEARCH BAR
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 10),
-            //   child: TextField(
-            //     controller: searchController,
-            //     decoration: InputDecoration(
-            //       hintText: "Search location...",
-            //       prefixIcon: const Icon(Icons.search),
-            //       border: OutlineInputBorder(
-            //         borderRadius: BorderRadius.circular(10),
-            //       ),
-            //     ),
-            //     onChanged: onSearchChanged,
-            //   ),
-            // ),
-            GoogleSearchBox(
-              onSelected: (lat, lng, address) async {
-                final latLng = LatLng(lat, lng);
-
-                setState(() {
-                  selectedLocation = latLng;
-                  this.address = address;
-                });
-
-                updateCircle();
-
-                mapController?.animateCamera(
-                  CameraUpdate.newLatLng(latLng),
-                );
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: "Search location...",
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onChanged: onSearchChanged,
+              ),
             ),
+            // GoogleSearchBox(
+            //   onSelected: (lat, lng, address) async {
+            //     final latLng = LatLng(lat, lng);
+            //
+            //     setState(() {
+            //       selectedLocation = latLng;
+            //       this.address = address;
+            //     });
+            //
+            //     updateCircle();
+            //
+            //     mapController?.animateCamera(
+            //       CameraUpdate.newLatLng(latLng),
+            //     );
+            //   },
+            // ),
 
             /// 🔍 SEARCH RESULTS
             if (searchResults.isNotEmpty)

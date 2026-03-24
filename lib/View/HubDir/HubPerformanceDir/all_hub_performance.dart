@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
@@ -6,156 +7,125 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/utils.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/deliveries_by_hub_chart.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/success_rate_chart.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_performance_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/ViewAllOrderHubDir/view_all_order_specific_hub.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/view_all_hub_performance_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
 
 class AllHubsPerformanceScreen extends StatefulWidget {
   const AllHubsPerformanceScreen({super.key});
 
   @override
-  State<AllHubsPerformanceScreen> createState() => _AllHubsPerformanceScreenState();
+  State<AllHubsPerformanceScreen> createState() =>
+      _AllHubsPerformanceScreenState();
 }
 
 class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final hubPerformance = Provider.of<HubPerformanceViewModel>(
+        context,
+        listen: false,
+      );
+      hubPerformance.getHubPerformanceDataApi(context);
+    });
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(Sizes.screenWidth * 0.015),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomWidgets.pageHeader(
-            title: "All Hubs Performance",
-            subtitle: "City Overview",
-          ),
-          CustomWidgets.verticalSpace(0.025),
-           statsSection(),
-          CustomWidgets.verticalSpace(0.025),
-          Row(
+    return Consumer<HubPerformanceViewModel>(
+      builder: (context, hvm, child) {
+        final hubData = hvm.hubPerformanceModel?.data?.hubs;
+        final summaryData = hvm.hubPerformanceModel?.data?.summary;
+
+        if (hubData == null || hubData.isEmpty) {
+          return Text("No data found");
+        }
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(Sizes.screenWidth * 0.015),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children:  [
-              Expanded(flex: 1, child: DeliveriesChartCard()),
-              SizedBox(width: 20),
-              Expanded(flex: 1, child: SuccessRateChartCard()),
+            children: [
+              CustomWidgets.pageHeader(
+                title: "All Hubs Performance",
+                subtitle: "City Overview",
+              ),
+              CustomWidgets.verticalSpace(0.025),
+              statsSection(summaryData: summaryData),
+              CustomWidgets.verticalSpace(0.025),
+              performanceTableCard(context, hubData),
             ],
           ),
-          CustomWidgets.verticalSpace(0.025),
-          performanceTableCard(context),
-        ],
-      ),
+        );
+      },
     );
   }
-  Widget statsSection() {
+
+  Widget statsSection({Summary? summaryData}) {
     final stats = [
       {
         'title': "Total Deliveries",
-        'value': "42,850",
+        'value': summaryData?.totalDeliveries.toString() ?? "-",
         'icon': Icons.check_circle_outline,
       },
       {
         'title': "Avg Success Rate",
-        'value': "91.5%",
+        'value': "${summaryData?.avgSuccessRate.toString() ?? "-"} %",
         'icon': Icons.analytics_outlined,
       },
       {
-        'title':"Active Delivery Boys",
-        'value': "148",
+        'title': "Active Delivery Boys",
+        'value': summaryData?.activeDeliveryBoys.toString() ?? "-",
         'icon': Icons.timer_outlined,
       },
       {
-        'title':"Total Hubs",
-        'value': "12",
+        'title': "Total Hubs",
+        'value': summaryData?.totalHubs.toString() ?? "-",
         'icon': Icons.cancel_outlined,
       },
     ];
 
-    return CustomWidgets.statsRow(stats: stats, isMobile: true);
+    return CustomWidgets.statsRow(stats: stats, isMobile: false);
   }
 
-  Widget performanceTableCard(BuildContext context) {
+  Widget performanceTableCard(BuildContext context, List<Hubs> hubData) {
+    final hubs = hubData;
+    final showLimited = hubs.length > 4;
+    final displayList = showLimited ? hubs.take(4).toList() : hubs;
     return CustomWidgets.cardWrapperWithActionWidget(
       title: "Hub Performance Details",
-      actionWidget: Row(
-        children: [
-          _buildFilterChip(
-            label: "Filter",
-            icon: Icons.filter_alt_outlined,
-            onTap: () => _showFilterDialog(context),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            label: "Sort",
-            icon: Icons.swap_vert,
-            onTap: () => _showSortDialog(context),
-          ),
-          const SizedBox(width: 8),
-          _buildRefreshButton(context),
-        ],
-      ),
+      actionWidget: _buildRefreshButton(context),
       child: Column(
         children: [
           _buildEnhancedTableHeader(),
           const Divider(height: 24, thickness: 1, color: Color(0xFFE5E7EB)),
-
-          // Hub Rows
-          _buildEnhancedHubRow(
-            context,
-            name: "Gomti Nagar Hub",
-            orders: "8,502",
-            rate: "94.2%",
-            time: "28 mins",
-            boys: "34",
-            optimal: true,
-            trend: "+12%",
+          ListView.builder(
+            itemCount: displayList.length,
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, int i) {
+              return _buildEnhancedHubRow(
+                context,
+                name: displayList[i].hubName,
+                orders: displayList[i].totalOrders.toString(),
+                rate: "${displayList[i].successRate.toString()} %",
+                time: "${displayList[i].avgDeliveryTime.toString()} Min",
+                boys: displayList[i].activeBoys.toString(),
+                hubId:displayList[i].hubId.toString()
+              );
+            },
           ),
-          _buildEnhancedHubRow(
-            context,
-            name: "Hazratganj Hub",
-            orders: "7,245",
-            rate: "92.8%",
-            time: "32 mins",
-            boys: "28",
-            optimal: true,
-            trend: "+8%",
-          ),
-          _buildEnhancedHubRow(
-            context,
-            name: "Aliganj Hub",
-            orders: "6,512",
-            rate: "88.5%",
-            time: "35 mins",
-            boys: "22",
-            optimal: true,
-            trend: "+5%",
-          ),
-          _buildEnhancedHubRow(
-            context,
-            name: "Indira Nagar Hub",
-            orders: "5,580",
-            rate: "85.2%",
-            time: "42 mins",
-            boys: "18",
-            optimal: false,
-            trend: "-3%",
-          ),
-          _buildEnhancedHubRow(
-            context,
-            name: "Chowk Hub",
-            orders: "4,890",
-            rate: "82.7%",
-            time: "48 mins",
-            boys: "15",
-            optimal: false,
-            trend: "-8%",
-          ),
-
-          const SizedBox(height: 16),
+          SizedBox(height: Sizes.screenHeight*0.02),
+          if(displayList.length>4)
           AppBtn(
-            title:  "View All Hubs Performance",
-            onTap:(){ _navigateToAllHubs(context);},
-
-          )
+            title: "View All Hubs Performance",
+            onTap: () {
+              openRightDrawer(context,ViewAllHubPerformanceScreen(hub:hubs));
+            },
+          ),
         ],
       ),
     );
@@ -177,18 +147,10 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
           Expanded(
             child: _buildHeaderCell("Total Orders", Icons.shopping_cart),
           ),
-          Expanded(
-            child: _buildHeaderCell("Success Rate", Icons.percent),
-          ),
-          Expanded(
-            child: _buildHeaderCell("Avg. Delivery", Icons.timer),
-          ),
-          Expanded(
-            child: _buildHeaderCell("Active Boys", Icons.pedal_bike),
-          ),
-          Expanded(
-            child: _buildHeaderCell("Status", Icons.circle),
-          ),
+          Expanded(child: _buildHeaderCell("Success Rate", Icons.percent)),
+          Expanded(child: _buildHeaderCell("Avg. Delivery", Icons.timer)),
+          Expanded(child: _buildHeaderCell("Active Boys", Icons.pedal_bike)),
+          Expanded(child: _buildHeaderCell("Status", Icons.circle)),
           Container(width: 40),
         ],
       ),
@@ -212,20 +174,16 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
     );
   }
 
-// Enhanced Hub Row
+  // Enhanced Hub Row
   Widget _buildEnhancedHubRow(
-      BuildContext context, {
-        required String name,
-        required String orders,
-        required String rate,
-        required String time,
-        required String boys,
-        required bool optimal,
-        required String trend,
-      }) {
-    final rateColor = optimal ? Colors.green : Colors.orange;
-    final trendColor = trend.startsWith('+') ? Colors.green : Colors.red;
-
+    BuildContext context, {
+    required String name,
+    required String orders,
+    required String rate,
+    required String time,
+    required String boys,
+        required String hubId,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -235,7 +193,7 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -243,15 +201,14 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
       ),
       child: Row(
         children: [
-          // Hub Details with Icon
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: Sizes.screenWidth*0.235,
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: ColorConst.primaryGreen.withValues(alpha:0.1),
+                    color: ColorConst.primaryGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -265,10 +222,7 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomText.medium(
-                        name,
-                        fontSize: 14,
-                      ),
+                      CustomText.medium(name, fontSize: 14),
                       const SizedBox(height: 2),
                       CustomText.regular(
                         "ID: HUB${name.hashCode.abs() % 1000}",
@@ -281,64 +235,40 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
               ],
             ),
           ),
-          SizedBox(width: Sizes.screenWidth*0.02,),
-          // Total Orders with Trend
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText.bold(orders, fontSize: 16),
-                const SizedBox(height: 2),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: trendColor.withValues(alpha:0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    trend,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: trendColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          CustomText.bold(orders, fontSize: 16),
 
-          // Success Rate
-          Expanded(
+          SizedBox(width: Sizes.screenWidth*0.055),
+          SizedBox(
+            width: Sizes.screenWidth*0.1,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomText.bold(rate, fontSize: 16, color: rateColor),
+                CustomText.bold(rate, fontSize: 16, color: ColorConst.primaryGreen),
                 const SizedBox(height: 2),
                 LinearProgressIndicator(
                   value: double.parse(rate.replaceAll('%', '')) / 100,
-                  backgroundColor: rateColor.withValues(alpha:0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(rateColor),
+                  backgroundColor: ColorConst.primaryGreen.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(ColorConst.primaryGreen),
                   minHeight: 4,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ],
             ),
           ),
-          SizedBox(width: Sizes.screenWidth*0.01,),
-          // Avg Delivery Time
-          Expanded(
+          SizedBox(width: Sizes.screenWidth * 0.028),
+          SizedBox(
+            width: Sizes.screenWidth*0.048,
             child: Row(
               children: [
                 Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
-                const SizedBox(width: 4),
+                 SizedBox(width: Sizes.screenWidth*0.007),
                 CustomText.medium(time, fontSize: 13),
               ],
             ),
           ),
-
-          // Active Boys
-          Expanded(
+          SizedBox(width: Sizes.screenWidth * 0.058),
+          SizedBox(
+            width: Sizes.screenWidth*0.023,
             child: Row(
               children: [
                 Icon(Icons.person, size: 12, color: Colors.grey.shade500),
@@ -347,83 +277,28 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
               ],
             ),
           ),
-
-
-          // Status Badge
-          Expanded(
-            child: _buildEnhancedStatusBadge(optimal),
-          ),
-
-          // View Orders Button
-          _buildViewOrdersButton(context, name),
+          SizedBox(width: Sizes.screenWidth*0.08,),
+          _buildViewOrdersButton(context, name,hubId),
         ],
       ),
     );
   }
 
-// Enhanced Status Badge
-  Widget _buildEnhancedStatusBadge(bool optimal) {
-    final color = optimal ? Colors.green : Colors.orange;
-    final bgColor = optimal ? const Color(0xffE6F7EF) : const Color(0xffFFF4E5);
-    final text = optimal ? "Optimal" : "Needs Attention";
 
-    return Center(
-      child: Container(
-        width: Sizes.screenWidth*0.099,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha:0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha:0.5),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 4),
-            Center(
-              child: CustomText.medium(
-                text,
-                fontSize: 11,
-                color: color,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-// View Orders Button
-  Widget _buildViewOrdersButton(BuildContext context, String hubName) {
+  Widget _buildViewOrdersButton(BuildContext context, String hubName, String hubId) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          openRightDrawer(context,ViewAllOrderSpecificHub(hubName: hubName) );
+
+          openRightDrawer(context, ViewAllOrderSpecificHub(hubName: hubName,hubId:hubId));
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: ColorConst.primaryGreen.withValues(alpha:0.1),
+            color: ColorConst.primaryGreen.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -436,43 +311,6 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
     );
   }
 
-// Filter Chip
-  Widget _buildFilterChip({
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 16, color: Colors.grey.shade700),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-// Refresh Button
   Widget _buildRefreshButton(BuildContext context) {
     return Material(
       color: Colors.transparent,
@@ -493,86 +331,4 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen> {
     );
   }
 
-
-  void _navigateToAllHubs(BuildContext context) {
-    Utils.show("Navigating to all hubs performance", context);
-  }
-
-// Filter Dialog
-  void _showFilterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Filter Hubs"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.circle, color: Colors.green),
-                title: const Text("Optimal Hubs"),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.circle, color: Colors.orange),
-                title: const Text("Needs Attention"),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.star, color: Colors.blue),
-                title: const Text("Top Performing"),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-// Sort Dialog
-  void _showSortDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Sort By"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.trending_up),
-                title: const Text("Highest Orders"),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.timer),
-                title: const Text("Fastest Delivery"),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.percent),
-                title: const Text("Success Rate"),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
 }
-

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_order_from_hub_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_performance_view_order_details_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
 
 class OrderDetailsPanel extends StatefulWidget {
   const OrderDetailsPanel({super.key});
@@ -14,14 +16,19 @@ class OrderDetailsPanel extends StatefulWidget {
 class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<HubOrdersViewModel>(
+    return Consumer<HubPerformanceViewModel>(
       builder: (context, vm, _) {
-        final order = vm.selectedOrder;
+        final details = vm.hubPerformanceViewOrderDetailsModel;
 
-        if (order == null) {
+        if (details == null || details.data!.items!.isEmpty) {
           return _buildEmptyState();
         }
 
+        if(vm.isLoading){
+          return SizedBox.shrink();
+
+        }
+        final order = details.data;
         return Container(
           height: double.infinity,
           decoration: BoxDecoration(
@@ -71,7 +78,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                       const SizedBox(height: 32),
 
                       // Action buttons
-                      _buildActionButtons(),
+                      // _buildActionButtons(),
                     ],
                   ),
                 ),
@@ -166,7 +173,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildHeader(HubOrderModel order) {
+  Widget _buildHeader(HubPerformanceViewOrderDetailsData? order) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -175,7 +182,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            _getStatusColor(order.status).withValues(alpha:0.05),
+            _getStatusColor(order!.order!.status.toString()).withValues(alpha:0.05),
           ],
         ),
         borderRadius: const BorderRadius.only(
@@ -225,7 +232,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                                 ),
                               ),
                               Text(
-                                order.id,
+                                order.order!.orderNo.toString(),
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
@@ -240,7 +247,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        _buildStatusBadge(order.status),
+                        _buildStatusBadge(order.order!.status.toString()),
                         const SizedBox(width: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -258,7 +265,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                _formatDate(order.time),
+                                _formatDate(order.order!.createdAt.toString()),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade700,
@@ -375,7 +382,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildTimelineSection(HubOrderModel order) {
+  Widget _buildTimelineSection(HubPerformanceViewOrderDetailsData? order) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -417,43 +424,43 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildEnhancedTimeline(HubOrderModel order) {
+  Widget _buildEnhancedTimeline(HubPerformanceViewOrderDetailsData? order) {
     final timelineEvents = [
       TimelineEvent(
         title: "Order Placed",
-        time: order.time,
+        time: order!.order!.createdAt.toString(),
         status: "completed",
         description: "Order has been placed successfully",
         icon: Icons.shopping_cart_rounded,
       ),
       TimelineEvent(
         title: "Order Confirmed",
-        time: _addMinutes(order.time, 5),
-        status: order.status == "cancelled" ? "cancelled" : "completed",
+        time: _addMinutes(order.order!.createdAt.toString(), 5),
+        status: order.order!.status.toString() == "cancelled" ? "cancelled" : "completed",
         description: "Restaurant has confirmed your order",
         icon: Icons.check_circle_rounded,
       ),
       TimelineEvent(
         title: "Picked by Delivery Boy",
-        time: _addMinutes(order.time, 15),
-        status: order.status == "pending" ? "pending" :
-        order.status == "cancelled" ? "cancelled" : "completed",
-        description: order.boy,
+        time: _addMinutes(order.order!.createdAt.toString(), 15),
+        status: order.order!.status.toString() == "pending" ? "pending" :
+        order.order!.status.toString() == "cancelled" ? "cancelled" : "completed",
+        description: order.order!.deliveryBoy.toString(),
         icon: Icons.pedal_bike_rounded,
       ),
       TimelineEvent(
         title: "Out for Delivery",
-        time: _addMinutes(order.time, 25),
-        status: order.status == "in transit" ? "active" :
-        order.status == "delivered" ? "completed" :
-        order.status == "cancelled" ? "cancelled" : "pending",
+        time: _addMinutes(order.order!.createdAt.toString(), 25),
+        status: order.order!.status.toString() == "in transit" ? "active" :
+        order.order!.status.toString() == "delivered" ? "completed" :
+        order.order!.status.toString() == "cancelled" ? "cancelled" : "pending",
         description: "Your order is on the way",
         icon: Icons.local_shipping_rounded,
       ),
       TimelineEvent(
         title: "Delivered",
-        time: _addMinutes(order.time, 45),
-        status: order.status == "delivered" ? "completed" : "pending",
+        time: _addMinutes(order.order!.createdAt.toString(), 45),
+        status: order.order!.status.toString() == "delivered" ? "completed" : "pending",
         description: "Order has been delivered",
         icon: Icons.check_box_rounded,
       ),
@@ -585,7 +592,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildInfoGrid(HubOrderModel order) {
+  Widget _buildInfoGrid(HubPerformanceViewOrderDetailsData? order) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -613,16 +620,15 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.6,
+          childAspectRatio: 2.8,
           children: [
             _buildEnhancedInfoCard(
               title: "Customer Details",
               icon: Icons.person_rounded,
               color: const Color(0xFF3B82F6),
               items: [
-                InfoItem("Name", order.customer),
-                InfoItem("Phone", order.customerPhone),
-                InfoItem("Email", order.customerEmail),
+                InfoItem("Name", order!.order!.customerName.toString()),
+                InfoItem("Phone", order.order!.phone.toString()),
               ],
             ),
             _buildEnhancedInfoCard(
@@ -630,9 +636,9 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
               icon: Icons.location_on_rounded,
               color: const Color(0xFF10B981),
               items: [
-                InfoItem("Address", order.address),
-                InfoItem("Landmark", order.landmark),
-                InfoItem("Pincode", order.pincode),
+                InfoItem("Address", order.order!.address.toString()),
+                InfoItem("Landmark", order.order!.landmark.toString()),
+                InfoItem("Pincode", order.order!.pincode.toString()),
               ],
             ),
             _buildEnhancedInfoCard(
@@ -640,9 +646,8 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
               icon: Icons.delivery_dining_rounded,
               color: const Color(0xFFF59E0B),
               items: [
-                InfoItem("Name", order.boy),
-                InfoItem("Phone", order.boyPhone),
-                InfoItem("Vehicle", order.boyVehicle),
+                InfoItem("Name", order.order!.deliveryBoy.toString()),
+                InfoItem("Phone", order.order!.phone.toString()),
               ],
             ),
             _buildEnhancedInfoCard(
@@ -650,9 +655,8 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
               icon: Icons.payment_rounded,
               color: const Color(0xFF8B5CF6),
               items: [
-                InfoItem("Method", order.paymentMethod),
-                InfoItem("Status", order.paymentStatus),
-                InfoItem("Transaction", order.transactionId),
+                InfoItem("Method", order.order!.paymentMethod.toString()),
+                InfoItem("Status", order.order!.paymentStatus==0?"Pending":order.order!.paymentStatus==1?"Success":"Failed"),
               ],
             ),
           ],
@@ -705,7 +709,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                   color: color,
                 ),
               ),
-              const SizedBox(width: 8),
+               SizedBox(width: Sizes.screenWidth*0.01),
               Expanded(
                 child: Text(
                   title,
@@ -719,14 +723,14 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+           SizedBox(height: Sizes.screenHeight*0.013),
           ...items.map((item) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 55,
+                  width: Sizes.screenWidth*0.042,
                   child: Text(
                     item.label,
                     style: TextStyle(
@@ -735,7 +739,6 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     item.value,
@@ -755,7 +758,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildOrderItemsSection(HubOrderModel order) {
+  Widget _buildOrderItemsSection(HubPerformanceViewOrderDetailsData? order) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -800,7 +803,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  "3 items",
+                  "${order!.items!.length} items",
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -813,13 +816,9 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
           const SizedBox(height: 16),
 
           // Items list
-          ...List.generate(3, (index) {
-            final items = [
-              {"name": "Margherita Pizza", "qty": 2, "price": 240, "note": "Extra cheese"},
-              {"name": "Garlic Breadsticks", "qty": 1, "price": 120, "note": "With dip"},
-              {"name": "Pepsi (500ml)", "qty": 2, "price": 60, "note": "Cold"},
-            ];
-            final item = items[index];
+          ...List.generate(order.items!.length, (index) {
+
+            final item = order.items![index];
 
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
@@ -851,27 +850,16 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          item["name"] as String,
+                          item.productName as String,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
                         ),
-                        if (item["note"] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              "Note: ${item["note"]}",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade600,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ),
+
                         const SizedBox(height: 4),
                         Text(
-                          "Qty: ${item["qty"]} × ₹${item["price"]}",
+                          "Qty: ${item.qty} × ₹${item.price}",
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade700,
@@ -884,7 +872,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "₹${(item["qty"] as int) * (item["price"] as int)}",
+                        "₹${(item.totalPrice)}",
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -946,12 +934,10 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildPaymentSummary(HubOrderModel order) {
-    final subtotal = 480;
-    final delivery = 40;
-    final tax = 48;
-    final discount = 30;
-    final total = subtotal + delivery + tax - discount;
+  Widget _buildPaymentSummary(HubPerformanceViewOrderDetailsData? order) {
+    final subtotal = order!.order!.totalAmount.toString();
+    final delivery = order.order!.deliveryCharge.toString();
+    final total = order.order!.totalAmount.toString();
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -992,13 +978,6 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
           const SizedBox(height: 10),
           _buildSummaryRow("Delivery Fee", "₹$delivery"),
           const SizedBox(height: 10),
-          _buildSummaryRow("Tax (10%)", "₹$tax"),
-          const SizedBox(height: 10),
-          _buildSummaryRow(
-            "Discount",
-            "-₹$discount",
-            valueColor: Colors.green,
-          ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(),
@@ -1031,7 +1010,7 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
                   ),
                 ),
                 Text(
-                  order.paymentMethod,
+                  order.order!.paymentMethod.toString(),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -1070,75 +1049,75 @@ class _OrderDetailsPanelState extends State<OrderDetailsPanel> {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ColorConst.primaryGreen,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.update_rounded, size: 18),
-                  SizedBox(width: 8),
-                  Text(
-                    "Update Status",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red, width: 1.5),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.cancel_rounded, size: 18),
-                  SizedBox(width: 8),
-                  Text(
-                    "Cancel Order",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildActionButtons() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       color: Colors.grey.shade50,
+  //       borderRadius: BorderRadius.circular(16),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Expanded(
+  //           child: ElevatedButton(
+  //             onPressed: () {},
+  //             style: ElevatedButton.styleFrom(
+  //               backgroundColor: ColorConst.primaryGreen,
+  //               foregroundColor: Colors.white,
+  //               padding: const EdgeInsets.symmetric(vertical: 16),
+  //               shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(14),
+  //               ),
+  //               elevation: 0,
+  //             ),
+  //             child: Row(
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: const [
+  //                 Icon(Icons.update_rounded, size: 18),
+  //                 SizedBox(width: 8),
+  //                 Text(
+  //                   "Update Status",
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.w600,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: OutlinedButton(
+  //             onPressed: () {},
+  //             style: OutlinedButton.styleFrom(
+  //               foregroundColor: Colors.red,
+  //               side: const BorderSide(color: Colors.red, width: 1.5),
+  //               padding: const EdgeInsets.symmetric(vertical: 16),
+  //               shape: RoundedRectangleBorder(
+  //                 borderRadius: BorderRadius.circular(14),
+  //               ),
+  //             ),
+  //             child: Row(
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: const [
+  //                 Icon(Icons.cancel_rounded, size: 18),
+  //                 SizedBox(width: 8),
+  //                 Text(
+  //                   "Cancel Order",
+  //                   style: TextStyle(
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.w600,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
