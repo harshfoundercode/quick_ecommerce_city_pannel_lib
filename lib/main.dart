@@ -1,14 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/notification_main_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/app_initializer.dart'
     show AppInitializer;
 import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
