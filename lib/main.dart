@@ -16,14 +16,14 @@ import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 String? fcmToken;
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // 🔹 Get FCM Token
-  fcmToken = await FirebaseMessaging.instance.getToken();
-  if (kDebugMode) {
-    print("✅ FCM Token: $fcmToken");
-  }
+void main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp();
+  // // 🔹 Get FCM Token
+  // fcmToken = await FirebaseMessaging.instance.getToken();
+  // if (kDebugMode) {
+  //   print("✅ FCM Token: $fcmToken");
+  // }
   runApp(const MyApp());
 }
 
@@ -36,15 +36,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final notificationService = NotificationService(navigatorKey: navigatorKey);
-
-  @override
-  void initState() {
-    super.initState();
-    notificationService.requestedNotificationPermission();
-    notificationService.firebaseInit(context);
-    notificationService.setupInteractMassage(context);
-  }
+  // final notificationService = NotificationService(navigatorKey: navigatorKey);
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   notificationService.requestedNotificationPermission();
+  //   notificationService.firebaseInit(context);
+  //   notificationService.setupInteractMassage(context);
+  // }
 
 
   @override
