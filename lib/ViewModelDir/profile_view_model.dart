@@ -50,11 +50,11 @@ class ProfileViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getManagerProfileDataApi(context) async {
+  Future<void> getManagerProfileDataApi(context,String hubId) async {
     _managerProfileData = null;
     notifyListeners();
     try {
-      final value = await _profileRepo.hubProfileApi();
+      final value = await _profileRepo.hubProfileApi(hubId);
       int statusCode = value['statusCode'] ?? 0;
       Map<String, dynamic> body = value['body'] ?? {};
 

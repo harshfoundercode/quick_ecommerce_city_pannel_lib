@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/search_hub_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
 
@@ -20,7 +19,7 @@ class _SearchFilterSectionState extends State<SearchFilterSection> {
     final mobile = Responsive.isMobile(context);
 
     final viewModel = Provider.of<AllHubViewModel>(context, listen: false);
-    return mobile?Container(
+    return mobile?SizedBox(
       height: Sizes.screenHeight*0.12,
       child: Column(
         children: [

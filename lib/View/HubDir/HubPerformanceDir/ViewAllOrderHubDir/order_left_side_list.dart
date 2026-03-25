@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_performance_order_list_model.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_order_from_hub_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
 
 class OrdersListPanel extends StatefulWidget {
@@ -481,8 +480,3 @@ class _OrdersListPanelState extends State<OrdersListPanel> {
   }
 }
 
-// Add this extension for updatedAt field if not present in your model
-extension HubOrderModelExtension on HubOrderModel {
-  DateTime? get updatedAt => null; // Implement based on your actual model
-  String? get customerAvatar => null; // Implement based on your actual model
-}

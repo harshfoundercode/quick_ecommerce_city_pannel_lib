@@ -6,12 +6,12 @@ class HubProfileDataModel {
 
   HubProfileDataModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -20,20 +20,20 @@ class HubProfileDataModel {
 }
 
 class Data {
-  int? id;
-  int? hubzoneid;
-  int? citymanagerid;
-  String? name;
-  String? phone;
-  String? address;
-  String? adharno;
-  String? panno;
-  String? img;
-  String? email;
-  String? password;
-  int? createdBy;
-  int? status;
-  Null? fcmToken;
+  dynamic id;
+  dynamic hubzoneid;
+  dynamic citymanagerid;
+  dynamic name;
+  dynamic phone;
+  dynamic address;
+  dynamic adharno;
+  dynamic panno;
+  dynamic img;
+  dynamic email;
+  dynamic password;
+  dynamic createdBy;
+  dynamic status;
+  dynamic fcmToken;
 
   Data(
       {this.id,
@@ -69,21 +69,21 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['hubzoneid'] = this.hubzoneid;
-    data['citymanagerid'] = this.citymanagerid;
-    data['name'] = this.name;
-    data['phone'] = this.phone;
-    data['address'] = this.address;
-    data['adharno'] = this.adharno;
-    data['panno'] = this.panno;
-    data['img'] = this.img;
-    data['email'] = this.email;
-    data['password'] = this.password;
-    data['created_by'] = this.createdBy;
-    data['status'] = this.status;
-    data['fcm_token'] = this.fcmToken;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['hubzoneid'] = hubzoneid;
+    data['citymanagerid'] = citymanagerid;
+    data['name'] = name;
+    data['phone'] = phone;
+    data['address'] = address;
+    data['adharno'] = adharno;
+    data['panno'] = panno;
+    data['img'] = img;
+    data['email'] = email;
+    data['password'] = password;
+    data['created_by'] = createdBy;
+    data['status'] = status;
+    data['fcm_token'] = fcmToken;
     return data;
   }
 }

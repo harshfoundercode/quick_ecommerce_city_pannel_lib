@@ -19,7 +19,7 @@ class Routers {
                   as Map<String, dynamic>?;
           final name = args?['name'];
           final id = args?['id'];
-          return ViewHubDetails(name: name, id: id,);
+          return ViewHubDetails(hubName: name, hubId: id,);
         };
       case RoutesName.adminLoginScreen:
         return (context)=>AdminLoginScreen();

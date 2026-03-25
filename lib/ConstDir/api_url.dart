@@ -1,6 +1,7 @@
 class ApiUrl {
 
   static const String baseurl = "https://payment.codescarts.com/";
+  static const String mapKey = "AIzaSyAW2lp2BYRmy8oD3ppvvegrql2MlMa-4tI";
 
   static const String configUrl1 = "${baseurl}api/";
   static const String configUrl2 = "${baseurl}citymanagerapi/";
@@ -11,7 +12,7 @@ class ApiUrl {
   static const String cityZoneListUrl = "${configUrl2}cityzone_list";
   static const String hubZoneCreateUrl = "${configUrl1}hubzone/create";
   static const String hubManagerCreateUrl = "${configUrl2}hubmanager/create";
-  static const String hubProfileUrl = "${configUrl1}hubprofile";
+  static String hubProfileUrl(String hubId) => "${configUrl1}hubprofile?id=$hubId";
   static const String hubZoneListUrl = "${configUrl1}hubzone_list";
   static const String orderListUrl = "${configUrl1}orders";
   static const String orderDetailsUrl = "${configUrl1}orderprofile";
@@ -28,5 +29,6 @@ class ApiUrl {
   static String hubPerformanceUrl = "${configUrl1}performance_hubs";
   static String hubPerformanceOrderListUrl(String hubId) => "${configUrl1}hubs/$hubId/orders";
   static String hubPerformanceViewOrderDetailsUrl(String orderId) => "${configUrl1}orders/$orderId";
+
 
 }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/DisputeDir/dispute_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/add_hub_form.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_screen.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/RevenueDir/revenue_dashboard_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_list_new.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_request_to_admin_history.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_screen.dart';
 
@@ -70,18 +69,13 @@ class AdminViewModel extends ChangeNotifier {
         SubMenuItem(title: "All Hubs", screen: AllHubScreen()),
         SubMenuItem(title: "Add Hub", screen:  AddHubForm()),
         SubMenuItem(title: "Hub Performance", screen:  AllHubsPerformanceScreen()),
-        SubMenuItem(title: "Hub Zone", screen:  HubZoneListScreen()),
+        SubMenuItem(title: "Hub Zone", screen:  HubZoneMapScreen()),
       ],
     ),
     MenuItem(
       icon: Icons.shopping_bag,
       title: "Orders",
-      screen: OrderScreen(),
-      // subItems: [
-      //   SubMenuItem(title: "All Orders", screen: AllHubScreen()),
-      //   SubMenuItem(title: "Pending Orders", screen: const AllHubScreen()),
-      //   SubMenuItem(title: "Completed Orders", screen: const AllHubScreen()),
-      // ],
+      screen: OrderListScreen(),
     ),
     MenuItem(
       icon: Icons.analytics,
@@ -89,6 +83,7 @@ class AdminViewModel extends ChangeNotifier {
       subItems: [
         SubMenuItem(title: "City Stocks", screen: CityStockScreen()),
         SubMenuItem(title: "City Stocks History", screen: CityHubHistoryScreen()),
+        SubMenuItem(title: "City Stocks Admin Request History", screen: CityRequestHistoryScreen()),
       ],
     ),
     // MenuItem(

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/view_all_hub_list_screen.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_desktop_view_model.dart';
 
 class HubManagementTable extends StatefulWidget {
   final List<Hubs>? dashboardHubData;
@@ -37,7 +35,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
           CustomWidgets.verticalSpace(0.02),
           if (!mobileSize) hubTableHeader(),
           CustomWidgets.verticalSpace(0.01),
-          Container(
+          SizedBox(
             height: mobileSize ?Sizes.screenHeight*0.65:Sizes.screenHeight*0.35,
             child: ListView.builder(
               shrinkWrap: true,

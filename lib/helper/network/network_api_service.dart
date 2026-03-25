@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/constant_popup.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
@@ -328,10 +326,10 @@ class NetworkApiServices extends BaseApiServices {
         return 'Validation Error';
       case >= 500:
         _showServerErrorDialog(statusCode, requestUrl);
-        throw FetchDataException('Server error (${statusCode})');
+        throw FetchDataException('Server error ($statusCode)');
       default:
         throw FetchDataException(
-            'Unexpected error: ${statusCode}');
+            'Unexpected error: $statusCode');
     }
   }
 

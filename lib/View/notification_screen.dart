@@ -31,7 +31,7 @@ class _NotificationViewState extends State<NotificationView> {
 
     return Material(
       color: Colors.white,
-      child: Container(
+      child: SizedBox(
         width: mobileSize?Sizes.screenWidth:Sizes.screenWidth*0.4,
         child: Column(
           children: [
@@ -99,7 +99,7 @@ class _NotificationViewState extends State<NotificationView> {
         ),
         const SizedBox(height: 8),
 
-        ...list.map((item) => _notificationTile(item)).toList(),
+        ...list.map((item) => _notificationTile(item)),
 
         const SizedBox(height: 16),
       ],

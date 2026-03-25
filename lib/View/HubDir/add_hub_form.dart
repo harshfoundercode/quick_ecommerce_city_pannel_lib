@@ -602,62 +602,6 @@ class _AddHubFormState extends State<AddHubForm> {
     );
   }
 
-  Widget _buildDropdownField(AddHubViewModel ahvm) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Row(
-            children: [
-              Icon(Icons.engineering_outlined, size: 16, color: ColorConst.primaryGreen),
-              CustomWidgets.horizontalSpace(0.005),
-              CustomText.medium("Operating Status", fontSize: 14),
-              const Text(" *", style: TextStyle(color: Colors.red, fontSize: 14)),
-            ],
-          ),
-        ),
-        Container(
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: ColorConst.borderColor),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              dropdownColor: ColorConst.white,
-              value: ahvm.selectedStatus,
-              isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down, color: ColorConst.textGrey),
-              items: ahvm.statusOptions.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: ahvm.getStatusColor(item),
-                        ),
-                      ),
-                      CustomWidgets.horizontalSpace(0.01),
-                      CustomText.medium(item, fontSize: 14),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) => ahvm.updateSelectedStatus(value),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildActionButtons(AddHubViewModel ahvm) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,

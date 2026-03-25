@@ -115,7 +115,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
-import 'package:quick_ecommerce_city_panel_redefined/View/MapDir/google_search_box.dart';
 
 class MapPickerPopup extends StatefulWidget {
   const MapPickerPopup({super.key});
@@ -163,7 +162,7 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
           circleId: const CircleId("coverage"),
           center: selectedLocation,
           radius: radius * 1000,
-          fillColor: Colors.blue.withOpacity(0.2),
+          fillColor: Colors.blue.withValues(alpha:0.2),
           strokeColor: Colors.blue,
           strokeWidth: 2,
         )

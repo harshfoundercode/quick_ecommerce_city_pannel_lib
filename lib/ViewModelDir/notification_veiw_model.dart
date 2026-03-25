@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/notification_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/notification_repo.dart';

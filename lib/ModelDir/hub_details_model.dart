@@ -23,16 +23,15 @@ class HubDetailsData {
   Hub? hub;
   Performance? performance;
   Drivers? drivers;
-  // List<Null>? topDeliveryBoys;
-  // List<Null>? recentDisruptions;
+  List<TopDeliveryBoys>? topDeliveryBoys;
+  List<RecentDisruptions>? recentDisruptions;
 
   HubDetailsData(
       {this.hub,
         this.performance,
         this.drivers,
-        // this.topDeliveryBoys,
-        // this.recentDisruptions
-      });
+        this.topDeliveryBoys,
+        this.recentDisruptions});
 
   HubDetailsData.fromJson(Map<String, dynamic> json) {
     hub = json['hub'] != null ? Hub.fromJson(json['hub']) : null;
@@ -41,18 +40,18 @@ class HubDetailsData {
         : null;
     drivers =
     json['drivers'] != null ? Drivers.fromJson(json['drivers']) : null;
-    // if (json['top_delivery_boys'] != null) {
-    //   topDeliveryBoys = <Null>[];
-    //   json['top_delivery_boys'].forEach((v) {
-    //     topDeliveryBoys!.add(new Null.fromJson(v));
-    //   });
-    // }
-    // if (json['recent_disruptions'] != null) {
-    //   recentDisruptions = <Null>[];
-    //   json['recent_disruptions'].forEach((v) {
-    //     recentDisruptions!.add(new Null.fromJson(v));
-    //   });
-    // }
+    if (json['top_delivery_boys'] != null) {
+      topDeliveryBoys = <TopDeliveryBoys>[];
+      json['top_delivery_boys'].forEach((v) {
+        topDeliveryBoys!.add(TopDeliveryBoys.fromJson(v));
+      });
+    }
+    if (json['recent_disruptions'] != null) {
+      recentDisruptions = <RecentDisruptions>[];
+      json['recent_disruptions'].forEach((v) {
+        recentDisruptions!.add(RecentDisruptions.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -66,14 +65,14 @@ class HubDetailsData {
     if (drivers != null) {
       data['drivers'] = drivers!.toJson();
     }
-    // if (this.topDeliveryBoys != null) {
-    //   data['top_delivery_boys'] =
-    //       this.topDeliveryBoys!.map((v) => v.toJson()).toList();
-    // }
-    // if (this.recentDisruptions != null) {
-    //   data['recent_disruptions'] =
-    //       this.recentDisruptions!.map((v) => v.toJson()).toList();
-    // }
+    if (topDeliveryBoys != null) {
+      data['top_delivery_boys'] =
+          topDeliveryBoys!.map((v) => v.toJson()).toList();
+    }
+    if (recentDisruptions != null) {
+      data['recent_disruptions'] =
+          recentDisruptions!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -167,6 +166,53 @@ class Drivers {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['total_delivery_boys'] = totalDeliveryBoys;
     data['active_boys'] = activeBoys;
+    return data;
+  }
+}
+
+class TopDeliveryBoys {
+  dynamic id;
+  dynamic name;
+  dynamic phone;
+  dynamic totalDeliveries;
+
+  TopDeliveryBoys({this.id, this.name, this.phone, this.totalDeliveries});
+
+  TopDeliveryBoys.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    phone = json['phone'];
+    totalDeliveries = json['total_deliveries'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['phone'] = phone;
+    data['total_deliveries'] = totalDeliveries;
+    return data;
+  }
+}
+
+class RecentDisruptions {
+  dynamic orderNo;
+  dynamic status;
+  dynamic createdAt;
+
+  RecentDisruptions({this.orderNo, this.status, this.createdAt});
+
+  RecentDisruptions.fromJson(Map<String, dynamic> json) {
+    orderNo = json['order_no'];
+    status = json['status'];
+    createdAt = json['created_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['order_no'] = orderNo;
+    data['status'] = status;
+    data['created_at'] = createdAt;
     return data;
   }
 }

@@ -5,7 +5,6 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/splash_services.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/auth_view_model.dart';
 
 class AdminLoginScreen extends StatefulWidget {

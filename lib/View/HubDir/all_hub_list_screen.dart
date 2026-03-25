@@ -9,7 +9,6 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_wid
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/SpecificHubPerformanceDir/view_hub_details.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/edit_hub_details.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/filter_hub_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
 
 class AllHubScreen extends StatefulWidget {
@@ -101,8 +100,8 @@ class _AllHubScreenState extends State<AllHubScreen> {
   Widget hubTableSection(AllHubViewModel vm, bool mobile) {
     final hubs = vm.hubListModel?.data?.hubs ?? [];
 
-    final showLimited = hubs.length > 3;
-    final displayList = showLimited ? hubs.take(3).toList() : hubs;
+    final showLimited = hubs.length > 4;
+    final displayList = showLimited ? hubs.take(4).toList() : hubs;
 
     return CustomWidgets.borderedContainer(
       child: Column(
@@ -201,9 +200,9 @@ class _AllHubScreenState extends State<AllHubScreen> {
             child: actionButtons(
               () => openRightDrawer(
                 context,
-                ViewHubDetails(name: hub.hubName, id: hub.hubId.toString()),
+                ViewHubDetails(hubName: hub.hubName, hubId: hub.hubId.toString(),),
               ),
-              () => openRightDrawer(context, EditCityDrawer()),
+              () => openRightDrawer(context, EditCityDrawer(hubId:hub.hubId.toString())),
             ),
           ),
         ],
@@ -258,9 +257,9 @@ class _AllHubScreenState extends State<AllHubScreen> {
           actionButtons(
             () => openRightDrawer(
               context,
-              ViewHubDetails(name: hub.hubName, id: hub.hubId.toString()),
+              ViewHubDetails(hubName: hub.hubName, hubId: hub.hubId.toString()),
             ),
-            () => openRightDrawer(context, EditCityDrawer()),
+            () => openRightDrawer(context, EditCityDrawer(hubId:hub.hubId.toString())),
           ),
         ],
       ),
@@ -292,7 +291,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
           child: const Icon(Icons.hub_outlined, color: ColorConst.primaryGreen),
         ),
         SizedBox(width: Sizes.screenWidth * spacing),
-        Container(
+        SizedBox(
           width: mobile?Sizes.screenWidth * 0.6:Sizes.screenWidth * 0.13,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,9 +411,9 @@ class _AllHubListFullScreenState extends State<AllHubListFullScreen> {
             child: actionButtons(
                   () => openRightDrawer(
                 context,
-                ViewHubDetails(name: hub.hubName, id: hub.hubId.toString()),
+                ViewHubDetails(hubName: hub.hubName, hubId: hub.hubId.toString()),
               ),
-                  () => openRightDrawer(context, EditCityDrawer()),
+                  () => openRightDrawer(context, EditCityDrawer(hubId:hub.hubId.toString())),
             ),
           ),
         ],
@@ -453,9 +452,9 @@ class _AllHubListFullScreenState extends State<AllHubListFullScreen> {
           actionButtons(
                 () => openRightDrawer(
               context,
-              ViewHubDetails(name: hub.hubName, id: hub.hubId.toString()),
+              ViewHubDetails(hubName: hub.hubName, hubId: hub.hubId.toString()),
             ),
-                () => openRightDrawer(context, EditCityDrawer()),
+                () => openRightDrawer(context, EditCityDrawer(hubId:hub.hubId.toString())),
           ),
         ],
       ),
@@ -485,7 +484,7 @@ class _AllHubListFullScreenState extends State<AllHubListFullScreen> {
           child: const Icon(Icons.hub_outlined, color: ColorConst.primaryGreen),
         ),
         SizedBox(width: Sizes.screenWidth * spacing),
-        Container(
+        SizedBox(
           width: mobile?Sizes.screenWidth * 0.6:Sizes.screenWidth * 0.2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

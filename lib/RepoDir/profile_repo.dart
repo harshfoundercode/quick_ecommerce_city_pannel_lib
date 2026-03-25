@@ -19,10 +19,10 @@ class ProfileRepo {
     }
   }
 
-  Future<dynamic> hubProfileApi() async {
+  Future<dynamic> hubProfileApi(String hubId) async {
     await _apiServices.initializeToken();
     try {
-      dynamic response = await _apiServices.getGetApiResponse(ApiUrl.hubProfileUrl);
+      dynamic response = await _apiServices.getGetApiResponse(ApiUrl.hubProfileUrl(hubId));
       return response;
     } catch (e) {
       if (kDebugMode) {

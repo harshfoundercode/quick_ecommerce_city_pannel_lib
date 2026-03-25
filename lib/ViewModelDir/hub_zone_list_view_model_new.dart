@@ -4,25 +4,19 @@ import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_mode
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_zone_list_repo.dart';
 
 class HubZoneViewModel extends ChangeNotifier {
+  final _hubZoneListRepo = HubZoneListRepo();
+
+
   List<HubZoneListData> _hubZones = [];
-  bool _isLoading = false;
-  bool _isGridView = false;
-
   List<HubZoneListData> get hubZones => _hubZones;
-  bool get isLoading => _isLoading;
-  bool get isGridView => _isGridView;
 
-  void toggleViewMode() {
-    _isGridView = !_isGridView;
-    notifyListeners();
-  }
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   Future<void> refreshZones() async {
     _isLoading = true;
     notifyListeners();
-
     await Future.delayed(const Duration(seconds: 1));
-
     _isLoading = false;
     notifyListeners();
   }
@@ -60,7 +54,6 @@ class HubZoneViewModel extends ChangeNotifier {
   ) /
       _hubZones.length;
 
-  final _hubZoneListRepo = HubZoneListRepo();
 
   HubZoneListDataModel? _hubZoneListDataModel;
   HubZoneListDataModel? get hubZoneListDataModel =>

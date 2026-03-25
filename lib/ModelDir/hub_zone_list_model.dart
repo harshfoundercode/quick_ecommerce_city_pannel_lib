@@ -1,5 +1,3 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
 
 class HubZoneListDataModel {
   String? message;
@@ -35,6 +33,8 @@ class HubZoneListData {
   dynamic lat;
   dynamic long;
   dynamic status;
+  dynamic address;
+  dynamic pincode;
 
   HubZoneListData({
     this.id,
@@ -43,7 +43,9 @@ class HubZoneListData {
     this.radiuskm,
     this.lat,
     this.long,
-    this.status
+    this.status,
+    this.address,
+    this.pincode
   });
 
   HubZoneListData.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,8 @@ class HubZoneListData {
     status: json['status'] == 1
         ? HubZoneStatus.active
         : HubZoneStatus.inactive;
+    address = json['address'];
+    pincode = json['pincode'];
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +71,8 @@ class HubZoneListData {
     data['lat'] = lat;
     data['long'] = long;
     data['status'] = status;
+    data['pincode'] = pincode;
+    data['address'] = address;
     return data;
   }
 
@@ -78,7 +84,9 @@ class HubZoneListData {
     dynamic radiuskm,
     dynamic lat,
     dynamic long,
-    dynamic status
+    dynamic status,
+    dynamic pincode,
+    dynamic address
   }) {
     return HubZoneListData(
       id: id ?? this.id,
@@ -87,7 +95,9 @@ class HubZoneListData {
       radiuskm: radiuskm ?? this.radiuskm,
       lat: lat ?? this.lat,
       long: long ?? this.long,
-      status: status ?? this.status
+      status: status ?? this.status,
+      address: address ?? this.address,
+      pincode: pincode ?? this.pincode,
     );
   }
 
@@ -122,31 +132,54 @@ enum HubZoneStatus {
   inactive
 }
 
-extension HubZoneStatusExtension on HubZoneStatus {
-  String get displayName {
-    switch (this) {
-      case HubZoneStatus.active:
-        return 'Active';
-      case HubZoneStatus.inactive:
-        return 'Inactive';
-    }
+
+
+
+class Data {
+  int? id;
+  int? cityzoneid;
+  String? name;
+  String? address;
+  int? pincode;
+  String? radiuskm;
+  String? lat;
+  String? long;
+  int? status;
+
+  Data(
+      {this.id,
+        this.cityzoneid,
+        this.name,
+        this.address,
+        this.pincode,
+        this.radiuskm,
+        this.lat,
+        this.long,
+        this.status});
+
+  Data.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    cityzoneid = json['cityzoneid'];
+    name = json['name'];
+    address = json['address'];
+    pincode = json['pincode'];
+    radiuskm = json['radiuskm'];
+    lat = json['lat'];
+    long = json['long'];
+    status = json['status'];
   }
 
-  Color get color {
-    switch (this) {
-      case HubZoneStatus.active:
-        return const Color(0xFF10B981);
-      case HubZoneStatus.inactive:
-        return const Color(0xFFEF4444);
-    }
-  }
-
-  IconData get icon {
-    switch (this) {
-      case HubZoneStatus.active:
-        return Icons.check_circle_rounded;
-      case HubZoneStatus.inactive:
-        return Icons.cancel_rounded;
-    }
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['cityzoneid'] = this.cityzoneid;
+    data['name'] = this.name;
+    data['address'] = this.address;
+    data['pincode'] = this.pincode;
+    data['radiuskm'] = this.radiuskm;
+    data['lat'] = this.lat;
+    data['long'] = this.long;
+    data['status'] = this.status;
+    return data;
   }
 }

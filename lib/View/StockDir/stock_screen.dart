@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_stock_model.dart';
@@ -23,7 +24,10 @@ class _CityStockScreenState extends State<CityStockScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final stockProvider = Provider.of<CityStockViewModel>(context,listen: false);
+      final stockProvider = Provider.of<CityStockViewModel>(
+        context,
+        listen: false,
+      );
       stockProvider.getCityStockDataApi(context);
     });
   }
@@ -43,7 +47,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
         builder: (context, vm, _) {
           if (vm.cityStockModel == null) {
             return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF2563EB)),
+              child: CircularProgressIndicator(color: ColorConst.primaryGreen),
             );
           }
 
@@ -54,18 +58,20 @@ class _CityStockScreenState extends State<CityStockScreen> {
               .toList();
 
           final filtered = allItems.where((item) {
-            final matchSearch = _searchQuery.isEmpty ||
-                (item.productName
-                    ?.toLowerCase()
-                    .contains(_searchQuery.toLowerCase()) ??
+            final matchSearch =
+                _searchQuery.isEmpty ||
+                (item.productName?.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ??
                     false);
-            final matchCategory = _selectedCategory == null ||
-                item.category == _selectedCategory;
+            final matchCategory =
+                _selectedCategory == null || item.category == _selectedCategory;
             return matchSearch && matchCategory;
           }).toList();
 
           // Group by main_category > category > sub_category
-          final Map<String, Map<String, Map<String, List<CityStockData>>>> grouped = {};
+          final Map<String, Map<String, Map<String, List<CityStockData>>>>
+          grouped = {};
           for (var item in filtered) {
             final main = item.mainCategory ?? 'Other';
             final cat = item.category ?? 'Other';
@@ -80,16 +86,76 @@ class _CityStockScreenState extends State<CityStockScreen> {
             children: [
               _buildSearchAndFilter(categories),
               _buildSummaryRow(allItems),
+              /// 🔥 BULK REQUEST BAR
+              Consumer<CityStockViewModel>(
+                builder: (context, vm, _) {
+                  if (vm.selectedProductIds.isEmpty) {
+                    return const SizedBox();
+                  }
+
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    color: Colors.white,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: vm.cityRequestLoading
+                                ? null
+                                : () {
+                              vm.bulkRequestStock(
+                                context,
+                                "Bulk stock request",
+                              );
+                            },
+                            icon: vm.cityRequestLoading
+                                ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                                : const Icon(Icons.send,color: Colors.white,),
+                            label: Text(
+                              vm.cityRequestLoading
+                                  ? "Requesting..."
+                                  : "Request (${vm.selectedProductIds.length})",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorConst.primaryGreen,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+
+                        // /// LOW STOCK AUTO SELECT
+                        // TextButton(
+                        //   onPressed: () {
+                        //     vm.selectLowStock(allItems);
+                        //   },
+                        //   child: const Text("Low Stock",style: TextStyle(color: ColorConst.primaryGreen),),
+                        // ),
+                      ],
+                    ),
+                  );
+                },
+              ),
               Expanded(
                 child: filtered.isEmpty
                     ? _buildEmptyState()
                     : ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                  children: grouped.entries.map((mainEntry) {
-                    return _buildMainCategorySection(
-                        mainEntry.key.toString(), mainEntry.value, vm);
-                  }).toList(),
-                ),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                        children: grouped.entries.map((mainEntry) {
+                          return _buildMainCategorySection(
+                            mainEntry.key.toString(),
+                            mainEntry.value,
+                            vm,
+                          );
+                        }).toList(),
+                      ),
               ),
             ],
           );
@@ -102,19 +168,24 @@ class _CityStockScreenState extends State<CityStockScreen> {
     return AppBar(
       backgroundColor: ColorConst.primaryGreen,
       elevation: 0,
-      toolbarHeight: Sizes.screenHeight*0.12,
+      toolbarHeight: Sizes.screenHeight * 0.12,
       automaticallyImplyLeading: false,
-      title:  Column(
+      title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('City Stock',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700)),
-          SizedBox(height: Sizes.screenHeight*0.01),
-          Text('Inventory Management',
-              style: TextStyle(color: ColorConst.white, fontSize: 15)),
+          Text(
+            'City Stock',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(height: Sizes.screenHeight * 0.01),
+          Text(
+            'Inventory Management',
+            style: TextStyle(color: ColorConst.white, fontSize: 15),
+          ),
         ],
       ),
       actions: [
@@ -132,26 +203,29 @@ class _CityStockScreenState extends State<CityStockScreen> {
 
   Widget _buildSearchAndFilter(List<dynamic> categories) {
     return Container(
-      color: ColorConst.primaryLightGreen,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+      color: ColorConst.primaryExtraLightGreen,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Row(
         children: [
           Expanded(
             child: Container(
               height: 42,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
                 controller: _searchController,
                 onChanged: (v) => setState(() => _searchQuery = v),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: ColorConst.primaryGreen, fontSize: 14),
                 decoration: const InputDecoration(
                   hintText: 'Search products...',
-                  hintStyle: TextStyle(color: Colors.white, fontSize: 14),
-                  prefixIcon:
-                  Icon(Icons.search_rounded, color: Colors.white, size: 20),
+                  hintStyle: TextStyle(color: ColorConst.primaryGreen , fontSize: 14),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: ColorConst.primaryGreen,
+                    size: 20,
+                  ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 11),
                 ),
@@ -163,30 +237,42 @@ class _CityStockScreenState extends State<CityStockScreen> {
             height: 42,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha:0.15),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String?>(
                 value: _selectedCategory,
-                dropdownColor: const Color(0xFF1E3A5F),
-                hint: const Text('Category',
-                    style:
-                    TextStyle(color: Color(0xFF93C5FD), fontSize: 13)),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                    color: Color(0xFF93C5FD)),
+                dropdownColor: ColorConst.primaryExtraLightGreen
+                ,
+                hint: const Text(
+                  'Category',
+                  style: TextStyle(color: ColorConst.primaryGreen, fontSize: 13),
+                ),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: ColorConst.primaryGreen,
+                ),
                 items: [
                   const DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('All',
-                        style: TextStyle(color: Colors.white, fontSize: 13)),
+                    child: Text(
+                      'All',
+                      style: TextStyle(color: ColorConst.primaryGreen, fontSize: 13),
+                    ),
                   ),
-                  ...categories.map((c) => DropdownMenuItem<String?>(
-                    value: c,
-                    child: Text(c,
+                  ...categories.map(
+                    (c) => DropdownMenuItem<String?>(
+                      value: c,
+                      child: Text(
+                        c,
                         style: const TextStyle(
-                            color: Colors.white, fontSize: 13)),
-                  )),
+                          color: Colors.red,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _selectedCategory = v),
               ),
@@ -202,27 +288,43 @@ class _CityStockScreenState extends State<CityStockScreen> {
     final lowStock = items.where((i) => (i.currentStock ?? 0) < 10).length;
     final totalStock = items.fold<int>(
       0,
-          (sum, i) => sum + int.tryParse(i.currentStock?.toString() ?? "0")!,
+      (sum, i) => sum + int.tryParse(i.currentStock?.toString() ?? "0")!,
     );
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
         children: [
-          _buildSummaryCard('Products', '$totalProducts',
-              Icons.inventory_2_outlined, const Color(0xFF2563EB)),
+          _buildSummaryCard(
+            'Products',
+            '$totalProducts',
+            Icons.inventory_2_outlined,
+            const Color(0xFF2563EB),
+          ),
           const SizedBox(width: 10),
-          _buildSummaryCard('Total Stock', totalStock.toString(),
-              Icons.stacked_bar_chart_rounded, const Color(0xFF059669)),
+          _buildSummaryCard(
+            'Total Stock',
+            totalStock.toString(),
+            Icons.stacked_bar_chart_rounded,
+            const Color(0xFF059669),
+          ),
           const SizedBox(width: 10),
-          _buildSummaryCard('Low Stock', '$lowStock',
-              Icons.warning_amber_rounded, const Color(0xFFDC2626)),
+          _buildSummaryCard(
+            'Low Stock',
+            '$lowStock',
+            Icons.warning_amber_rounded,
+            const Color(0xFFDC2626),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildSummaryCard(
-      String label, String value, IconData icon, Color color) {
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -231,9 +333,10 @@ class _CityStockScreenState extends State<CityStockScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha:0.05),
-                blurRadius: 6,
-                offset: const Offset(0, 2))
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Row(
@@ -241,7 +344,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
             Container(
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: color.withValues(alpha:0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -250,14 +353,21 @@ class _CityStockScreenState extends State<CityStockScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value,
-                    style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18)),
-                Text(label,
-                    style: const TextStyle(
-                        color: Color(0xFF6B7280), fontSize: 10)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 10,
+                  ),
+                ),
               ],
             ),
           ],
@@ -267,9 +377,10 @@ class _CityStockScreenState extends State<CityStockScreen> {
   }
 
   Widget _buildMainCategorySection(
-      String mainCategory,
-      Map<String, Map<String, List<CityStockData>>> categoryMap,
-      CityStockViewModel vm) {
+    String mainCategory,
+    Map<String, Map<String, List<CityStockData>>> categoryMap,
+    CityStockViewModel vm,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -281,15 +392,19 @@ class _CityStockScreenState extends State<CityStockScreen> {
                 width: 4,
                 height: 20,
                 decoration: BoxDecoration(
-                    color: ColorConst.primaryGreen,
-                    borderRadius: BorderRadius.circular(2)),
+                  color: ColorConst.primaryGreen,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(width: 8),
-              Text(mainCategory,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: ColorConst.primaryGreen)),
+              Text(
+                mainCategory,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: ColorConst.primaryGreen,
+                ),
+              ),
             ],
           ),
         ),
@@ -299,33 +414,44 @@ class _CityStockScreenState extends State<CityStockScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 12, top: 6, bottom: 6),
-                child: Text(catEntry.key,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF374151))),
+                child: Text(
+                  catEntry.key,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF374151),
+                  ),
+                ),
               ),
               ...catEntry.value.entries.map((subEntry) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding:
-                      const EdgeInsets.only(left: 24, top: 4, bottom: 4),
+                      padding: const EdgeInsets.only(
+                        left: 24,
+                        top: 4,
+                        bottom: 4,
+                      ),
                       child: Row(
                         children: [
-                          const Icon(Icons.subdirectory_arrow_right_rounded,
-                              size: 14, color: Color(0xFF9CA3AF)),
+                          const Icon(
+                            Icons.subdirectory_arrow_right_rounded,
+                            size: 14,
+                            color: Color(0xFF9CA3AF),
+                          ),
                           const SizedBox(width: 4),
-                          Text(subEntry.key,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF9CA3AF))),
+                          Text(
+                            subEntry.key,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF9CA3AF),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    ...subEntry.value
-                        .map((item) => _buildStockCard(item, vm))
-                        ,
+                    ...subEntry.value.map((item) => _buildStockCard(item, vm)),
                   ],
                 );
               }),
@@ -340,8 +466,9 @@ class _CityStockScreenState extends State<CityStockScreen> {
     final current = item.currentStock ?? 0;
     final received = int.tryParse(item.totalReceived ?? '0') ?? 0;
     final sold = received - current;
-    final double progress =
-    received > 0 ? (current / received).clamp(0.0, 1.0) : 0.0;
+    final double progress = received > 0
+        ? (current / received).clamp(0.0, 1.0)
+        : 0.0;
     final isLow = current < 10;
     final stockColor = isLow
         ? const Color(0xFFDC2626)
@@ -349,19 +476,23 @@ class _CityStockScreenState extends State<CityStockScreen> {
         ? const Color(0xFFD97706)
         : ColorConst.primaryGreen;
 
+    final isSelected =
+    vm.selectedProductIds.contains(item.productid);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: isLow
-            ? Border.all(color: const Color(0xFFDC2626).withValues(alpha:0.3))
+            ? Border.all(color: const Color(0xFFDC2626).withValues(alpha: 0.3))
             : null,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha:0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2))
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Padding(
@@ -369,46 +500,104 @@ class _CityStockScreenState extends State<CityStockScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product name + low stock badge
+            Row(
+              children: [
+                Checkbox(
+                  value: isSelected,
+                  checkColor: ColorConst.white,
+                  activeColor: ColorConst.primaryGreen,
+                  onChanged: (_) {
+                    if (item.productid != null) {
+                      vm.toggleSelection(item.productid!);
+                    }
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    item.productName ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            if (isSelected)
+              Row(
+                children: [
+                  const Text("Qty: "),
+                  CustomTextField(
+                    width: Sizes.screenWidth*0.05,
+                    height: 30,
+                    keyboardType: TextInputType.number,
+                    fillColor: Colors.white,
+                    maxLength: 3,
+                    filled: true,
+                    onChanged: (val) {
+                      final qty = int.tryParse(val) ?? 1;
+                      vm.updateQty(item.productid!, qty);
+                    },
+                    hintText: "1",
+                  ),
+                ],
+              ),
+
+            const SizedBox(height: 10),
+
             Row(
               children: [
                 Expanded(
                   child: Text(
                     item.productName ?? '',
                     style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: Color(0xFF111827)),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Color(0xFF111827),
+                    ),
                   ),
                 ),
                 if (item.variantName != null && item.variantName != 'Default')
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(item.variantName!,
-                        style: const TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF2563EB),
-                            fontWeight: FontWeight.w500)),
+                    child: Text(
+                      item.variantName!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF2563EB),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                 if (isLow) ...[
                   const SizedBox(width: 6),
                   Container(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEE2E2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text('Low Stock',
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFFDC2626),
-                            fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Low Stock',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFFDC2626),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ],
@@ -418,14 +607,15 @@ class _CityStockScreenState extends State<CityStockScreen> {
             // Stock numbers
             Row(
               children: [
-                _buildStockStat(
-                    'Current', '$current', stockColor),
+                _buildStockStat('Current', '$current', stockColor),
                 const SizedBox(width: 16),
                 _buildStockStat(
-                    'Received', '$received', const Color(0xFF374151)),
+                  'Received',
+                  '$received',
+                  const Color(0xFF374151),
+                ),
                 const SizedBox(width: 16),
-                _buildStockStat(
-                    'Sold', '$sold', const Color(0xFF6B7280)),
+                _buildStockStat('Sold', '$sold', const Color(0xFF6B7280)),
               ],
             ),
             const SizedBox(height: 10),
@@ -437,14 +627,18 @@ class _CityStockScreenState extends State<CityStockScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Stock Level',
-                        style: TextStyle(
-                            fontSize: 11, color: Color(0xFF6B7280))),
-                    Text('${(progress * 100).toStringAsFixed(0)}%',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: stockColor)),
+                    const Text(
+                      'Stock Level',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                    ),
+                    Text(
+                      '${(progress * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: stockColor,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 5),
@@ -475,7 +669,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildActionButton(
-                    label: 'Update Stock',
+                    label: 'Request Stock',
                     icon: Icons.edit_rounded,
                     color: const Color(0xFF059669),
                     onTap: () => _showUpdateStockDialog(context, item, vm),
@@ -493,15 +687,19 @@ class _CityStockScreenState extends State<CityStockScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style:
-            const TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+        ),
         const SizedBox(height: 2),
-        Text(value,
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: color)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
       ],
     );
   }
@@ -518,20 +716,23 @@ class _CityStockScreenState extends State<CityStockScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: color.withValues(alpha:0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withValues(alpha:0.25)),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 15, color: color),
             const SizedBox(width: 5),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: color)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
           ],
         ),
       ),
@@ -543,11 +744,16 @@ class _CityStockScreenState extends State<CityStockScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined,
-              size: 60, color: Colors.grey.shade300),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 60,
+            color: Colors.grey.shade300,
+          ),
           const SizedBox(height: 12),
-          const Text('No products found',
-              style: TextStyle(color: Color(0xFF6B7280), fontSize: 16)),
+          const Text(
+            'No products found',
+            style: TextStyle(color: Color(0xFF6B7280), fontSize: 16),
+          ),
         ],
       ),
     );
@@ -556,8 +762,10 @@ class _CityStockScreenState extends State<CityStockScreen> {
   // ─── Dialogs ────────────────────────────────────────────────────────────────
 
   void _showTransferDialog(
-      BuildContext context, CityStockData item, CityStockViewModel vm) {
-
+    BuildContext context,
+    CityStockData item,
+    CityStockViewModel vm,
+  ) {
     final qtyController = TextEditingController();
 
     String? selectedHubId;
@@ -583,7 +791,9 @@ class _CityStockScreenState extends State<CityStockScreen> {
               child: Column(
                 children: [
                   _dialogInfoRow(
-                      'Available Stock', '${item.currentStock ?? 0}'),
+                    'Available Stock',
+                    '${item.currentStock ?? 0}',
+                  ),
 
                   const SizedBox(height: 16),
 
@@ -597,16 +807,25 @@ class _CityStockScreenState extends State<CityStockScreen> {
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: selectedHubId,
-                        hint: const Text("Select Destination Hub",style: TextStyle(fontSize: 14),),
+                        hint: const Text(
+                          "Select Destination Hub",
+                          style: TextStyle(fontSize: 14),
+                        ),
                         isExpanded: true,
                         dropdownColor: Colors.white,
+
                         /// ✅ Handle loading safely
-                        items: (hubVM.hubListModel?.data?.hubs ?? []).map<DropdownMenuItem<String>>((hub) {
-                          return DropdownMenuItem<String>(
-                            value: hub.hubId.toString(),
-                            child: Text(hub.hubName ?? "",style: TextStyle(fontSize: 16),),
-                          );
-                        }).toList(),
+                        items: (hubVM.hubListModel?.data?.hubs ?? [])
+                            .map<DropdownMenuItem<String>>((hub) {
+                              return DropdownMenuItem<String>(
+                                value: hub.hubId.toString(),
+                                child: Text(
+                                  hub.hubName ?? "",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              );
+                            })
+                            .toList(),
 
                         onChanged: (value) {
                           setState(() {
@@ -634,34 +853,46 @@ class _CityStockScreenState extends State<CityStockScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                        onPressed: () {
-                          if (selectedHubId == null) {
-                            CustomSnackBar.show(context,message: "Please select a hub", type: SnackBarType.error);
-                          }
-
-                          if (qtyController.text.isEmpty) {
-                            CustomSnackBar.show(context,message:"Enter quantity", type: SnackBarType.error);
-                          }
-
-                          final qty = int.tryParse(qtyController.text);
-                          if (qty == null || qty <= 0) {
-                            CustomSnackBar.show(context,message:'Enter valid quantity', type: SnackBarType.error);
-                          }
-                          final items = [
-                            {
-                              "productid": item.productid,
-                              "variantid": item.variantid ?? 0,
-                              "qty": qty,
-                            }
-                          ];
-
-                          vm.cityTransferToHubApi(
+                      onPressed: () {
+                        if (selectedHubId == null) {
+                          CustomSnackBar.show(
                             context,
-                            selectedHubId!,
-                            "Transfer from city",
-                            items,
+                            message: "Please select a hub",
+                            type: SnackBarType.error,
                           );
-                        },
+                        }
+
+                        if (qtyController.text.isEmpty) {
+                          CustomSnackBar.show(
+                            context,
+                            message: "Enter quantity",
+                            type: SnackBarType.error,
+                          );
+                        }
+
+                        final qty = int.tryParse(qtyController.text);
+                        if (qty == null || qty <= 0) {
+                          CustomSnackBar.show(
+                            context,
+                            message: 'Enter valid quantity',
+                            type: SnackBarType.error,
+                          );
+                        }
+                        final items = [
+                          {
+                            "productid": item.productid,
+                            "variantid": item.variantid ?? 0,
+                            "qty": qty,
+                          },
+                        ];
+
+                        vm.cityTransferToHubApi(
+                          context,
+                          selectedHubId!,
+                          "Transfer from city",
+                          items,
+                        );
+                      },
                       icon: const Icon(Icons.send_rounded, size: 18),
                       label: const Text('Confirm Transfer'),
                       style: ElevatedButton.styleFrom(
@@ -684,99 +915,205 @@ class _CityStockScreenState extends State<CityStockScreen> {
   }
 
   void _showUpdateStockDialog(
-      BuildContext context, CityStockData item, CityStockViewModel vm) {
-    final stockController =
-    TextEditingController(text: '${item.currentStock ?? 0}');
-    final receivedController =
-    TextEditingController(text: item.totalReceived ?? '0');
-    String updateType = 'add';
+      BuildContext context,
+      CityStockData item,
+      CityStockViewModel vm,
+      ) {
+    final stockController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx, setModalState) => _BottomSheetWrapper(
-          title: 'Update Stock',
+      builder: (_) {
+        return _BottomSheetWrapper(
+          title: 'Request Stock', // ✅ corrected meaning
           subtitle: item.productName ?? '',
-          icon: Icons.edit_rounded,
+          icon: Icons.inventory_2_outlined,
           iconColor: ColorConst.primaryGreen,
-          child: Column(
-            children: [
-              _dialogInfoRow('Current Stock', '${item.currentStock ?? 0}'),
-              const SizedBox(height: 16),
+          child: Consumer<CityStockViewModel>(
+            builder: (context, vm, _) {
+              return Column(
+                children: [
+                  _dialogInfoRow(
+                    'Current Stock',
+                    '${item.currentStock ?? 0}',
+                  ),
+                  const SizedBox(height: 16),
 
-              // Update type toggle
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    _toggleOption('Add Stock', 'add', updateType,
-                            (v) => setModalState(() => updateType = v),
-                    ColorConst.primaryGreen),
-                    _toggleOption('Remove Stock', 'remove', updateType,
-                            (v) => setModalState(() => updateType = v),
-                        const Color(0xFFDC2626)),
-                    _toggleOption('Set Exact', 'set', updateType,
-                            (v) => setModalState(() => updateType = v),
-                        const Color(0xFF7C3AED)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
+                  // 🔢 Quantity Input
+                  _buildDialogField(
+                    controller: stockController,
+                    label: 'Request Quantity',
+                    hint: 'Enter quantity',
+                    icon: Icons.numbers_rounded,
+                    keyboardType: TextInputType.number,
+                  ),
 
-              _buildDialogField(
-                controller: stockController,
-                label: updateType == 'set' ? 'New Stock Value' : 'Quantity',
-                hint: 'Enter value',
-                icon: Icons.inventory_2_outlined,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 12),
-              _buildDialogField(
-                controller: receivedController,
-                label: 'Total Received',
-                hint: 'Enter total received',
-                icon: Icons.move_to_inbox_rounded,
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: call update stock API
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Stock updated for ${item.productName}'),
-                        backgroundColor: const Color(0xFF059669),
+                  /// 🚀 REQUEST BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: vm.cityRequestLoading
+                          ? null
+                          : () {
+                        final qty = int.tryParse(stockController.text);
+
+                        // ❌ validation
+                        if (qty == null || qty <= 0) {
+                          CustomSnackBar.show(
+                            context,
+                            message: "Enter valid quantity",
+                            type: SnackBarType.error,
+                          );
+                          return;
+                        }
+                        final items = [
+                          {
+                            "productid": item.productid,
+                            "qty": qty,
+                          }
+                        ];
+
+                        // ✅ API CALL
+                        vm.cityRequestApi(
+                          context,
+                          "Stock request from city panel",
+                          items,
+                        );
+                      },
+
+                      icon: vm.cityRequestLoading
+                          ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : const Icon(Icons.send_rounded, size: 18),
+
+                      label: Text(
+                        vm.cityRequestLoading
+                            ? 'Requesting...'
+                            : 'Request Stock',
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.check_rounded, size: 18),
-                  label: const Text('Save Changes'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorConst.primaryGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorConst.primaryGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  /// 🔥 UPDATED STOCK CARD
+  Widget _buildStockCardd(CityStockData item, CityStockViewModel vm) {
+    final current = item.currentStock ?? 0;
+
+    final isSelected =
+    vm.selectedProductIds.contains(item.productid);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          /// 🔥 CHECKBOX + NAME
+          Row(
+            children: [
+              Checkbox(
+                value: isSelected,
+                onChanged: (_) {
+                  if (item.productid != null) {
+                    vm.toggleSelection(item.productid!);
+                  }
+                },
+              ),
+              Expanded(
+                child: Text(
+                  item.productName ?? '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
                   ),
                 ),
               ),
             ],
           ),
-        ),
+
+          const SizedBox(height: 8),
+
+          /// STOCK INFO
+          Text("Current Stock: $current"),
+
+          /// 🔥 QTY INPUT (ONLY WHEN SELECTED)
+          if (isSelected)
+            Row(
+              children: [
+                const Text("Qty: "),
+                SizedBox(
+                  width: 60,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    onChanged: (val) {
+                      final qty = int.tryParse(val) ?? 1;
+                      vm.updateQty(item.productid!, qty);
+                    },
+                    decoration: const InputDecoration(
+                      hintText: "1",
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+          const SizedBox(height: 10),
+
+          /// BUTTONS
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showUpdateStockDialog(context, item, vm);
+                  },
+                  child: const Text("Request Stock"),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
-
 
   Widget _dialogInfoRow(String label, String value) {
     return Container(
@@ -788,14 +1125,18 @@ class _CityStockScreenState extends State<CityStockScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 13, color: Color(0xFF6B7280))),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF111827))),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF111827),
+            ),
+          ),
         ],
       ),
     );
@@ -811,19 +1152,21 @@ class _CityStockScreenState extends State<CityStockScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF374151))),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF374151),
+          ),
+        ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle:
-            const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+            hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
             prefixIcon: Icon(icon, size: 18, color: const Color(0xFF6B7280)),
             filled: true,
             fillColor: const Color(0xFFF9FAFB),
@@ -837,45 +1180,18 @@ class _CityStockScreenState extends State<CityStockScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+              borderSide: const BorderSide(
+                color: Color(0xFF2563EB),
+                width: 1.5,
+              ),
             ),
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _toggleOption(
-      String label,
-      String value,
-      String selected,
-      Function(String) onChanged,
-      Color activeColor,
-      ) {
-    final isSelected = selected == value;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onChanged(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? activeColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : const Color(0xFF6B7280),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -935,7 +1251,7 @@ class _BottomSheetWrapper extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha:0.1),
+                    color: iconColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: iconColor, size: 22),
@@ -944,14 +1260,21 @@ class _BottomSheetWrapper extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF111827))),
-                    Text(subtitle,
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF6B7280))),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF111827),
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
                   ],
                 ),
               ],

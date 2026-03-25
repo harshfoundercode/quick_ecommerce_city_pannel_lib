@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/api_url.dart';
-import 'package:quick_ecommerce_city_panel_redefined/helper/network/base_api_service.dart';
 import 'package:quick_ecommerce_city_panel_redefined/helper/network/network_api_service.dart';
 
 class CreateZoneRepo {

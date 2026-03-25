@@ -126,6 +126,7 @@ class CityStockViewModel with ChangeNotifier {
   ///=================== CITY REQUEST FOR PRODUCTS STOCK TO ADMIN ===================
 
 
+  // ================= LOADING =================
   bool _cityRequestLoading = false;
   bool get cityRequestLoading => _cityRequestLoading;
 
@@ -134,60 +135,95 @@ class CityStockViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+// ================= SELECTION =================
+  final Set<int> _selectedProductIds = {};
+  final Map<int, int> _selectedQty = {};
+
+  Set<int> get selectedProductIds => _selectedProductIds;
+  Map<int, int> get selectedQty => _selectedQty;
+
+// toggle select
+  void toggleSelection(int productId) {
+    if (_selectedProductIds.contains(productId)) {
+      _selectedProductIds.remove(productId);
+      _selectedQty.remove(productId);
+    } else {
+      _selectedProductIds.add(productId);
+      _selectedQty[productId] = 1;
+    }
+    notifyListeners();
+  }
+
+// update qty
+  void updateQty(int productId, int qty) {
+    if (qty <= 0) qty = 1;
+    _selectedQty[productId] = qty;
+    notifyListeners();
+  }
+
+// clear selection
+  void clearSelection() {
+    _selectedProductIds.clear();
+    _selectedQty.clear();
+    notifyListeners();
+  }
+
+// select low stock
+  void selectLowStock(List<CityStockData> items) {
+    _selectedProductIds.clear();
+    _selectedQty.clear();
+
+    for (var item in items) {
+      if ((item.currentStock ?? 0) < 10 && item.productid != null) {
+        _selectedProductIds.add(item.productid!);
+        _selectedQty[item.productid!] = 5;
+      }
+    }
+    notifyListeners();
+  }
+
   Future<void> cityRequestApi(
       BuildContext context,
-      String hubManagerId,
       String remarks,
-      final List<Map<String, dynamic>> items
+      List<Map<String, dynamic>> items,
       ) async {
     if (!context.mounted) return;
 
     _setCityRequestLoading(true);
 
     final data = {
-      // "items": [
-      //   {
-      //     "productid": 1,
-      //     "qty": 10
-      //   }
-      // ],
       "items": items,
-      "remarks": "Stock khatam ho raha hai, urgent bhejo"
+      "remarks": remarks,
     };
 
     try {
       final response = await _cityStockListRepo.cityRequestInventoryApi(data);
 
-      if (!context.mounted) {
-        _setTransferLoading(false);
-        return;
-      }
-
       final statusCode = response['statusCode'] ?? 0;
       final body = response['body'] ?? {};
 
       if (statusCode == 200 || statusCode == 201) {
-        if (!context.mounted) {
-          _setTransferLoading(false);
-          return;
-        }
+        if (!context.mounted) return;
+
         CustomSnackBar.show(
           context,
-          message: body['message'] ?? 'request Successful',
+          message: body['message'] ?? 'Request Successful',
           title: 'Success',
           type: SnackBarType.success,
         );
+
         Navigator.pop(context);
       } else {
         CustomSnackBar.show(
           context,
-          message: body['message'] ?? 'transfer Failed',
+          message: body['message'] ?? 'Request Failed',
           title: 'Oh Snap!',
           type: SnackBarType.error,
         );
       }
     } catch (e) {
       if (kDebugMode) print('❌ request error: $e');
+
       if (context.mounted) {
         CustomSnackBar.show(
           context,
@@ -200,7 +236,20 @@ class CityStockViewModel with ChangeNotifier {
       _setCityRequestLoading(false);
     }
   }
+  Future<void> bulkRequestStock(BuildContext context, String remarks) async {
+    if (_selectedProductIds.isEmpty) return;
 
+    final items = _selectedProductIds.map((id) {
+      return {
+        "productid": id,
+        "qty": _selectedQty[id] ?? 1,
+      };
+    }).toList();
+
+    await cityRequestApi(context, remarks, items);
+
+    clearSelection();
+  }
 
   ///============== CITY HUB HISTORY API ====================================
 

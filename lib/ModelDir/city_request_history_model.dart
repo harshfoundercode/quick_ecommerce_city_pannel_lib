@@ -1,15 +1,15 @@
 class CityRequestHistoryModel {
   String? message;
-  List<Data>? data;
+  List<CityRequestHistoryData>? data;
 
   CityRequestHistoryModel({this.message, this.data});
 
   CityRequestHistoryModel.fromJson(Map<String, dynamic> json) {
     message = json['message'];
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <CityRequestHistoryData>[];
       json['data'].forEach((v) {
-        data!.add(Data.fromJson(v));
+        data!.add(CityRequestHistoryData.fromJson(v));
       });
     }
   }
@@ -24,7 +24,7 @@ class CityRequestHistoryModel {
   }
 }
 
-class Data {
+class CityRequestHistoryData {
   dynamic id;
   dynamic status;
   dynamic remarks;
@@ -32,7 +32,7 @@ class Data {
   dynamic name;
   dynamic quantity;
 
-  Data(
+  CityRequestHistoryData(
       {this.id,
         this.status,
         this.remarks,
@@ -40,7 +40,7 @@ class Data {
         this.name,
         this.quantity});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  CityRequestHistoryData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     status = json['status'];
     remarks = json['remarks'];

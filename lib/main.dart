@@ -1,19 +1,29 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/notification_main_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/app_initializer.dart'
     show AppInitializer;
 import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+String? fcmToken;
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  // 🔹 Get FCM Token
+  fcmToken = await FirebaseMessaging.instance.getToken();
+  if (kDebugMode) {
+    print("✅ FCM Token: $fcmToken");
+  }
   runApp(const MyApp());
 }
 
@@ -25,6 +35,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+  final notificationService = NotificationService(navigatorKey: navigatorKey);
+
+  @override
+  void initState() {
+    super.initState();
+    notificationService.requestedNotificationPermission();
+    notificationService.firebaseInit(context);
+    notificationService.setupInteractMassage(context);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     Sizes.init(context);
