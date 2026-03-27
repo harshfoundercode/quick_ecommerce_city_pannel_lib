@@ -410,7 +410,7 @@ class _HeroCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: ColorConst.primaryGreen.withOpacity(0.30),
+            color: ColorConst.primaryGreen.withValues(alpha:0.30),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -425,9 +425,9 @@ class _HeroCard extends StatelessWidget {
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha:0.18),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withOpacity(0.35), width: 2),
+                border: Border.all(color: Colors.white.withValues(alpha:0.35), width: 2),
               ),
               clipBehavior: Clip.antiAlias,
               child: vm.managerImageFile != null
@@ -444,7 +444,7 @@ class _HeroCard extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(7),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.1),
+                    BoxShadow(color: Colors.black.withValues(alpha:0.1),
                         blurRadius: 4),
                   ],
                 ),
@@ -468,7 +468,7 @@ class _HeroCard extends StatelessWidget {
             Text(
               'Tap the avatar to upload a\nprofile photo',
               style: TextStyle(
-                  color: Colors.white.withOpacity(0.75),
+                  color: Colors.white.withValues(alpha:0.75),
                   fontSize: 11,
                   height: 1.5),
             ),
@@ -478,7 +478,7 @@ class _HeroCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha:0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Icon(Icons.manage_accounts_rounded,
@@ -566,15 +566,15 @@ class _PickerOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha:0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha:0.2)),
         ),
         child: Column(children: [
           Container(
             width: 44, height: 44,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha:0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: 22, color: color),
@@ -614,7 +614,7 @@ class _HubDropdown extends StatelessWidget {
     final isLoading = hubVm.isLoading;
 
     return DropdownButtonFormField<String>(
-      value: selectedId,
+      initialValue: selectedId,
       validator: validator,
       icon: isLoading
           ? const SizedBox(width: 18, height: 18,
@@ -902,7 +902,7 @@ class _SubmitButton extends StatelessWidget {
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: _kAccent,
-          disabledBackgroundColor: _kAccent.withOpacity(0.55),
+          disabledBackgroundColor: _kAccent.withValues(alpha:0.55),
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -955,7 +955,7 @@ InputDecoration _fieldDecoration({
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
         color: isTouched
-            ? (isValid ? _kSuccess.withOpacity(0.5) : _kError.withOpacity(0.4))
+            ? (isValid ? _kSuccess.withValues(alpha:0.5) : _kError.withValues(alpha:0.4))
             : _kBorder,
       ),
     ),

@@ -180,9 +180,9 @@ class _AdminSidebarState extends State<AdminSidebar>
           child: InkWell(
             onTap: () {
               avm.onMenuItemTap(index);
-              if (Responsive.isMobile(context)) {
-                Navigator.pop(context);
-              }
+              // if (Responsive.isMobile(context)) {
+              //   Navigator.pop(context);
+              // }
             },
             borderRadius: BorderRadius.circular(14),
             child: Container(
