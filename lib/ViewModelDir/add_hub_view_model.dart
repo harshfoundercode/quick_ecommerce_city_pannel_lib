@@ -36,6 +36,13 @@ class AddHubViewModel extends ChangeNotifier {
   TextEditingController managerEmailController = TextEditingController();
   TextEditingController managerPasswordController = TextEditingController();
 
+  String? _selectedHubZoneId;
+  String? get selectedHubZoneId => _selectedHubZoneId;
+
+  void setSelectedHubZoneId(String? val) {
+    _selectedHubZoneId = val;
+    notifyListeners();
+  }
 
   // Dropdown State
   String? _selectedStatus = "Active";
@@ -257,7 +264,8 @@ class AddHubViewModel extends ChangeNotifier {
       "address": managerAddressController.text.trim(),
       "adharno": managerAdharNumber.text.trim(),
       "panno": managerPanNumber.text.trim(),
-      "img":  managerImage.text,
+      // "img":  managerImage.text,
+      "img":  "FUYUYFU",
       "email": managerEmailController.text.trim(),
       "password": managerPasswordController.text.trim(),
     };

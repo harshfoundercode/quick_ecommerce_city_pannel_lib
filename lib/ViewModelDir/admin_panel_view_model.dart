@@ -5,6 +5,8 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/add_hub_form.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_add_hub_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_hub_manager_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_list_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_request_to_admin_history.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
@@ -67,7 +69,8 @@ class AdminViewModel extends ChangeNotifier {
       title: "Hubs",
       subItems: [
         SubMenuItem(title: "All Hubs", screen: AllHubScreen()),
-        SubMenuItem(title: "Add Hub", screen:  AddHubForm()),
+        SubMenuItem(title: "Add Hub", screen:  AddHubScreen()),
+        SubMenuItem(title: "Add Hub Manager", screen:  AddManagerScreen()),
         SubMenuItem(title: "Hub Performance", screen:  AllHubsPerformanceScreen()),
         SubMenuItem(title: "Hub Zone", screen:  HubZoneMapScreen()),
       ],

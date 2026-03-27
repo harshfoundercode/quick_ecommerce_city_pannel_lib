@@ -19,7 +19,11 @@ class AllHubViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   Future<void> getHubListDataApi(BuildContext context) async {
+    _isLoading = true;
     _hubListModel = null;
     notifyListeners();
 
@@ -52,6 +56,7 @@ class AllHubViewModel extends ChangeNotifier {
         type: SnackBarType.error,
       );
     }
+    _isLoading = false;
   }
 
 
