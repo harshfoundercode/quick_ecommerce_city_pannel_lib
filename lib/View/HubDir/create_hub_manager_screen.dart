@@ -85,6 +85,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
                   controller: vm.coverageRadiusController,
                   icon: Icons.radio_button_unchecked_rounded,
                   keyboardType: TextInputType.number,
+                  readOnly: true,
                   validator: (v) =>
                   (v == null || v.isEmpty) ? 'Radius is required' : null,
                 ),
@@ -114,6 +115,8 @@ class _AddHubScreenState extends State<AddHubScreen> {
                           result['address'].toString();
                       vm.pincodeHubZone.text =
                           result['pincode'].toString();
+                      vm.coverageRadiusController.text =
+                          result['radius'].toString();
 
                       setState(() => _locationPicked = true);
                     }
@@ -344,6 +347,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
+    bool readOnly = false
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,6 +372,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
           validator: validator,
           style: const TextStyle(
               fontSize: 13, color: Color(0xFF111827)),
+          readOnly: readOnly,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(

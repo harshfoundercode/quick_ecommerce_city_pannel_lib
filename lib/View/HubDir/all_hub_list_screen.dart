@@ -75,7 +75,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
       },
       {
         'title': "Active Hubs",
-        'value': vm.hubListModel?.data?.summary?.activeHubs.toString() ?? "0",
+        'value': vm.hubListModel?.data?.summary?.activeHubs==null?"0":vm.hubListModel?.data?.summary?.activeHubs.toString() ?? "0",
         'icon': Icons.check_circle_outline,
       },
       {

@@ -196,7 +196,6 @@ class AddHubViewModel extends ChangeNotifier {
           _setLoading(false);
           return;
         }
-        Navigator.pop(context);
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Added Successful',
@@ -291,7 +290,6 @@ class AddHubViewModel extends ChangeNotifier {
           _setAddLoading(false);
           return;
         }
-        Navigator.pop(context);
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Added Successful',
