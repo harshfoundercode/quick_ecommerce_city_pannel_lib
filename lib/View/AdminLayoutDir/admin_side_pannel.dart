@@ -178,7 +178,12 @@ class _AdminSidebarState extends State<AdminSidebar>
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: InkWell(
-            onTap: () => avm.onMenuItemTap(index),
+            onTap: () {
+              avm.onMenuItemTap(index);
+              if (Responsive.isMobile(context)) {
+                Navigator.pop(context);
+              }
+            },
             borderRadius: BorderRadius.circular(14),
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -245,7 +250,17 @@ class _AdminSidebarState extends State<AdminSidebar>
 
   Widget _buildSubMenuItem(SubMenuItem item, AdminViewModel avm) {
     return InkWell(
-      onTap: () => avm.onSubItemTap(item),
+      onTap: () {
+        avm.onSubItemTap(item);
+
+        /// ✅ CLOSE DRAWER
+        if (Responsive.isMobile(context)) {
+          Future.delayed(const Duration(milliseconds: 150), () {
+            Navigator.pop(context);
+          });
+        }
+
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
