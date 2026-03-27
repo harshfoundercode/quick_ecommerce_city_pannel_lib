@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/api_url.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_zone_list_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_zone_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
 
@@ -65,12 +66,13 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   @override
   void initState() {
     super.initState();
-
-    // Parse city zone from profile API
     _cityCenter = LatLng(
-      double.tryParse(widget.cityZone?.lat?.toString() ?? '26.8467') ?? 26.8467,
-      double.tryParse(widget.cityZone?.long?.toString() ?? '80.9462') ?? 80.9462,
+      double.tryParse(widget.cityZone!.lat?.toString() ?? '26.8467') ?? 26.8467,
+      double.tryParse(widget.cityZone!.long?.toString() ?? '80.9462') ?? 80.9462,
     );
+
+    _cityRadiusKm =
+        double.tryParse(widget.cityZone?.radiuskm?.toString() ?? '10') ?? 10.0;
     _cityRadiusKm =
         double.tryParse(widget.cityZone?.radiuskm?.toString() ?? '10') ?? 10.0;
 
@@ -94,6 +96,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       Future.microtask(() {
         Provider.of<HubZoneViewModel>(context, listen: false)
             .getHubZoneListDataApi(context);
+         Provider.of<CityZoneListViewModel>(context, listen: false)
+            .getCityZoneDataApi(context);
       });
     });
 

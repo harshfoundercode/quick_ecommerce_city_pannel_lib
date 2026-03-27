@@ -63,7 +63,7 @@ class _CityCardState extends State<CityCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomText.bold(
-          widget.dashboardSummaryData?.cityName,
+          widget.dashboardSummaryData?.cityName ?? "N/n",
           color: Colors.white,
           fontSize: mobileSize ? 25 : 38,
           letterSpacing: 1,
