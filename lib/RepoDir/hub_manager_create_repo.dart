@@ -9,7 +9,7 @@ class HubManagerCreateRepo {
     await _apiServices.initializeToken();
     try {
       dynamic response = await _apiServices.getPostApiResponse(
-        ApiUrl.hubZoneCreateUrl,
+        ApiUrl.hubManagerCreateUrl,
         data,
       );
       return response;
