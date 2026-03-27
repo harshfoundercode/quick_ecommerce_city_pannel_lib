@@ -63,42 +63,98 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 
   // ── Init ───────────────────────────────────────────────────────────────────
 
+  // @override
+//   void initState() {
+//     super.initState();
+//
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       _fetchAddress(_selectedLocation);
+//       // Fit camera to city boundary on first load
+//       Future.delayed(const Duration(milliseconds: 500), _fitCityBoundary);
+//       Future.microtask(() {
+//         Provider.of<HubZoneViewModel>(context, listen: false)
+//             .getHubZoneListDataApi(context);
+//          Provider.of<CityZoneListViewModel>(context, listen: false)
+//             .getCityZoneDataApi(context);
+//         _cityCenter = LatLng(
+//           double.tryParse(widget.cityZone!.lat?.toString() ?? '26.8467') ?? 26.8467,
+//           double.tryParse(widget.cityZone!.long?.toString() ?? '80.9462') ?? 80.9462,
+//         );
+//
+//         _cityRadiusKm =
+//             double.tryParse(widget.cityZone?.radiuskm?.toString() ?? '10') ?? 10.0;
+//         _cityRadiusKm =
+//             double.tryParse(widget.cityZone?.radiuskm?.toString() ?? '10') ?? 10.0;
+// // Default hub pin = city center
+//         _selectedLocation = _cityCenter;
+//
+//         _hubRadius = (_hubRadius).clamp(0.5, _cityRadiusKm);
+//         _radiusCtrl = TextEditingController(
+//             text: _hubRadius.toStringAsFixed(1));
+//         _slideCtrl = AnimationController(
+//             vsync: this, duration: const Duration(milliseconds: 380));
+//         _slideAnim = CurvedAnimation(
+//             parent: _slideCtrl, curve: Curves.easeOutCubic);
+//         _slideCtrl.forward();
+//       });
+//     });
+//
+//     _searchFocus.addListener(() {
+//       if (!_searchFocus.hasFocus) {
+//         setState(() => _searchResults = []);
+//       }
+//     });
+//   }
+
+
   @override
   void initState() {
     super.initState();
+
+    /// ✅ STEP 1: INIT FIRST (IMPORTANT)
     _cityCenter = LatLng(
-      double.tryParse(widget.cityZone!.lat?.toString() ?? '26.8467') ?? 26.8467,
-      double.tryParse(widget.cityZone!.long?.toString() ?? '80.9462') ?? 80.9462,
+      double.tryParse(widget.cityZone?.lat?.toString() ?? '26.8467') ?? 26.8467,
+      double.tryParse(widget.cityZone?.long?.toString() ?? '80.9462') ?? 80.9462,
     );
 
-    _cityRadiusKm =
-        double.tryParse(widget.cityZone?.radiuskm?.toString() ?? '10') ?? 10.0;
+    print(widget.cityZone?.lat?.toString());
+    print(widget.cityZone?.long?.toString());
+    print("edfefew");
     _cityRadiusKm =
         double.tryParse(widget.cityZone?.radiuskm?.toString() ?? '10') ?? 10.0;
 
-    // Default hub pin = city center
+    /// ✅ DEFAULT LOCATION
     _selectedLocation = _cityCenter;
 
+    /// ✅ INIT CONTROLLERS
     _hubRadius = (_hubRadius).clamp(0.5, _cityRadiusKm);
     _radiusCtrl = TextEditingController(
-        text: _hubRadius.toStringAsFixed(1));
+      text: _hubRadius.toStringAsFixed(1),
+    );
 
     _slideCtrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 380));
+      vsync: this,
+      duration: const Duration(milliseconds: 380),
+    );
+
     _slideAnim = CurvedAnimation(
-        parent: _slideCtrl, curve: Curves.easeOutCubic);
+      parent: _slideCtrl,
+      curve: Curves.easeOutCubic,
+    );
+
     _slideCtrl.forward();
 
+    /// ✅ STEP 2: THEN USE
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchAddress(_selectedLocation);
-      // Fit camera to city boundary on first load
+
       Future.delayed(const Duration(milliseconds: 500), _fitCityBoundary);
-      Future.microtask(() {
-        Provider.of<HubZoneViewModel>(context, listen: false)
-            .getHubZoneListDataApi(context);
-         Provider.of<CityZoneListViewModel>(context, listen: false)
-            .getCityZoneDataApi(context);
-      });
+
+      Provider.of<HubZoneViewModel>(context, listen: false)
+          .getHubZoneListDataApi(context);
+
+      Provider.of<CityZoneListViewModel>(context, listen: false)
+          .getCityZoneDataApi(context);
     });
 
     _searchFocus.addListener(() {

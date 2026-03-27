@@ -116,10 +116,13 @@ class _AddHubScreenState extends State<AddHubScreen> {
                       final zone = Provider.of<CityZoneListViewModel>(context,listen: false).cityZoneDataModel?.data?.firstWhere(
                             (z) => z.status == 1,
                       );
+
                       final result = await showDialog(
                         context: context,
                         builder: (_) => MapPickerPopup(cityZone: zone),
                       );
+                      await Provider.of<CityZoneListViewModel>(context, listen: false)
+                          .getCityZoneDataApi(context);
                       if (result != null) {
                         vm.locationController.text = result['address'] ?? '';
                         vm.latitudeController.text = result['lat'].toString();

@@ -203,6 +203,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        print("fkbekfbkvfb");
         Navigator.pushReplacementNamed(context, RoutesName.adminSliderLayoutScreen);
         setZoneCreated(true);
       } else {
