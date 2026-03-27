@@ -110,6 +110,11 @@ class _AddHubScreenState extends State<AddHubScreen> {
                           result['lat'].toString();
                       vm.longitudeController.text =
                           result['lng'].toString();
+                      vm.hubZoneAddress.text =
+                          result['address'].toString();
+                      vm.pincodeHubZone.text =
+                          result['pincode'].toString();
+
                       setState(() => _locationPicked = true);
                     }
                   },
@@ -231,7 +236,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
                         );
                         return;
                       }
-                      vm.saveHub(context);
+                      vm.hubZoneCreateApi(context);
                     }
                   },
                   icon: const Icon(Icons.hub_outlined,

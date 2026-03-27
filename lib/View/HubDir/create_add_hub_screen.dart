@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
 // ── Design tokens ──────────────────────────────────────────────────────────────
 const _kAccent      = ColorConst.primaryGreen;
@@ -45,8 +46,8 @@ class _AddManagerScreenState extends State<AddManagerScreen>
 
     Future.microtask(() {
       if (!mounted) return;
-      Provider.of<AllHubViewModel>(context, listen: false)
-          .getHubListDataApi(context);
+      Provider.of<HubZoneViewModel>(context, listen: false)
+          .getHubZoneListDataApi(context);
     });
   }
 
@@ -91,7 +92,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
       backgroundColor: _kBg,
       body: FadeTransition(
         opacity: _fadeAnim,
-        child: Consumer2<AllHubViewModel, AddHubViewModel>(
+        child: Consumer2<HubZoneViewModel, AddHubViewModel>(
           builder: (context, hubVm, addVm, _) {
             return CustomScrollView(
               slivers: [
@@ -103,18 +104,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                   backgroundColor: Colors.white,
                   elevation: 0,
                   surfaceTintColor: Colors.white,
-                  leading: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 18, color: _kTextHead),
-                    ),
-                  ),
+
                   title: const Text('Create Manager',
                       style: TextStyle(
                         fontSize: 18,
@@ -609,7 +599,7 @@ class _PickerOption extends StatelessWidget {
 // ─── Hub Dropdown ──────────────────────────────────────────────────────────────
 
 class _HubDropdown extends StatelessWidget {
-  final AllHubViewModel hubVm;
+  final HubZoneViewModel hubVm;
   final String? selectedId;
   final bool isTouched;
   final ValueChanged<String?> onChanged;
@@ -625,7 +615,7 @@ class _HubDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hubs      = hubVm.hubListModel?.data?.hubs ?? [];
+    final zones     = hubVm.hubZones;
     final isLoading = hubVm.isLoading;
 
     return DropdownButtonFormField<String>(
@@ -636,7 +626,7 @@ class _HubDropdown extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2, color: _kAccent))
           : const Icon(Icons.keyboard_arrow_down_rounded, color: _kAccent),
       decoration: _fieldDecoration(
-        label: 'Select Hub',
+        label: 'Select Hub Zone',
         prefixIcon: const Icon(Icons.hub_rounded, size: 18, color: _kAccent),
         suffixIcon: isTouched && selectedId != null
             ? const Padding(
@@ -644,28 +634,50 @@ class _HubDropdown extends StatelessWidget {
             child: Icon(Icons.check_circle_rounded, size: 18, color: _kSuccess))
             : null,
       ),
-      hint: Text(isLoading ? 'Loading hubs…' : 'Choose a hub',
+      hint: Text(isLoading ? 'Loading zones…' : 'Choose a hub zone',
           style: const TextStyle(fontSize: 13, color: _kTextMuted)),
-      items: hubs.map((hub) => DropdownMenuItem<String>(
-        value: hub.hubId.toString(),
+      items: zones.map((zone) => DropdownMenuItem<String>(
+        value: zone.id.toString(),
         child: Row(children: [
-          Container(width: 8, height: 8,
-              decoration: const BoxDecoration(
-                  shape: BoxShape.circle, color: _kSuccess)),
+          // Active/inactive dot
+          Container(
+            width: 8, height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: (zone.status == 1 || zone.status == HubZoneStatus.active)
+                  ? _kSuccess
+                  : _kError,
+            ),
+          ),
           const SizedBox(width: 8),
-          Text(hub.hubName,
+          Text(
+            zone.name?.toString() ?? 'Zone #${zone.id}',
+            style: const TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w600, color: _kTextHead),
+          ),
+          const SizedBox(width: 6),
+          // Radius badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: _kAccentLight,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '${zone.radiusInKm.toStringAsFixed(0)} km',
               style: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w600, color: _kTextHead)),
+                  fontSize: 10, fontWeight: FontWeight.w700, color: _kAccent),
+            ),
+          ),
         ]),
       )).toList(),
       onChanged: onChanged,
       dropdownColor: Colors.white,
       borderRadius: BorderRadius.circular(14),
-      menuMaxHeight: 260,
+      menuMaxHeight: 280,
     );
   }
 }
-
 // ─── Generic form field ───────────────────────────────────────────────────────
 
 class _FormField extends StatelessWidget {

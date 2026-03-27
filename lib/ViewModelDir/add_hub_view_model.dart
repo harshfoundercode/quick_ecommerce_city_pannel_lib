@@ -35,6 +35,8 @@ class AddHubViewModel extends ChangeNotifier {
   TextEditingController managerImage = TextEditingController();
   TextEditingController managerEmailController = TextEditingController();
   TextEditingController managerPasswordController = TextEditingController();
+  TextEditingController hubZoneAddress = TextEditingController();
+  TextEditingController pincodeHubZone = TextEditingController();
 
   String? _selectedHubZoneId;
   String? get selectedHubZoneId => _selectedHubZoneId;
@@ -170,6 +172,8 @@ class AddHubViewModel extends ChangeNotifier {
     final data = {
       "cityzoneid": profileProvider.profileData?.data?.cityzoneid.toString(),
       "name": hubNameController.text.trim(),
+      "address": hubZoneAddress.text.trim(),
+      "pincode":pincodeHubZone.text.trim(),
       "radiuskm": coverageRadiusController.text.trim(),
       "lat": latitudeController.text.trim(),
       "long": longitudeController.text.trim(),
@@ -192,7 +196,7 @@ class AddHubViewModel extends ChangeNotifier {
           _setLoading(false);
           return;
         }
-
+        Navigator.pop(context);
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Added Successful',
@@ -287,7 +291,7 @@ class AddHubViewModel extends ChangeNotifier {
           _setAddLoading(false);
           return;
         }
-
+        Navigator.pop(context);
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Added Successful',

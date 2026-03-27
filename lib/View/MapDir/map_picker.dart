@@ -128,6 +128,7 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
 
   LatLng selectedLocation = const LatLng(26.8467, 80.9462);
   String address = "Select location";
+  String pincode = "";
 
   double radius = 1; // KM
   Set<Circle> circles = {};
@@ -151,6 +152,7 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
     setState(() {
       address =
       "${place.street}, ${place.locality}, ${place.administrativeArea}";
+      pincode = place.postalCode ?? "";
     });
   }
 
@@ -387,6 +389,7 @@ class _MapPickerPopupState extends State<MapPickerPopup> {
                   "lng": selectedLocation.longitude,
                   "address": address,
                   "radius": radius,
+                  "pincode":pincode
                 });
               },
               child: const Text("Confirm Location"),

@@ -4,14 +4,13 @@ class ApiUrl {
   static const String mapKey = "AIzaSyAW2lp2BYRmy8oD3ppvvegrql2MlMa-4tI";
 
   static const String configUrl1 = "${baseurl}api/";
-  static const String configUrl2 = "${baseurl}citymanagerapi/";
 
   static const String loginUrl = "${configUrl1}citylogin";
   static const String profileUrl = "${configUrl1}cityprofile";
-  static const String createZoneUrl = "${configUrl2}hubzone/create";
-  static const String cityZoneListUrl = "${configUrl2}cityzone_list";
+  static const String createZoneUrl = "${configUrl1}hubzone/create";
+  static const String cityZoneListUrl = "${configUrl1}cityzone_list";
   static const String hubZoneCreateUrl = "${configUrl1}hubzone/create";
-  static const String hubManagerCreateUrl = "${configUrl2}hubmanager/create";
+  static const String hubManagerCreateUrl = "${configUrl1}hubmanager/create";
   static String hubProfileUrl(String hubId) => "${configUrl1}hubprofile?id=$hubId";
   static const String hubZoneListUrl = "${configUrl1}hubzone_list";
   static const String orderListUrl = "${configUrl1}orders";
