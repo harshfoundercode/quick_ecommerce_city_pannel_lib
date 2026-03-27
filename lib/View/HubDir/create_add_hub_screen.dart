@@ -104,7 +104,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                   backgroundColor: Colors.white,
                   elevation: 0,
                   surfaceTintColor: Colors.white,
-
+                  automaticallyImplyLeading: false,
                   title: const Text('Create Manager',
                       style: TextStyle(
                         fontSize: 18,
@@ -407,15 +407,11 @@ class _HeroCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6366F1), Color(0xFF818CF8)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: ColorConst.primaryGreen,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.30),
+            color: ColorConst.primaryGreen.withOpacity(0.30),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
