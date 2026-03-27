@@ -625,6 +625,8 @@ class _AddHubFormState extends State<AddHubForm> {
           onTap: () {
             if (_formKey.currentState!.validate()) {
               ahvm.saveHub(context);
+              final addHubViewModel = Provider.of<AddHubViewModel>(context,listen: false);
+              addHubViewModel.hubManagerApi(context);
             }
           },
           title: "Create Hub",
