@@ -202,10 +202,10 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   //       circleId: const CircleId('city_boundary'),
   //       center:      _cityCenter,
   //       radius:      _cityRadiusKm * 1000,
-  //       fillColor:   const Color(0xFF2563EB).withOpacity(0.06),
+  //       fillColor:   const Color(0xFF2563EB).withValues(alpha:0.06),
   //       strokeColor: outside
-  //           ? Colors.red.withOpacity(0.7)
-  //           : const Color(0xFF2563EB).withOpacity(0.5),
+  //           ? Colors.red.withValues(alpha:0.7)
+  //           : const Color(0xFF2563EB).withValues(alpha:0.5),
   //       strokeWidth: outside ? 3 : 2,
   //     ),
   //     // Hub coverage circle
@@ -214,11 +214,11 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   //       center:      _selectedLocation,
   //       radius:      _hubRadius * 1000,
   //       fillColor:   outside
-  //           ? Colors.red.withOpacity(0.10)
-  //           : ColorConst.primaryGreen.withOpacity(0.12),
+  //           ? Colors.red.withValues(alpha:0.10)
+  //           : ColorConst.primaryGreen.withValues(alpha:0.12),
   //       strokeColor: outside
-  //           ? Colors.red.withOpacity(0.6)
-  //           : ColorConst.primaryGreen.withOpacity(0.7),
+  //           ? Colors.red.withValues(alpha:0.6)
+  //           : ColorConst.primaryGreen.withValues(alpha:0.7),
   //       strokeWidth: 2,
   //     ),
   //   };
@@ -234,10 +234,10 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         circleId: const CircleId('city_boundary'),
         center: _cityCenter,
         radius: _cityRadiusKm * 1000,
-        fillColor: const Color(0xFF2563EB).withOpacity(0.06),
+        fillColor: const Color(0xFF2563EB).withValues(alpha: 0.06),
         strokeColor: _isOutsideBoundary
-            ? Colors.red.withOpacity(0.7)
-            : const Color(0xFF2563EB).withOpacity(0.5),
+            ? Colors.red.withValues(alpha:0.7)
+            : const Color(0xFF2563EB).withValues(alpha:0.5),
         strokeWidth: _isOutsideBoundary ? 3 : 2,
       ),
 
@@ -247,11 +247,11 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         center: _selectedLocation,
         radius: _hubRadius * 1000,
         fillColor: _isOutsideBoundary
-            ? Colors.red.withOpacity(0.10)
-            : ColorConst.primaryGreen.withOpacity(0.12),
+            ? Colors.red.withValues(alpha:0.10)
+            : ColorConst.primaryGreen.withValues(alpha:0.12),
         strokeColor: _isOutsideBoundary
-            ? Colors.red.withOpacity(0.6)
-            : ColorConst.primaryGreen.withOpacity(0.7),
+            ? Colors.red.withValues(alpha:0.6)
+            : ColorConst.primaryGreen.withValues(alpha:0.7),
         strokeWidth: 2,
       ),
     };
@@ -266,8 +266,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             double.parse(zone.longitude.toString()),
           ),
           radius: double.parse(zone.radiuskm.toString()) * 1000,
-          fillColor: Colors.red.withOpacity(0.12),
-          strokeColor: Colors.red.withOpacity(0.6),
+          fillColor: Colors.red.withValues(alpha:0.12),
+          strokeColor: Colors.red.withValues(alpha:0.6),
           strokeWidth: 2,
         ),
       );
@@ -584,7 +584,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.14),
+                  color: Colors.black.withValues(alpha:0.14),
                   blurRadius: 40,
                   offset: const Offset(0, 12),
                 ),
@@ -633,7 +633,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: ColorConst.primaryGreen.withOpacity(0.1),
+            color: ColorConst.primaryGreen.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(Icons.map_rounded,
@@ -679,16 +679,16 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       padding: const EdgeInsets.symmetric(
           horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF2563EB).withOpacity(0.06),
+        color: const Color(0xFF2563EB).withValues(alpha:0.06),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-            color: const Color(0xFF2563EB).withOpacity(0.2)),
+            color: const Color(0xFF2563EB).withValues(alpha:0.2)),
       ),
       child: Row(children: [
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB).withOpacity(0.1),
+            color: const Color(0xFF2563EB).withValues(alpha:0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.location_city_rounded,
@@ -723,7 +723,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             padding: const EdgeInsets.symmetric(
                 horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF2563EB).withOpacity(0.1),
+              color: const Color(0xFF2563EB).withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Row(
@@ -813,7 +813,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
           border: Border.all(color: const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha:0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -891,7 +891,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
+            color: Colors.black.withValues(alpha:0.07),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -923,7 +923,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                     width: 32, height: 32,
                     decoration: BoxDecoration(
                       color: ColorConst.primaryGreen
-                          .withOpacity(0.08),
+                          .withValues(alpha:0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -1037,7 +1037,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             Container(
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: ColorConst.primaryGreen.withOpacity(0.1),
+                color: ColorConst.primaryGreen.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(9),
               ),
               child: const Icon(Icons.radar_rounded,
@@ -1078,7 +1078,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                       fontWeight: FontWeight.w500),
                   filled: true,
                   fillColor: ColorConst.primaryGreen
-                      .withOpacity(0.07),
+                      .withValues(alpha:0.07),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
@@ -1096,7 +1096,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             inactiveTrackColor: const Color(0xFFE5E7EB),
             thumbColor:         ColorConst.primaryGreen,
             overlayColor:
-            ColorConst.primaryGreen.withOpacity(0.1),
+            ColorConst.primaryGreen.withValues(alpha:0.1),
             trackHeight: 3,
             thumbShape: const RoundSliderThumbShape(
                 enabledThumbRadius: 7),
@@ -1321,13 +1321,13 @@ class _HintChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.92),
+        color: Colors.white.withValues(alpha:0.92),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-            color: color.withOpacity(0.3)),
+            color: color.withValues(alpha:0.3)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.07),
+              color: Colors.black.withValues(alpha:0.07),
               blurRadius: 8),
         ],
       ),
@@ -1364,7 +1364,7 @@ class _MapBtn extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha:0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2)),
           ],
@@ -1392,10 +1392,10 @@ class _AddrTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
+        color: color.withValues(alpha:0.06),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-            color: color.withOpacity(0.18)),
+            color: color.withValues(alpha:0.18)),
       ),
       child: Row(children: [
         Icon(icon, size: 13, color: color),
