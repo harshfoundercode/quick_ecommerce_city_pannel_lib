@@ -236,7 +236,6 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                               label: 'Address',
                               hint: 'e.g. 12, MG Road, Lucknow',
                               icon: Icons.location_on_rounded,
-                              maxLines: 2,
                               isTouched: _touched.contains('address'),
                               isValid: addVm.managerAddressController.text.trim().length >= 5,
                               onChanged: (_) => _touch('address'),
