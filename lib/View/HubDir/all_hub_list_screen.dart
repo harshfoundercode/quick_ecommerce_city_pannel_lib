@@ -269,7 +269,7 @@ class _AllHubScreenState extends State<AllHubScreen> {
   // ===================== COMMON CELLS =====================
 
   Widget hubCell(Hubs? hub) {
-    return hubCellData(name: hub!.hubName, location: hub.address);
+    return hubCellData(name: hub!.hubName ?? "-", location: hub.address ?? "-");
   }
 
   Widget hubCellData({

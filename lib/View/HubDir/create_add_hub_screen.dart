@@ -315,7 +315,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                         // ════════════════════════════════════════════════
                         const _SectionLabel(
                           icon: Icons.lock_rounded,
-                          label: 'Account Credentials',
+                          label: 'Hub Account Credentials',
                           subtitle: 'Login email and password for the manager',
                         ),
 
