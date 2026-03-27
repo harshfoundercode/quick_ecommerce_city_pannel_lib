@@ -37,4 +37,12 @@ class ColorConst {
   static const  criticalBlue = Color(0xff007AFF);
   static const  criticalBlueLight = Color(0xffF5FAFE);
   static const  criticalBlueLightText = Color(0xff007AFF);
+
+  static const kAccent      = ColorConst.primaryGreen;
+  static const kAccentLight = Color(0xFFEEF2FF);
+  static const kBg          = Color(0xFFF8FAFC);
+  static const kBorder      = Color(0xFFE2E8F0);
+  static const kTextHead    = Color(0xFF1E293B);
+  static const kTextMuted   = Color(0xFF94A3B8);
+  static const kWarning     = Color(0xFFF59E0B);
 }

@@ -4,6 +4,8 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/email_validation.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/auth_view_model.dart';
 
@@ -15,6 +17,8 @@ class AdminLoginScreen extends StatefulWidget {
 }
 
 class _AdminLoginScreenState extends State<AdminLoginScreen> {
+
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +108,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       prefixIcon: const Icon(Icons.mail_outline),
                       borderSide: BorderSide.none,
                       hintText: "Enter your email",
+                      keyboardType: TextInputType.emailAddress,
+                      inputFormatters: [
+                        SingleAtEmailInputFormatter(),
+                      ],
                     ),
 
                     CustomWidgets.verticalSpace(0.02),
@@ -117,11 +125,23 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                     CustomTextField(
                       controller: lvm.passwordController,
-                      obscureText: true,
+                      obscureText: !_isPasswordVisible,
                       prefixIcon: const Icon(Icons.lock_outline),
                       borderSide: BorderSide.none,
                       maxLines: 1,
                       hintText: "Enter your password",
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
                     ),
 
                     CustomWidgets.verticalSpace(0.02),
@@ -130,7 +150,21 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       height: isMobile ? 52 : height * 0.07,
                       title: "Sign in to Dashboard",
                       onTap: (){
-                        lvm.loginApi(context);
+                        if (lvm.emailController.text.isEmpty) {
+                          CustomSnackBar.show(context,message: "Please enter your email", type: SnackBarType.error);
+                        } else if (!RegExp(
+                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|in|co)$'
+                        ).hasMatch(lvm.emailController.text.trim())) {
+                          CustomSnackBar.show(context,message:
+                            "Please enter a valid email address",
+                            type: SnackBarType.error,
+                          );
+                        } else if(lvm.passwordController.text.isEmpty){
+                          CustomSnackBar.show(context,message: "Please enter your password", type: SnackBarType.error);
+                        } else {
+                          lvm.loginApi(context);
+                        }
+
                       },
                       loading: lvm.loginLoading,
                     ),

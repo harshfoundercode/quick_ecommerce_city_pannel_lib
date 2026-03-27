@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_manager_create_repo.dart';
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_zone_create_repo.dart';
@@ -202,6 +203,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        Navigator.pushReplacementNamed(context, RoutesName.adminSliderLayoutScreen);
         setZoneCreated(true);
       } else {
         CustomSnackBar.show(
@@ -256,12 +258,12 @@ class AddHubViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> hubManagerApi(BuildContext context) async {
+  Future<void> hubManagerApi(BuildContext context,String hubZoneId) async {
     if (!context.mounted) return;
 
     _setAddLoading(true);
     final data = {
-      "hubzoneid": 2,
+      "hubzoneid": hubZoneId,
       "name": managerNameController.text.trim(),
       "phone": managerContactController.text.trim(),
       "address": managerAddressController.text.trim(),
@@ -296,6 +298,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        Navigator.pushReplacementNamed(context, RoutesName.adminSliderLayoutScreen);
       } else {
         CustomSnackBar.show(
           context,

@@ -552,7 +552,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    item.productName ?? '',
+                    item.productName ?? 'N/a',
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -571,7 +571,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      item.variantName!,
+                      item.variantName! ?? "N/a",
                       style: const TextStyle(
                         fontSize: 11,
                         color: Color(0xFF2563EB),
@@ -820,8 +820,8 @@ class _CityStockScreenState extends State<CityStockScreen> {
                               return DropdownMenuItem<String>(
                                 value: hub.hubId.toString(),
                                 child: Text(
-                                  hub.hubName ?? "",
-                                  style: TextStyle(fontSize: 16),
+                                  hub.hubName ?? "N/a",
+                                  style: TextStyle(fontSize: 16,color: Colors.black),
                                 ),
                               );
                             })

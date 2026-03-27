@@ -26,25 +26,16 @@ class CityZoneDataModel {
 
 class Data {
   dynamic id;
-  dynamic cityzoneid;
   dynamic name;
   dynamic radiuskm;
   dynamic lat;
   dynamic long;
   dynamic status;
 
-  Data(
-      {this.id,
-        this.cityzoneid,
-        this.name,
-        this.radiuskm,
-        this.lat,
-        this.long,
-        this.status});
+  Data({this.id, this.name, this.radiuskm, this.lat, this.long, this.status});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    cityzoneid = json['cityzoneid'];
     name = json['name'];
     radiuskm = json['radiuskm'];
     lat = json['lat'];
@@ -55,7 +46,6 @@ class Data {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
-    data['cityzoneid'] = cityzoneid;
     data['name'] = name;
     data['radiuskm'] = radiuskm;
     data['lat'] = lat;
