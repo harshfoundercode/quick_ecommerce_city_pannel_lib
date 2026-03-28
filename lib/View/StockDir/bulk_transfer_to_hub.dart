@@ -6,16 +6,8 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_v
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// USAGE:
-//   Navigator.push(context, MaterialPageRoute(
-//     builder: (_) => BulkTransferScreen(allItems: vm.cityStockModel!.data!),
-//   ));
-// ─────────────────────────────────────────────────────────────────────────────
-
 class BulkTransferScreen extends StatefulWidget {
-  final List<CityStockData> allItems;
-  const BulkTransferScreen({super.key, required this.allItems});
+  const BulkTransferScreen({super.key});
 
   @override
   State<BulkTransferScreen> createState() => _BulkTransferScreenState();
@@ -42,6 +34,9 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) =>
         context.read<AllHubViewModel>().getHubListDataApi(context));
+    WidgetsBinding.instance.addPostFrameCallback((_) =>
+        context.read<CityStockViewModel>().getCityStockDataApi(context));
+
   }
 
   @override
@@ -60,11 +55,15 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
     return ColorConst.primaryGreen;
   }
 
-  List<CityStockData> get _filteredItems => _searchQuery.isEmpty
-      ? widget.allItems
-      : widget.allItems
-      .where((i) => (i.product?.name ?? '').toLowerCase().contains(_searchQuery.toLowerCase()))
-      .toList();
+  final CityStockViewModel _cityStockViewModel = CityStockViewModel();
+
+  List<CityStockData> get filteredItems =>
+      (_cityStockViewModel.cityStockModel?.data ?? [])
+          .where((item) => _searchQuery.isEmpty ||
+          (item.product?.name ?? '')
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()))
+          .toList();
 
   bool get _hasSelections   => _selectedQty.isNotEmpty;
   int  get _totalUnits      => _selectedQty.values.fold(0, (s, q) => s + q);
@@ -212,7 +211,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
   // ── Product search dropdown ────────────────────────────────────────────────
 
   Widget _buildProductSearchSection() {
-    final filtered = _filteredItems;
+    final filtered = filteredItems;
     return Container(
       color: const Color(0xFFF4F6FA),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -411,8 +410,8 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
   // ── Selected product list (qty steppers) ───────────────────────────────────
 
   Widget _buildSelectedList() {
-    final selected = widget.allItems
-        .where((i) => i.productid != null && _selectedQty.containsKey(i.productid as int))
+    final cityStockData = Provider.of<CityStockViewModel>(context).cityStockModel?.data;
+    final selected = cityStockData!.where((i) => i.productid != null && _selectedQty.containsKey(i.productid as int))
         .toList();
 
     return ListView.builder(
@@ -507,8 +506,8 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
         child: ElevatedButton.icon(
           onPressed: (_canConfirm && !vm.transferLoading) ? () {
             final items = _selectedQty.entries.map((e) {
-              final product = widget.allItems.firstWhere((i) => i.productid == e.key);
-              return {'productid': e.key, 'variantid': product.variantid ?? 0, 'qty': e.value};
+              final product = vm.cityStockModel?.data?.firstWhere((i) => i.productid == e.key);
+              return {'productid': e.key, 'variantid': product?.variantid ?? 0, 'qty': e.value};
             }).toList();
             vm.cityTransferToHubApi(context, _hubId!,
                 _remarksCtrl.text.trim().isEmpty ? 'Bulk transfer from city panel' : _remarksCtrl.text.trim(),

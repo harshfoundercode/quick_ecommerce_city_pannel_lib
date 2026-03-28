@@ -10,9 +10,6 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_edit_view_model.dart';
 
-// ── Replace with your actual Google Places API key ────────────────────────────
-const String _kPlacesApiKey = ApiUrl.mapKey;
-
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const _kAccent      = ColorConst.primaryGreen;
 const _kAccentLight = Color(0xFFEEF2FF);
@@ -180,13 +177,7 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
   Future<void> _fetchSuggestions(String input) async {
     setState(() => _searchLoading = true);
     try {
-      final uri = Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-            '?input=${Uri.encodeComponent(input)}'
-            '&key=$_kPlacesApiKey'
-            '&language=en'
-            '&components=country:in',
-      );
+      final uri = Uri.parse(ApiUrl.mapPlaceAutoCompleteUrl(Uri.encodeComponent(input)));
       final res = await http.get(uri);
       if (!mounted) return;
       if (res.statusCode == 200) {
@@ -235,12 +226,7 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
     );
 
     try {
-      final uri = Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/details/json'
-            '?place_id=$placeId'
-            '&fields=geometry,formatted_address,address_components'
-            '&key=$_kPlacesApiKey',
-      );
+      final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
       final res = await http.get(uri);
       if (!mounted) return;
       if (res.statusCode == 200) {

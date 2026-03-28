@@ -93,8 +93,8 @@ class AdminViewModel extends ChangeNotifier {
         SubMenuItem(title: "City Stocks", screen: CityStockListScreen()),
         SubMenuItem(title: "City Stocks History", screen: CityHubHistoryScreen()),
         SubMenuItem(title: "City Stocks Admin Request History", screen: CityRequestHistoryScreen()),
-        SubMenuItem(title: "Stocks Transfer to Hub", screen: TransferStockScreen(allItems: [],)),
-        SubMenuItem(title: "Bulk Stock Transfer To Hub", screen: BulkTransferScreen(allItems: [],)),
+        SubMenuItem(title: "Stocks Transfer to Hub", screen: TransferStockScreen()),
+        SubMenuItem(title: "Bulk Stock Transfer To Hub", screen: BulkTransferScreen()),
       ],
     ),
     // MenuItem(
