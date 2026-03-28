@@ -123,9 +123,8 @@ class CityStockViewModel with ChangeNotifier {
     }
   }
 
-  ///=================== CITY REQUEST FOR PRODUCTS STOCK TO ADMIN ===================
 
-
+  ///========================== CITY REQUEST TO ADMIN ========================
   // ================= LOADING =================
   bool _cityRequestLoading = false;
   bool get cityRequestLoading => _cityRequestLoading;
@@ -142,7 +141,6 @@ class CityStockViewModel with ChangeNotifier {
   Set<int> get selectedProductIds => _selectedProductIds;
   Map<int, int> get selectedQty => _selectedQty;
 
-// toggle select
   void toggleSelection(int productId) {
     if (_selectedProductIds.contains(productId)) {
       _selectedProductIds.remove(productId);
@@ -154,27 +152,24 @@ class CityStockViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-// update qty
   void updateQty(int productId, int qty) {
     if (qty <= 0) qty = 1;
     _selectedQty[productId] = qty;
     notifyListeners();
   }
 
-// clear selection
   void clearSelection() {
     _selectedProductIds.clear();
     _selectedQty.clear();
     notifyListeners();
   }
 
-// select low stock
   void selectLowStock(List<CityStockData> items) {
     _selectedProductIds.clear();
     _selectedQty.clear();
 
     for (var item in items) {
-      if ((item.currentStock ?? 0) < 10 && item.productid != null) {
+      if ((item.stock ?? 0) < 10 && item.productid != null) {
         _selectedProductIds.add(item.productid!);
         _selectedQty[item.productid!] = 5;
       }
@@ -182,11 +177,7 @@ class CityStockViewModel with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> cityRequestApi(
-      BuildContext context,
-      String remarks,
-      List<Map<String, dynamic>> items,
-      ) async {
+  Future<void> cityRequestApi(BuildContext context, String remarks, List<Map<String, dynamic>> items,) async {
     if (!context.mounted) return;
 
     _setCityRequestLoading(true);
@@ -236,6 +227,7 @@ class CityStockViewModel with ChangeNotifier {
       _setCityRequestLoading(false);
     }
   }
+
   Future<void> bulkRequestStock(BuildContext context, String remarks) async {
     if (_selectedProductIds.isEmpty) return;
 
@@ -251,7 +243,7 @@ class CityStockViewModel with ChangeNotifier {
     clearSelection();
   }
 
-  ///============== CITY HUB HISTORY API ====================================
+  ///============== CITY REQUEST TO HUB HISTORY API ====================================
 
   CityHubHistoryModel? _cityHubHistoryModel;
   CityHubHistoryModel? get cityHubHistoryModel => _cityHubHistoryModel;
