@@ -60,28 +60,28 @@ class HubPerformanceViewOrderDetailsData {
 }
 
 class Order {
-  int? id;
-  String? orderNo;
-  int? couponid;
-  int? userid;
-  int? citymanagerid;
-  int? hubmanagerid;
-  int? deliverypartnerid;
-  String? totalAmount;
-  String? deliveryCharge;
-  String? finalAmount;
-  String? paymentMethod;
-  int? paymentStatus;
-  int? status;
-  String? createdAt;
-  String? updatedAt;
-  Null deliveredAt;
-  String? customerName;
-  String? phone;
-  String? address;
-  String? pincode;
-  String? landmark;
-  String? deliveryBoy;
+  dynamic id;
+  dynamic orderNo;
+  dynamic couponid;
+  dynamic userid;
+  dynamic citymanagerid;
+  dynamic hubmanagerid;
+  dynamic deliverypartnerid;
+  dynamic totalAmount;
+  dynamic deliveryCharge;
+  dynamic finalAmount;
+  dynamic paymentMethod;
+  dynamic paymentStatus;
+  dynamic status;
+  dynamic createdAt;
+  dynamic updatedAt;
+  dynamic deliveredAt;
+  dynamic customerName;
+  dynamic phone;
+  dynamic address;
+  dynamic pincode;
+  dynamic landmark;
+  dynamic deliveryBoy;
 
   Order(
       {this.id,
@@ -161,10 +161,10 @@ class Order {
 }
 
 class Items {
-  String? productName;
-  String? price;
-  int? qty;
-  String? totalPrice;
+  dynamic productName;
+  dynamic price;
+  dynamic qty;
+  dynamic totalPrice;
 
   Items({this.productName, this.price, this.qty, this.totalPrice});
 
