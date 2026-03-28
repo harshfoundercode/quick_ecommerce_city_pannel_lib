@@ -440,35 +440,41 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   }
 
   Future<void> _selectPlace(String placeId) async {
-    print("dbevdb");
-    FocusScope.of(context).unfocus();
-    setState(() {
-      _searchResults = [];
-      _searchCtrl.clear();
-    });
     try {
-      final res = await http.get(Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId)));
+      final res = await http.get(
+        Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId)),
+      );
+
       final data = jsonDecode(res.body);
-      print(ApiUrl.mapPlaceDetailsUrl(placeId));
-      print("ApiUrl.mapPlaceDetailsUrl(placeId)");
+      print("DETAIL RESPONSE: $data");
+
       final loc = data['data'];
+      print(loc);
+      print("loc");
       final latLng = LatLng(
-        (loc['lat'] as num).toDouble(),
-        (loc['lng'] as num).toDouble(),
+        double.parse(loc['lat'].toString()),
+        double.parse(loc['lng'].toString()),
       );
 
       final outside = !_isInsideCity(latLng);
+
       setState(() {
         _selectedLocation = latLng;
         _isOutsideBoundary = outside;
+        _searchResults = [];
+        _searchCtrl.clear();
       });
+
       await _fetchAddress(latLng);
+
       _mapController?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(target: latLng, zoom: 14),
         ),
       );
-    } catch (_) {}
+    } catch (e) {
+      print("SELECT PLACE ERROR: $e");
+    }
   }
 
   // ── Radius slider ──────────────────────────────────────────────────────────
@@ -561,7 +567,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   // ── Confirm ────────────────────────────────────────────────────────────────
 
   void _confirm() {
-    if (_isOutsideBoundary) return; // blocked — button is disabled too
+    if (_isOutsideBoundary) return;
 
     if (_isOverlapping()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -988,7 +994,10 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                 ? parts.sublist(1).join(',').trim()
                 : '';
             return InkWell(
-              onTap: () => _selectPlace(place['place_id']),
+              onTap: (){
+                _selectPlace(place['place_id']);
+                print("fyfiy");
+              },
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
