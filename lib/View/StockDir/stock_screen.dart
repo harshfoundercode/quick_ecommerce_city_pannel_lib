@@ -19,6 +19,13 @@ class _CityStockScreenState extends State<CityStockScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String? _selectedCategory;
+  String? _selectedMainCategory;
+  String? _selectedSubCategory;
+  bool _showLowStockOnly = false;
+  bool _showOutOfStockOnly = false;
+  String _sortBy = 'name'; // name, stock, received
+  bool _sortAscending = true;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -35,6 +42,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -52,26 +60,53 @@ class _CityStockScreenState extends State<CityStockScreen> {
           }
 
           final allItems = vm.cityStockModel!.data ?? [];
+
+          // Extract unique categories
           final categories = allItems
               .map((e) => e.category ?? '')
+              .where((c) => c.isNotEmpty)
               .toSet()
               .toList();
 
-          final filtered = allItems.where((item) {
-            final matchSearch =
-                _searchQuery.isEmpty ||
+          final mainCategories = allItems
+              .map((e) => e.mainCategory ?? '')
+              .where((c) => c.isNotEmpty)
+              .toSet()
+              .toList();
+
+          final subCategories = allItems
+              .map((e) => e.subCategory ?? '')
+              .where((c) => c.isNotEmpty)
+              .toSet()
+              .toList();
+
+          // Apply filters
+          var filtered = allItems.where((item) {
+            final matchSearch = _searchQuery.isEmpty ||
                 (item.productName?.toLowerCase().contains(
-                      _searchQuery.toLowerCase(),
-                    ) ??
+                  _searchQuery.toLowerCase(),
+                ) ??
                     false);
-            final matchCategory =
-                _selectedCategory == null || item.category == _selectedCategory;
-            return matchSearch && matchCategory;
+            final matchCategory = _selectedCategory == null ||
+                item.category == _selectedCategory;
+            final matchMainCategory = _selectedMainCategory == null ||
+                item.mainCategory == _selectedMainCategory;
+            final matchSubCategory = _selectedSubCategory == null ||
+                item.subCategory == _selectedSubCategory;
+            final matchLowStock = !_showLowStockOnly ||
+                (item.currentStock ?? 0) < 10;
+            final matchOutOfStock = !_showOutOfStockOnly ||
+                (item.currentStock ?? 0) == 0;
+
+            return matchSearch && matchCategory && matchMainCategory &&
+                matchSubCategory && matchLowStock && matchOutOfStock;
           }).toList();
 
+          // Apply sorting
+          _applySorting(filtered);
+
           // Group by main_category > category > sub_category
-          final Map<String, Map<String, Map<String, List<CityStockData>>>>
-          grouped = {};
+          final Map<String, Map<String, Map<String, List<CityStockData>>>> grouped = {};
           for (var item in filtered) {
             final main = item.mainCategory ?? 'Other';
             final cat = item.category ?? 'Other';
@@ -84,84 +119,54 @@ class _CityStockScreenState extends State<CityStockScreen> {
 
           return Column(
             children: [
-              _buildSearchAndFilter(categories),
-              _buildSummaryRow(allItems),
-              /// 🔥 BULK REQUEST BAR
-              Consumer<CityStockViewModel>(
-                builder: (context, vm, _) {
-                  if (vm.selectedProductIds.isEmpty) {
-                    return const SizedBox();
-                  }
-
-                  return Container(
-                    padding: const EdgeInsets.all(12),
-                    color: Colors.white,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: vm.cityRequestLoading
-                                ? null
-                                : () {
-                              vm.bulkRequestStock(
-                                context,
-                                "Bulk stock request",
-                              );
-                            },
-                            icon: vm.cityRequestLoading
-                                ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                                : const Icon(Icons.send,color: Colors.white,),
-                            label: Text(
-                              vm.cityRequestLoading
-                                  ? "Requesting..."
-                                  : "Request (${vm.selectedProductIds.length})",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ColorConst.primaryGreen,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-
-                        // /// LOW STOCK AUTO SELECT
-                        // TextButton(
-                        //   onPressed: () {
-                        //     vm.selectLowStock(allItems);
-                        //   },
-                        //   child: const Text("Low Stock",style: TextStyle(color: ColorConst.primaryGreen),),
-                        // ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              _buildSearchAndFilter(categories, mainCategories, subCategories),
+              _buildAdvancedFilters(),
+              _buildSummaryRow(allItems, filtered),
+              _buildBulkRequestBar(vm, allItems),
               Expanded(
                 child: filtered.isEmpty
                     ? _buildEmptyState()
-                    : ListView(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                        children: grouped.entries.map((mainEntry) {
-                          return _buildMainCategorySection(
-                            mainEntry.key.toString(),
-                            mainEntry.value,
-                            vm,
-                          );
-                        }).toList(),
-                      ),
+                    : ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  itemCount: grouped.length,
+                  itemBuilder: (context, index) {
+                    final mainEntry = grouped.entries.elementAt(index);
+                    return _buildMainCategorySection(
+                      mainEntry.key.toString(),
+                      mainEntry.value,
+                      vm,
+                    );
+                  },
+                ),
               ),
             ],
           );
         },
       ),
     );
+  }
+
+  void _applySorting(List<CityStockData> items) {
+    switch (_sortBy) {
+      case 'name':
+        items.sort((a, b) => _sortAscending
+            ? (a.productName ?? '').compareTo(b.productName ?? '')
+            : (b.productName ?? '').compareTo(a.productName ?? ''));
+        break;
+      case 'stock':
+        items.sort((a, b) => _sortAscending
+            ? (a.currentStock ?? 0).compareTo(b.currentStock ?? 0)
+            : (b.currentStock ?? 0).compareTo(a.currentStock ?? 0));
+        break;
+      case 'received':
+        items.sort((a, b) => _sortAscending
+            ? (int.tryParse(a.totalReceived ?? '0') ?? 0)
+            .compareTo(int.tryParse(b.totalReceived ?? '0') ?? 0)
+            : (int.tryParse(b.totalReceived ?? '0') ?? 0)
+            .compareTo(int.tryParse(a.totalReceived ?? '0') ?? 0));
+        break;
+    }
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -189,6 +194,11 @@ class _CityStockScreenState extends State<CityStockScreen> {
         ],
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.download_rounded, color: Colors.white),
+          onPressed: () => _exportStockData(context),
+          tooltip: 'Export Data',
+        ),
         Consumer<CityStockViewModel>(
           builder: (context, vm, _) => IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
@@ -201,80 +211,165 @@ class _CityStockScreenState extends State<CityStockScreen> {
     );
   }
 
-  Widget _buildSearchAndFilter(List<dynamic> categories) {
+  Widget _buildSearchAndFilter(List<dynamic> categories, List<dynamic> mainCategories, List<dynamic> subCategories) {
     return Container(
       color: ColorConst.primaryExtraLightGreen,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    style: const TextStyle(color: ColorConst.primaryGreen, fontSize: 14),
+                    decoration: const InputDecoration(
+                      hintText: 'Search products...',
+                      hintStyle: TextStyle(color: ColorConst.primaryGreen, fontSize: 14),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: ColorConst.primaryGreen,
+                        size: 20,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 11),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                height: 42,
+                width: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.filter_list_rounded, color: ColorConst.primaryGreen),
+                  onPressed: () => _showFilterBottomSheet(categories, mainCategories, subCategories),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (_selectedCategory != null || _selectedMainCategory != null ||
+              _selectedSubCategory != null || _showLowStockOnly || _showOutOfStockOnly)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  if (_selectedCategory != null)
+                    _buildFilterChip('Category: $_selectedCategory', () {
+                      setState(() => _selectedCategory = null);
+                    }),
+                  if (_selectedMainCategory != null)
+                    _buildFilterChip('Main: $_selectedMainCategory', () {
+                      setState(() => _selectedMainCategory = null);
+                    }),
+                  if (_selectedSubCategory != null)
+                    _buildFilterChip('Sub: $_selectedSubCategory', () {
+                      setState(() => _selectedSubCategory = null);
+                    }),
+                  if (_showLowStockOnly)
+                    _buildFilterChip('Low Stock Only', () {
+                      setState(() => _showLowStockOnly = false);
+                    }),
+                  if (_showOutOfStockOnly)
+                    _buildFilterChip('Out of Stock', () {
+                      setState(() => _showOutOfStockOnly = false);
+                    }),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, VoidCallback onDeleted) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      child: Chip(
+        label: Text(label, style: const TextStyle(fontSize: 12)),
+        backgroundColor: ColorConst.primaryGreen.withValues(alpha: 0.1),
+        deleteIcon: const Icon(Icons.close, size: 16),
+        onDeleted: onDeleted,
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+
+  Widget _buildAdvancedFilters() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Expanded(
-            child: Container(
-              height: 42,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (v) => setState(() => _searchQuery = v),
-                style: const TextStyle(color: ColorConst.primaryGreen, fontSize: 14),
-                decoration: const InputDecoration(
-                  hintText: 'Search products...',
-                  hintStyle: TextStyle(color: ColorConst.primaryGreen , fontSize: 14),
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: ColorConst.primaryGreen,
-                    size: 20,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 11),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
           Container(
-            height: 42,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade200),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String?>(
-                value: _selectedCategory,
-                dropdownColor: ColorConst.primaryExtraLightGreen
-                ,
-                hint: const Text(
-                  'Category',
-                  style: TextStyle(color: ColorConst.primaryGreen, fontSize: 13),
+            child: Row(
+              children: [
+                const Icon(Icons.sort_rounded, size: 16, color: ColorConst.primaryGreen),
+                const SizedBox(width: 4),
+                DropdownButton<String>(
+                  value: _sortBy,
+                  underline: const SizedBox(),
+                  dropdownColor: Colors.white,
+                  items: const [
+                    DropdownMenuItem(value: 'name', child: Text('Name')),
+                    DropdownMenuItem(value: 'stock', child: Text('Stock')),
+                    DropdownMenuItem(value: 'received', child: Text('Received')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _sortBy = value!;
+                    });
+                  },
                 ),
-                icon: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: ColorConst.primaryGreen,
-                ),
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text(
-                      'All',
-                      style: TextStyle(color: ColorConst.primaryGreen, fontSize: 13),
-                    ),
+                IconButton(
+                  icon: Icon(
+                    _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 16,
                   ),
-                  ...categories.map(
-                    (c) => DropdownMenuItem<String?>(
-                      value: c,
-                      child: Text(
-                        c,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
+                  onPressed: () => setState(() => _sortAscending = !_sortAscending),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  FilterChip(
+                    label: const Text('Low Stock'),
+                    selected: _showLowStockOnly,
+                    onSelected: (selected) => setState(() => _showLowStockOnly = selected),
+                    backgroundColor: Colors.white,
+                    selectedColor: ColorConst.primaryGreen.withValues(alpha: 0.1),
+                  ),
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    label: const Text('Out of Stock'),
+                    selected: _showOutOfStockOnly,
+                    onSelected: (selected) => setState(() => _showOutOfStockOnly = selected),
+                    backgroundColor: Colors.white,
+                    selectedColor: Colors.red.withValues(alpha: 0.1),
                   ),
                 ],
-                onChanged: (v) => setState(() => _selectedCategory = v),
               ),
             ),
           ),
@@ -283,36 +378,72 @@ class _CityStockScreenState extends State<CityStockScreen> {
     );
   }
 
-  Widget _buildSummaryRow(List<CityStockData> items) {
-    final totalProducts = items.length;
-    final lowStock = items.where((i) => (i.currentStock ?? 0) < 10).length;
-    final totalStock = items.fold<int>(
+  Widget _buildSummaryRow(List<CityStockData> allItems, List<CityStockData> filteredItems) {
+    final totalProducts = filteredItems.length;
+    final totalAllProducts = allItems.length;
+    final lowStock = allItems.where((i) => (i.currentStock ?? 0) < 10).length;
+    final outOfStock = allItems.where((i) => (i.currentStock ?? 0) == 0).length;
+
+    final totalStock = allItems.fold<int>(
       0,
-      (sum, i) => sum + int.tryParse(i.currentStock?.toString() ?? "0")!,
+          (s, i) => s + (int.tryParse(i.currentStock?.toString() ?? '0') ?? 0),
     );
+
+    final totalValue = allItems.fold<double>(
+      0,
+          (sum, i) => sum + ((i.currentStock ?? 0) * (10)), // price hoga 10 ki jagah
+    );
+
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      child: Column(
         children: [
-          _buildSummaryCard(
-            'Products',
-            '$totalProducts',
-            Icons.inventory_2_outlined,
-            const Color(0xFF2563EB),
+          Row(
+            children: [
+              _buildSummaryCard(
+                'Products',
+                '$totalProducts',
+                Icons.inventory_2_outlined,
+                const Color(0xFF2563EB),
+                subtitle: 'Total: $totalAllProducts',
+              ),
+              const SizedBox(width: 10),
+              _buildSummaryCard(
+                'Total Stock',
+                totalStock.toString(),
+                Icons.stacked_bar_chart_rounded,
+                const Color(0xFF059669),
+                subtitle: 'Units',
+              ),
+              const SizedBox(width: 10),
+              _buildSummaryCard(
+                'Stock Value',
+                '₹${(totalValue).toStringAsFixed(0)}',
+                Icons.currency_rupee_rounded,
+                const Color(0xFFF59E0B),
+                subtitle: 'Estimated',
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          _buildSummaryCard(
-            'Total Stock',
-            totalStock.toString(),
-            Icons.stacked_bar_chart_rounded,
-            const Color(0xFF059669),
-          ),
-          const SizedBox(width: 10),
-          _buildSummaryCard(
-            'Low Stock',
-            '$lowStock',
-            Icons.warning_amber_rounded,
-            const Color(0xFFDC2626),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildSummaryCard(
+                'Low Stock',
+                '$lowStock',
+                Icons.warning_amber_rounded,
+                const Color(0xFFDC2626),
+                subtitle: 'Below 10 units',
+              ),
+              const SizedBox(width: 10),
+              _buildSummaryCard(
+                'Out of Stock',
+                '$outOfStock',
+                Icons.cancel_rounded,
+                const Color(0xFFEF4444),
+                subtitle: 'Zero stock',
+              ),
+            ],
           ),
         ],
       ),
@@ -320,11 +451,12 @@ class _CityStockScreenState extends State<CityStockScreen> {
   }
 
   Widget _buildSummaryCard(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+      String label,
+      String value,
+      IconData icon,
+      Color color, {
+        String? subtitle,
+      }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -350,25 +482,37 @@ class _CityStockScreenState extends State<CityStockScreen> {
               child: Icon(icon, color: color, size: 18),
             ),
             const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 10,
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 10,
+                    ),
                   ),
-                ),
-              ],
+                  if (subtitle != null)
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Color(0xFF9CA3AF),
+                        fontSize: 8,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ],
         ),
@@ -376,11 +520,112 @@ class _CityStockScreenState extends State<CityStockScreen> {
     );
   }
 
+  Widget _buildBulkRequestBar(CityStockViewModel vm, List<CityStockData> allItems) {
+    if (vm.selectedProductIds.isEmpty) {
+      return const SizedBox();
+    }
+
+    final selectedProducts = allItems.where((item) =>
+        vm.selectedProductIds.contains(item.productid)
+    ).toList();
+
+    // final totalQty = selectedProducts.fold<int>(
+    //     0,
+    //         (sum, item) => sum + int.parse(vm.requestQuantities[item.productid] ?? 1)
+    // );
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      color: Colors.white,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: vm.cityRequestLoading
+                      ? null
+                      : () {
+                    vm.bulkRequestStock(
+                      context,
+                      "Bulk stock request",
+                    );
+                  },
+                  icon: vm.cityRequestLoading
+                      ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Icon(Icons.send, color: Colors.white),
+                  label: Text(
+                    vm.cityRequestLoading
+                        ? "Requesting..."
+                        : "Request (${vm.selectedProductIds.length} items)",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorConst.primaryGreen,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton.icon(
+                onPressed: () => vm.clearSelection(),
+                icon: const Icon(Icons.clear_rounded, size: 18),
+                label: const Text('Clear'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
+              ),
+            ],
+          ),
+          if (selectedProducts.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            // SingleChildScrollView(
+            //   scrollDirection: Axis.horizontal,
+            //   child: Row(
+            //     children: selectedProducts.map((product) {
+            //       final qty = vm.requestQuantities[product.productid] ?? 1;
+            //       return Container(
+            //         margin: const EdgeInsets.only(right: 8),
+            //         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            //         decoration: BoxDecoration(
+            //           color: ColorConst.primaryGreen.withValues(alpha: 0.1),
+            //           borderRadius: BorderRadius.circular(12),
+            //         ),
+            //         child: Text(
+            //           '${product.productName}: $qty',
+            //           style: const TextStyle(fontSize: 11),
+            //         ),
+            //       );
+            //     }).toList(),
+            //   ),
+            // ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildMainCategorySection(
-    String mainCategory,
-    Map<String, Map<String, List<CityStockData>>> categoryMap,
-    CityStockViewModel vm,
-  ) {
+      String mainCategory,
+      Map<String, Map<String, List<CityStockData>>> categoryMap,
+      CityStockViewModel vm,
+      ) {
+    // Calculate category summary
+    int totalItems = 0;
+    int totalStock = 0;
+    categoryMap.forEach((cat, subMap) {
+      subMap.forEach((sub, items) {
+        totalItems += items.length;
+        totalStock += items.fold<int>(0, (sum, item) => sum + (int.tryParse(item.currentStock?.toString() ?? '0') ?? 0));
+      });
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -405,6 +650,18 @@ class _CityStockScreenState extends State<CityStockScreen> {
                   color: ColorConst.primaryGreen,
                 ),
               ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$totalItems items | $totalStock units',
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                ),
+              ),
             ],
           ),
         ),
@@ -414,13 +671,22 @@ class _CityStockScreenState extends State<CityStockScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 12, top: 6, bottom: 6),
-                child: Text(
-                  catEntry.key,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF374151),
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      catEntry.key,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF374151),
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${catEntry.value.values.fold<int>(0, (sum, items) => sum + items.length)} items',
+                      style: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
+                    ),
+                  ],
                 ),
               ),
               ...catEntry.value.entries.map((subEntry) {
@@ -469,23 +735,25 @@ class _CityStockScreenState extends State<CityStockScreen> {
     final double progress = received > 0
         ? (current / received).clamp(0.0, 1.0)
         : 0.0;
-    final isLow = current < 10;
-    final stockColor = isLow
+    final isLow = current < 10 && current > 0;
+    final isOutOfStock = current == 0;
+    final stockColor = isOutOfStock
+        ? const Color(0xFFEF4444)
+        : isLow
         ? const Color(0xFFDC2626)
         : current < 20
         ? const Color(0xFFD97706)
         : ColorConst.primaryGreen;
 
-    final isSelected =
-    vm.selectedProductIds.contains(item.productid);
+    final isSelected = vm.selectedProductIds.contains(item.productid);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: isLow
-            ? Border.all(color: const Color(0xFFDC2626).withValues(alpha: 0.3))
+        border: isLow || isOutOfStock
+            ? Border.all(color: stockColor.withValues(alpha: 0.3))
             : null,
         boxShadow: [
           BoxShadow(
@@ -506,121 +774,86 @@ class _CityStockScreenState extends State<CityStockScreen> {
                   value: isSelected,
                   checkColor: ColorConst.white,
                   activeColor: ColorConst.primaryGreen,
-                  onChanged: (_) {
-                    if (item.productid != null) {
-                      vm.toggleSelection(item.productid!);
-                    }
-                  },
+                  onChanged: (item.productid != null)
+                      ? (_) => vm.toggleSelection(item.productid!)
+                      : null,
                 ),
                 Expanded(
-                  child: Text(
-                    item.productName ?? '',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.productName ?? '',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (item.variantName != null && item.variantName != 'Default')
+                        Text(
+                          item.variantName!,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+                if (isOutOfStock)
+                  _buildStatusBadge('Out of Stock', const Color(0xFFEF4444))
+                else if (isLow)
+                  _buildStatusBadge('Low Stock', const Color(0xFFDC2626)),
               ],
             ),
 
             const SizedBox(height: 8),
 
             if (isSelected)
-              Row(
-                children: [
-                  const Text("Qty: "),
-                  CustomTextField(
-                    width: Sizes.screenWidth*0.05,
-                    height: 30,
-                    keyboardType: TextInputType.number,
-                    fillColor: Colors.white,
-                    maxLength: 3,
-                    filled: true,
-                    onChanged: (val) {
-                      final qty = int.tryParse(val) ?? 1;
-                      vm.updateQty(item.productid!, qty);
-                    },
-                    hintText: "1",
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: ColorConst.primaryGreen.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Text(
+                      "Request Quantity: ",
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    Expanded(
+                      child: CustomTextField(
+                        width: 80,
+                        height: 35,
+                        keyboardType: TextInputType.number,
+                        fillColor: Colors.white,
+                        maxLength: 3,
+                        filled: true,
+                        onChanged: (val) {
+                          final qty = int.tryParse(val) ?? 1;
+                          vm.updateQty(item.productid!, qty);
+                        },
+                        hintText: "1",
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
             const SizedBox(height: 10),
 
             Row(
               children: [
-                Expanded(
-                  child: Text(
-                    item.productName ?? 'N/a',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-                ),
-                if (item.variantName != null && item.variantName != 'Default')
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      item.variantName! ?? "N/a",
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF2563EB),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                if (isLow) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEE2E2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Low Stock',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFFDC2626),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Stock numbers
-            Row(
-              children: [
-                _buildStockStat('Current', '$current', stockColor),
+                _buildStockStat('Current', '$current', stockColor, Icons.inventory_rounded),
                 const SizedBox(width: 16),
-                _buildStockStat(
-                  'Received',
-                  '$received',
-                  const Color(0xFF374151),
-                ),
+                _buildStockStat('Received', '$received', const Color(0xFF059669), Icons.download_rounded),
                 const SizedBox(width: 16),
-                _buildStockStat('Sold', '$sold', const Color(0xFF6B7280)),
+                _buildStockStat('Sold', '$sold', const Color(0xFFDC2626), Icons.shopping_cart_rounded),
               ],
             ),
             const SizedBox(height: 10),
 
-            // Progress bar
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -655,24 +888,41 @@ class _CityStockScreenState extends State<CityStockScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Action buttons
             Row(
               children: [
                 Expanded(
-                  child: _buildActionButton(
-                    label: 'Transfer',
-                    icon: Icons.swap_horiz_rounded,
-                    color: ColorConst.primaryGreen,
-                    onTap: () => _showTransferDialog(context, item, vm),
+                  child: Tooltip(
+                    message: 'Transfer stock to hub',
+                    child: _buildActionButton(
+                      label: 'Transfer',
+                      icon: Icons.swap_horiz_rounded,
+                      color: ColorConst.primaryGreen,
+                      onTap: () => _showTransferDialog(context, item, vm),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: _buildActionButton(
-                    label: 'Request Stock',
-                    icon: Icons.edit_rounded,
-                    color: const Color(0xFF059669),
-                    onTap: () => _showUpdateStockDialog(context, item, vm),
+                  child: Tooltip(
+                    message: 'Request additional stock',
+                    child: _buildActionButton(
+                      label: 'Request',
+                      icon: Icons.add_shopping_cart_rounded,
+                      color: const Color(0xFF059669),
+                      onTap: () => _showUpdateStockDialog(context, item, vm),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Tooltip(
+                    message: 'View product details',
+                    child: _buildActionButton(
+                      label: 'Details',
+                      icon: Icons.info_outline_rounded,
+                      color: const Color(0xFF6B7280),
+                      onTap: () => _showProductDetailsDialog(context, item),
+                    ),
                   ),
                 ),
               ],
@@ -683,24 +933,50 @@ class _CityStockScreenState extends State<CityStockScreen> {
     );
   }
 
-  Widget _buildStockStat(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+  Widget _buildStatusBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w600,
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: color,
+      ),
+    );
+  }
+
+  Widget _buildStockStat(String label, String value, Color color, IconData icon) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 12, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 10, color: Color(0xFF6B7280)),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -723,12 +999,12 @@ class _CityStockScreenState extends State<CityStockScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 15, color: color),
+            Icon(icon, size: 14, color: color),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: color,
               ),
@@ -754,23 +1030,234 @@ class _CityStockScreenState extends State<CityStockScreen> {
             'No products found',
             style: TextStyle(color: Color(0xFF6B7280), fontSize: 16),
           ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _searchQuery = '';
+                _selectedCategory = null;
+                _selectedMainCategory = null;
+                _selectedSubCategory = null;
+                _showLowStockOnly = false;
+                _showOutOfStockOnly = false;
+              });
+            },
+            child: const Text('Clear Filters'),
+          ),
         ],
       ),
     );
   }
 
-  // ─── Dialogs ────────────────────────────────────────────────────────────────
+  void _showFilterBottomSheet(List<dynamic> categories, List<dynamic> mainCategories, List<dynamic> subCategories) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateSheet) {
+            return Container(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Filter Products',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          _buildFilterOption(
+                            'Main Category',
+                            mainCategories,
+                            _selectedMainCategory,
+                                (value) => setState(() => _selectedMainCategory = value),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFilterOption(
+                            'Category',
+                            categories,
+                            _selectedCategory,
+                                (value) => setState(() => _selectedCategory = value),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFilterOption(
+                            'Sub Category',
+                            subCategories,
+                            _selectedSubCategory,
+                                (value) => setState(() => _selectedSubCategory = value),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _selectedMainCategory = null;
+                              _selectedCategory = null;
+                              _selectedSubCategory = null;
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Clear All'),
+                        ),
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {});
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorConst.primaryGreen,
+                          ),
+                          child: const Text('Apply Filters'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterOption(
+      String title,
+      List<dynamic> options,
+      String? selectedValue,
+      Function(String?) onChanged,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilterChip(
+              label: const Text('All'),
+              selected: selectedValue == null,
+              onSelected: (_) => onChanged(null),
+            ),
+            ...options.map((option) {
+              return FilterChip(
+                label: Text(option),
+                selected: selectedValue == option,
+                onSelected: (_) => onChanged(option),
+              );
+            }),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showProductDetailsDialog(BuildContext context, CityStockData item) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(item.productName ?? 'Product Details'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _detailRow('Product ID', item.productid?.toString() ?? 'N/A'),
+                _detailRow('Variant', item.variantName ?? 'Default'),
+                _detailRow('Category', item.category ?? 'N/A'),
+                _detailRow('Main Category', item.mainCategory ?? 'N/A'),
+                _detailRow('Sub Category', item.subCategory ?? 'N/A'),
+                const Divider(),
+                _detailRow('Current Stock', item.currentStock?.toString() ?? '0'),
+                _detailRow('Total Received', item.totalReceived ?? '0'),
+                _detailRow('Price', '₹${10}'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(fontSize: 13)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _exportStockData(BuildContext context) {
+    CustomSnackBar.show(
+      context,
+      message: "Export feature coming soon",
+      type: SnackBarType.info,
+    );
+  }
 
   void _showTransferDialog(
-    BuildContext context,
-    CityStockData item,
-    CityStockViewModel vm,
-  ) {
+      BuildContext context,
+      CityStockData item,
+      CityStockViewModel vm,
+      ) {
     final qtyController = TextEditingController();
 
     String? selectedHubId;
 
-    /// 🔥 Call hub list API before opening bottom sheet
     final hubVM = Provider.of<AllHubViewModel>(context, listen: false);
     hubVM.getHubListDataApi(context);
 
@@ -797,7 +1284,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
 
                   const SizedBox(height: 16),
 
-                  /// 🔽 HUB DROPDOWN (replacing city field)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
@@ -813,20 +1299,17 @@ class _CityStockScreenState extends State<CityStockScreen> {
                         ),
                         isExpanded: true,
                         dropdownColor: Colors.white,
-
-                        /// ✅ Handle loading safely
                         items: (hubVM.hubListModel?.data?.hubs ?? [])
                             .map<DropdownMenuItem<String>>((hub) {
-                              return DropdownMenuItem<String>(
-                                value: hub.hubId.toString(),
-                                child: Text(
-                                  hub.hubName ?? "N/a",
-                                  style: TextStyle(fontSize: 16,color: Colors.black),
-                                ),
-                              );
-                            })
+                          return DropdownMenuItem<String>(
+                            value: hub.hubId.toString(),
+                            child: Text(
+                              hub.hubName ?? "N/a",
+                              style: const TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          );
+                        })
                             .toList(),
-
                         onChanged: (value) {
                           setState(() {
                             selectedHubId = value;
@@ -838,7 +1321,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// 🔢 Quantity Field
                   _buildDialogField(
                     controller: qtyController,
                     label: 'Quantity to Transfer',
@@ -849,7 +1331,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
 
                   const SizedBox(height: 20),
 
-                  /// 🚀 Submit Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -860,6 +1341,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
                             message: "Please select a hub",
                             type: SnackBarType.error,
                           );
+                          return;
                         }
 
                         if (qtyController.text.isEmpty) {
@@ -868,6 +1350,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
                             message: "Enter quantity",
                             type: SnackBarType.error,
                           );
+                          return;
                         }
 
                         final qty = int.tryParse(qtyController.text);
@@ -877,7 +1360,18 @@ class _CityStockScreenState extends State<CityStockScreen> {
                             message: 'Enter valid quantity',
                             type: SnackBarType.error,
                           );
+                          return;
                         }
+
+                        if (qty > (item.currentStock ?? 0)) {
+                          CustomSnackBar.show(
+                            context,
+                            message: 'Insufficient stock',
+                            type: SnackBarType.error,
+                          );
+                          return;
+                        }
+
                         final items = [
                           {
                             "productid": item.productid,
@@ -927,7 +1421,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) {
         return _BottomSheetWrapper(
-          title: 'Request Stock', // ✅ corrected meaning
+          title: 'Request Stock',
           subtitle: item.productName ?? '',
           icon: Icons.inventory_2_outlined,
           iconColor: ColorConst.primaryGreen,
@@ -941,7 +1435,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 🔢 Quantity Input
                   _buildDialogField(
                     controller: stockController,
                     label: 'Request Quantity',
@@ -952,7 +1445,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
 
                   const SizedBox(height: 20),
 
-                  /// 🚀 REQUEST BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -961,7 +1453,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
                           : () {
                         final qty = int.tryParse(stockController.text);
 
-                        // ❌ validation
                         if (qty == null || qty <= 0) {
                           CustomSnackBar.show(
                             context,
@@ -970,6 +1461,7 @@ class _CityStockScreenState extends State<CityStockScreen> {
                           );
                           return;
                         }
+
                         final items = [
                           {
                             "productid": item.productid,
@@ -977,14 +1469,12 @@ class _CityStockScreenState extends State<CityStockScreen> {
                           }
                         ];
 
-                        // ✅ API CALL
                         vm.cityRequestApi(
                           context,
                           "Stock request from city panel",
                           items,
                         );
                       },
-
                       icon: vm.cityRequestLoading
                           ? const SizedBox(
                         width: 16,
@@ -995,13 +1485,11 @@ class _CityStockScreenState extends State<CityStockScreen> {
                         ),
                       )
                           : const Icon(Icons.send_rounded, size: 18),
-
                       label: Text(
                         vm.cityRequestLoading
                             ? 'Requesting...'
                             : 'Request Stock',
                       ),
-
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorConst.primaryGreen,
                         foregroundColor: Colors.white,
@@ -1018,100 +1506,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
           ),
         );
       },
-    );
-  }
-
-  /// 🔥 UPDATED STOCK CARD
-  Widget _buildStockCardd(CityStockData item, CityStockViewModel vm) {
-    final current = item.currentStock ?? 0;
-
-    final isSelected =
-    vm.selectedProductIds.contains(item.productid);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-
-          /// 🔥 CHECKBOX + NAME
-          Row(
-            children: [
-              Checkbox(
-                value: isSelected,
-                onChanged: (_) {
-                  if (item.productid != null) {
-                    vm.toggleSelection(item.productid!);
-                  }
-                },
-              ),
-              Expanded(
-                child: Text(
-                  item.productName ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          /// STOCK INFO
-          Text("Current Stock: $current"),
-
-          /// 🔥 QTY INPUT (ONLY WHEN SELECTED)
-          if (isSelected)
-            Row(
-              children: [
-                const Text("Qty: "),
-                SizedBox(
-                  width: 60,
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    onChanged: (val) {
-                      final qty = int.tryParse(val) ?? 1;
-                      vm.updateQty(item.productid!, qty);
-                    },
-                    decoration: const InputDecoration(
-                      hintText: "1",
-                      isDense: true,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-          const SizedBox(height: 10),
-
-          /// BUTTONS
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showUpdateStockDialog(context, item, vm);
-                  },
-                  child: const Text("Request Stock"),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -1196,8 +1590,6 @@ class _CityStockScreenState extends State<CityStockScreen> {
   }
 }
 
-// ─── Reusable Bottom Sheet Wrapper ──────────────────────────────────────────
-
 class _BottomSheetWrapper extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -1232,7 +1624,6 @@ class _BottomSheetWrapper extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 width: 40,
@@ -1244,8 +1635,6 @@ class _BottomSheetWrapper extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Header
             Row(
               children: [
                 Container(
