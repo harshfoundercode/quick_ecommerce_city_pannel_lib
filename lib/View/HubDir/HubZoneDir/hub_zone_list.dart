@@ -58,10 +58,25 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
       if (hvm.hubZones.isEmpty) {
         hvm.getHubZoneListDataApi(context).then((_) {
           _buildMapOverlays(hvm.hubZones);
+          // 🔥 AUTO SELECT FIRST ZONE
+          if (hvm.hubZones.isNotEmpty) {
+            final firstZone = hvm.hubZones.first;
+
+            if (firstZone.hasValidCoordinates) {
+              _onZoneTap(firstZone);
+            }
+          }
           _fabController.forward();
         });
       } else {
         _buildMapOverlays(hvm.hubZones);
+        if (hvm.hubZones.isNotEmpty) {
+          final firstZone = hvm.hubZones.first;
+
+          if (firstZone.hasValidCoordinates) {
+            _onZoneTap(firstZone);
+          }
+        }
         _fabController.forward();
       }
     });

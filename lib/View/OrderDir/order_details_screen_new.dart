@@ -531,7 +531,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       child: Column(
         children: [
           _detailRow('Delivery Partner',
-              order?.deliveryName ?? '—',
+              order?.deliveryName ?? 'Not Assigned',
               Icons.delivery_dining_outlined),
           const SizedBox(height: 10),
           _detailRow('Partner Phone',

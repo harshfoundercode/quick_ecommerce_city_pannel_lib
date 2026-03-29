@@ -93,8 +93,6 @@ class _AddHubScreenState extends State<AddHubScreen> {
                     icon: Icons.radio_button_unchecked_rounded,
                     keyboardType: TextInputType.number,
                     readOnly: true,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Radius is required' : null,
                   ),
                 ],
               ),

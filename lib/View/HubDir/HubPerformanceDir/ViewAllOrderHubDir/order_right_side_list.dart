@@ -486,7 +486,7 @@ class _OrderDetailView extends StatelessWidget {
                 icon: Icons.delivery_dining_rounded,
                 iconColor: const Color(0xFFEA580C),
                 rows: [
-                  _InfoRow('Name', o?.deliveryBoy?.toString() ?? '—'),
+                  _InfoRow('Name', o?.deliveryBoy?.toString() ?? 'Not Assigned'),
                   _InfoRow('Phone', o?.phone?.toString() ?? '—'),
                 ],
               ),
