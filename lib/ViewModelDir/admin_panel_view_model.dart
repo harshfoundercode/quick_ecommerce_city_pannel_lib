@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_list.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/add_hub_form.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_manager_hub_screen.dart';
@@ -13,8 +12,8 @@ import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/bulk_transfer
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_request_to_admin_history.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_stock_screen_new_data.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/transfer_stock_to_hub.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 
 class AdminViewModel extends ChangeNotifier {
   Widget _currentScreen = const DashboardContent();
@@ -26,10 +25,14 @@ class AdminViewModel extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
   int? get expandedIndex => _expandedIndex;
 
+  SubMenuItem? _selectedSubMenu;
+  SubMenuItem? get selectedSubMenu => _selectedSubMenu;
+
   void changeScreen(Widget screen, int index) {
     _currentScreen = screen;
     _selectedIndex = index;
     _expandedIndex = null;
+    _selectedSubMenu = null; // ✅ reset submenu
     notifyListeners();
   }
 
@@ -60,6 +63,8 @@ class AdminViewModel extends ChangeNotifier {
 
   void onSubItemTap(SubMenuItem item) {
     openSubMenu(item.screen);
+    _selectedSubMenu = item; // ✅ store selected submenu
+    notifyListeners();
   }
 
   final List<MenuItem> menuItems = [
@@ -108,6 +113,7 @@ class AdminViewModel extends ChangeNotifier {
   ];
 
   Future<void> performLogout(BuildContext context) async {
+    await Provider.of<UserViewModel>(context, listen: false).logout();
     _currentScreen = const DashboardContent();
     _selectedIndex = 0;
     _expandedIndex = null;

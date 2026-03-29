@@ -93,8 +93,8 @@ class _HubManagementTableState extends State<HubManagementTable> {
                   ),
                   child: Icon(Icons.dashboard, color: ColorConst.primaryGreen),
                 ),
-                title: Text(hub.hubName),
-                subtitle: Text(hub.address),
+                title: Text(hub.hubName ?? "N/n"),
+                subtitle: Text(hub.address ?? "N/n"),
               ),
               const Divider(),
               _buildDetailRow("Delivery Boys", hub.deliveryBoys.toString()),
@@ -216,13 +216,16 @@ class _HubManagementTableState extends State<HubManagementTable> {
         ),
         child: Row(
           children: [
-            Expanded(
-              flex: 3,
+            Container(
+              width: Sizes.screenWidth*0.34,
               child: Row(
                 children: [
                   hubIcon(icon: Icons.dashboard),
                   const SizedBox(width: 12),
-                  hubText(name: hub.hubName, location: hub.address),
+                  hubText(
+                      name: hub.hubName ?? "N/n",
+                      location: hub.address ?? "N/n"
+                  ),
                 ],
               ),
             ),
@@ -278,7 +281,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
                 hubIcon(icon: Icons.dashboard_customize_sharp),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: hubText(name: hub.hubName, location: hub.address),
+                  child: hubText(name: hub.hubName ?? "N/n", location: hub.address ?? "N/n"),
                 ),
                 CustomWidgets.statusBadge(isActive: hub.status==1?true:false,width: Sizes.screenWidth*0.18)
               ],
@@ -355,12 +358,17 @@ class _HubManagementTableState extends State<HubManagementTable> {
     children: [
       Text(
         "Hub - $name",
+        maxLines: 1,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
       ),
       const SizedBox(height: 2),
-      Text(
-        location,
-        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+      Container(
+        width: Sizes.screenWidth*0.22,
+        child: Text(
+          location,
+          maxLines: 2,
+          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+        ),
       ),
     ],
   );

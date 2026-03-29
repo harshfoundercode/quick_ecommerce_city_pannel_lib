@@ -88,11 +88,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                     CustomWidgets.verticalSpace(0.008),
 
-                    CustomText.medium(
-                      "Lucknow Control Panel",
-                      fontSize: 13,
-                      color: ColorConst.textGrey1,
-                    ),
 
                     CustomWidgets.verticalSpace(0.025),
 

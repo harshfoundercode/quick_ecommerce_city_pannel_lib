@@ -248,28 +248,90 @@ class _AdminSidebarState extends State<AdminSidebar>
     );
   }
 
+  // Widget _buildSubMenuItem(SubMenuItem item, AdminViewModel avm) {
+  //   return InkWell(
+  //     onTap: () {
+  //       avm.onSubItemTap(item);
+  //
+  //       /// ✅ CLOSE DRAWER
+  //       if (Responsive.isMobile(context)) {
+  //         Future.delayed(const Duration(milliseconds: 150), () {
+  //           Navigator.pop(context);
+  //         });
+  //       }
+  //
+  //     },
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  //       child: Row(
+  //         children: [
+  //           Container(
+  //             width: 4,
+  //             height: 4,
+  //             decoration: BoxDecoration(
+  //               color: Colors.grey.shade400,
+  //               shape: BoxShape.circle,
+  //             ),
+  //           ),
+  //           const SizedBox(width: 12),
+  //           Expanded(
+  //             child: Text(
+  //               item.title,
+  //               style: TextStyle(
+  //                 fontSize: 13,
+  //                 color: Colors.grey.shade700,
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // ================= LOGOUT =================
+
   Widget _buildSubMenuItem(SubMenuItem item, AdminViewModel avm) {
+
+    bool isSelected = avm.selectedSubMenu == item;
+
     return InkWell(
       onTap: () {
         avm.onSubItemTap(item);
 
-        /// ✅ CLOSE DRAWER
         if (Responsive.isMobile(context)) {
           Future.delayed(const Duration(milliseconds: 150), () {
             Navigator.pop(context);
           });
         }
-
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? ColorConst.primaryLightGreen.withValues(alpha: 0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+
+          /// 🔥 LEFT BORDER (MAIN HIGHLIGHT)
+          border: Border(
+            left: BorderSide(
+              color: isSelected
+                  ? ColorConst.primaryGreen
+                  : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
         child: Row(
           children: [
             Container(
-              width: 4,
-              height: 4,
+              width: 5,
+              height: 5,
               decoration: BoxDecoration(
-                color: Colors.grey.shade400,
+                color: isSelected
+                    ? ColorConst.primaryGreen
+                    : Colors.grey.shade400,
                 shape: BoxShape.circle,
               ),
             ),
@@ -279,7 +341,11 @@ class _AdminSidebarState extends State<AdminSidebar>
                 item.title,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey.shade700,
+                  fontWeight:
+                  isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected
+                      ? ColorConst.primaryGreen
+                      : Colors.grey.shade700,
                 ),
               ),
             ),
@@ -288,8 +354,6 @@ class _AdminSidebarState extends State<AdminSidebar>
       ),
     );
   }
-
-  // ================= LOGOUT =================
 
   Widget _buildLogoutButton() {
     return Padding(
