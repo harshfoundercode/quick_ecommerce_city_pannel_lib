@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/dashboard_repo.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/profile_view_model.dart';
 
 class DashboardViewModel with ChangeNotifier {
   final DashboardRepo _dashboardRepo = DashboardRepo();
@@ -25,6 +27,8 @@ class DashboardViewModel with ChangeNotifier {
       if (statusCode == 200) {
         final dashboardDataModel = DashboardDetailsModel.fromJson(body);
         setDashboardDataModel(dashboardDataModel);
+        final profileData = Provider.of<ProfileViewModel>(context, listen: false);
+        profileData.getProfileDataApi(context);
       } else {
         CustomSnackBar.show(
           context,

@@ -10,6 +10,7 @@ import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/despute_s
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/hub_overview.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/revenue_card.dart' show RevenueCard;
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/today_overview.dart' show TodayOverviewCard;
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/dashboard_view_model.dart';
 
 class DashboardContent extends StatefulWidget {
@@ -23,9 +24,10 @@ class _DashboardContentState extends State<DashboardContent> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      final dashboardData = Provider.of<DashboardViewModel>(context,listen: false);
-      dashboardData.getDashBoardDataApi(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final token = await Provider.of<UserViewModel>(context, listen: false).getToken();
+      if (token == null || token.isEmpty) return;
+      Provider.of<DashboardViewModel>(context, listen: false).getDashBoardDataApi(context);
     });
     // TODO: implement initState
     super.initState();

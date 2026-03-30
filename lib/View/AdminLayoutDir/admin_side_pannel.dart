@@ -22,10 +22,6 @@ class _AdminSidebarState extends State<AdminSidebar>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final profileData = Provider.of<ProfileViewModel>(context, listen: false);
-      profileData.getProfileDataApi(context);
-    });
     super.initState();
     _hoverController = AnimationController(
       vsync: this,
