@@ -425,9 +425,8 @@ class _AdminSidebarState extends State<AdminSidebar>
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(context);
-                          await context.read<AdminViewModel>().performLogout(
-                            context,
-                          );
+                          final adminVm = Provider.of<AdminViewModel>(context,listen: false);
+                          await adminVm.performLogout(context);
                         },
                         child: const Text("Logout"),
                       ),

@@ -398,7 +398,8 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    context.read<HubZoneEditViewModel>().editZoneApi(
+    final hubZone = Provider.of<HubZoneEditViewModel>(context,listen: false);
+    hubZone.editZoneApi(
       context,
       widget.zone.id.toString(),
       widget.zone.cityzoneid.toString(),

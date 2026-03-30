@@ -53,7 +53,8 @@ class _OrderListScreenState extends State<OrderListScreen>
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrderDetailsViewModel>().getOrdersListDataApi(context);
+      final orderDetailsData = Provider.of<OrderDetailsViewModel>(context,listen: false);
+      orderDetailsData.getOrdersListDataApi(context);
     });
   }
 

@@ -45,7 +45,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrderDetailsViewModel>().orderDetailsApi(
+      final orderDetails = Provider.of<OrderDetailsViewModel>(context,listen: false);
+      orderDetails.orderDetailsApi(
         context,
         widget.orderId,
         showLoader: true,

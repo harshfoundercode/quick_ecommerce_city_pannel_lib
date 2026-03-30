@@ -59,14 +59,12 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
   }
 
   Future<void> _pickProduct() async {
-    final vm = context.read<CityStockViewModel>();
-
+    final vm = Provider.of<CityStockViewModel>(context,listen: false);
     final picked = await ProductPickerSheet.show(
       context,
       items: vm.cityStockModel?.data ?? [],
       selected: _product,
     );
-
     if (picked != null) {
       setState(() {
         _product = picked;
