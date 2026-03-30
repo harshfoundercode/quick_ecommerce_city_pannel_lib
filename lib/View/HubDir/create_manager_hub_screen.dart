@@ -3,20 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/email_validation.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const _kAccent      = ColorConst.primaryGreen;
-const _kAccentLight = Color(0xFFEEF2FF);
-const _kBg          = Color(0xFFF8FAFC);
-const _kBorder      = Color(0xFFE2E8F0);
-const _kTextHead    = Color(0xFF1E293B);
-const _kTextMuted   = Color(0xFF94A3B8);
-const _kSuccess     = Color(0xFF10B981);
-const _kError       = Color(0xFFEF4444);
-const _kWarning     = Color(0xFFF59E0B);
 
 class AddManagerScreen extends StatefulWidget {
   const AddManagerScreen({super.key});
@@ -89,7 +80,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: ColorConst.bgColor,
       body: FadeTransition(
         opacity: _fadeAnim,
         child: Consumer2<HubZoneViewModel, AddHubViewModel>(
@@ -109,7 +100,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: _kTextHead,
+                        color: ColorConst.kTextHead,
                       )),
                   actions: [
                     Container(
@@ -117,25 +108,25 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: _kAccentLight,
+                        color: ColorConst.kAccentLight,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Container(width: 7, height: 7,
-                            decoration: const BoxDecoration(
-                                shape: BoxShape.circle, color: _kSuccess)),
+                            decoration:  BoxDecoration(
+                                shape: BoxShape.circle, color: ColorConst.success)),
                         const SizedBox(width: 5),
                         const Text('New',
                             style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: _kAccent)),
+                                color:ColorConst.kAccent)),
                       ]),
                     ),
                   ],
                   bottom: PreferredSize(
                     preferredSize: const Size.fromHeight(1),
-                    child: Divider(height: 1, color: _kBorder),
+                    child: Divider(height: 1, color: ColorConst.kBorder),
                   ),
                 ),
 
@@ -268,7 +259,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(12),
-                                _AadhaarInputFormatter(),
+                                AadhaarInputFormatter(),
                               ],
                               isTouched: _touched.contains('aadhar'),
                               isValid: addVm.managerAdharNumber.text
@@ -459,7 +450,7 @@ class _HeroCard extends StatelessWidget {
                   ],
                 ),
                 child: const Icon(Icons.camera_alt_rounded,
-                    size: 13, color: _kAccent),
+                    size: 13, color: ColorConst.kAccent),
               ),
             ),
           ]),
@@ -520,24 +511,24 @@ class _ImagePickerSheet extends StatelessWidget {
         // Handle
         Container(width: 40, height: 4,
             decoration: BoxDecoration(
-                color: _kBorder,
+                color: ColorConst.kBorder,
                 borderRadius: BorderRadius.circular(2))),
         const SizedBox(height: 16),
         const Text('Upload Photo',
             style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: _kTextHead)),
+                color: ColorConst.kTextHead)),
         const SizedBox(height: 4),
         const Text('Choose a source for the manager photo',
-            style: TextStyle(fontSize: 12, color: _kTextMuted)),
+            style: TextStyle(fontSize: 12, color: ColorConst.kTextMuted)),
         const SizedBox(height: 20),
         Row(children: [
           Expanded(
             child: _PickerOption(
               icon: Icons.camera_alt_rounded,
               label: 'Camera',
-              color: _kAccent,
+              color: ColorConst.kAccent,
               onTap: onCamera,
             ),
           ),
@@ -628,19 +619,19 @@ class _HubDropdown extends StatelessWidget {
       validator: validator,
       icon: isLoading
           ? const SizedBox(width: 18, height: 18,
-          child: CircularProgressIndicator(strokeWidth: 2, color: _kAccent))
-          : const Icon(Icons.keyboard_arrow_down_rounded, color: _kAccent),
+          child: CircularProgressIndicator(strokeWidth: 2, color: ColorConst.kAccent))
+          : const Icon(Icons.keyboard_arrow_down_rounded, color: ColorConst.kAccent),
       decoration: _fieldDecoration(
         label: 'Select Hub Zone',
-        prefixIcon: const Icon(Icons.hub_rounded, size: 18, color: _kAccent),
+        prefixIcon: const Icon(Icons.hub_rounded, size: 18, color: ColorConst.kAccent),
         suffixIcon: isTouched && selectedId != null
             ? const Padding(
             padding: EdgeInsets.only(right: 36),
-            child: Icon(Icons.check_circle_rounded, size: 18, color: _kSuccess))
+            child: Icon(Icons.check_circle_rounded, size: 18, color: ColorConst.success))
             : null,
       ),
       hint: Text(isLoading ? 'Loading zones…' : 'Choose a hub zone',
-          style: const TextStyle(fontSize: 13, color: _kTextMuted)),
+          style: const TextStyle(fontSize: 13, color: ColorConst.kTextMuted)),
       items: zones.map((zone) => DropdownMenuItem<String>(
         value: zone.id.toString(),
         child: Row(children: [
@@ -650,28 +641,28 @@ class _HubDropdown extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: (zone.status == 1 || zone.status == HubZoneStatus.active)
-                  ? _kSuccess
-                  : _kError,
+                  ? ColorConst.success
+                  : ColorConst.error,
             ),
           ),
           const SizedBox(width: 8),
           Text(
             zone.name?.toString() ?? 'Zone #${zone.id}',
             style: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w600, color: _kTextHead),
+                fontSize: 14, fontWeight: FontWeight.w600, color: ColorConst.kTextHead),
           ),
           const SizedBox(width: 6),
           // Radius badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: _kAccentLight,
+              color: ColorConst.kAccentLight,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               '${zone.radiusInKm.toStringAsFixed(0)} km',
               style: const TextStyle(
-                  fontSize: 10, fontWeight: FontWeight.w700, color: _kAccent),
+                  fontSize: 10, fontWeight: FontWeight.w700, color: ColorConst.kAccent),
             ),
           ),
         ]),
@@ -722,16 +713,16 @@ class _FormField extends StatelessWidget {
       validator: validator,
       maxLines: maxLines,
       style: const TextStyle(
-          fontSize: 14, fontWeight: FontWeight.w600, color: _kTextHead),
+          fontSize: 14, fontWeight: FontWeight.w600, color: ColorConst.kTextHead),
       decoration: _fieldDecoration(
         label: label,
         hint: hint,
-        prefixIcon: Icon(icon, size: 18, color: _kAccent),
+        prefixIcon: Icon(icon, size: 18, color: ColorConst.kAccent),
         suffixIcon: isTouched
             ? Icon(
           isValid ? Icons.check_circle_rounded : Icons.cancel_rounded,
           size: 18,
-          color: isValid ? _kSuccess : _kError,
+          color: isValid ? ColorConst.success : ColorConst.error,
         )
             : null,
         isTouched: isTouched,
@@ -770,23 +761,23 @@ class _PasswordField extends StatelessWidget {
       onChanged: onChanged,
       validator: validator,
       style: const TextStyle(
-          fontSize: 14, fontWeight: FontWeight.w600, color: _kTextHead),
+          fontSize: 14, fontWeight: FontWeight.w600, color: ColorConst.kTextHead),
       decoration: _fieldDecoration(
         label: 'Password',
         hint: 'Min. 6 characters',
-        prefixIcon: const Icon(Icons.lock_rounded, size: 18, color: _kAccent),
+        prefixIcon: const Icon(Icons.lock_rounded, size: 18, color: ColorConst.kAccent),
         suffixIcon: Row(mainAxisSize: MainAxisSize.min, children: [
           if (isTouched)
             Icon(
               isValid ? Icons.check_circle_rounded : Icons.cancel_rounded,
               size: 18,
-              color: isValid ? _kSuccess : _kError,
+              color: isValid ? ColorConst.success : ColorConst.error,
             ),
           IconButton(
             onPressed: onToggle,
             icon: Icon(
               obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-              size: 18, color: _kTextMuted,
+              size: 18, color: ColorConst.kTextMuted,
             ),
           ),
         ]),
@@ -814,9 +805,9 @@ class _PasswordStrengthBar extends StatelessWidget {
   }
 
   Color get _color {
-    if (_score <= 1) return _kError;
-    if (_score <= 3) return _kWarning;
-    return _kSuccess;
+    if (_score <= 1) return ColorConst.error;
+    if (_score <= 3) return ColorConst.kWarning;
+    return ColorConst.success;
   }
 
   String get _label {
@@ -837,7 +828,7 @@ class _PasswordStrengthBar extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: _score / 5,
                 minHeight: 4,
-                backgroundColor: _kBorder,
+                backgroundColor: ColorConst.kBorder,
                 color: _color,
               ),
             ),
@@ -852,7 +843,7 @@ class _PasswordStrengthBar extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(
             'Use uppercase, numbers & symbols for a stronger password',
-            style: TextStyle(fontSize: 10, color: _kTextMuted),
+            style: TextStyle(fontSize: 10, color: ColorConst.kTextMuted),
           ),
         ),
       ]),
@@ -880,17 +871,17 @@ class _SectionLabel extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-              color: _kAccentLight,
+              color: ColorConst.kAccentLight,
               borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, size: 16, color: _kAccent),
+          child: Icon(icon, size: 16, color: ColorConst.kAccent),
         ),
         const SizedBox(width: 10),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(label,
               style: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w700, color: _kTextHead)),
+                  fontSize: 14, fontWeight: FontWeight.w700, color: ColorConst.kTextHead)),
           Text(subtitle,
-              style: const TextStyle(fontSize: 11, color: _kTextMuted)),
+              style: const TextStyle(fontSize: 11, color: ColorConst.kTextMuted)),
         ]),
       ]),
     );
@@ -911,8 +902,8 @@ class _SubmitButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: _kAccent,
-          disabledBackgroundColor: _kAccent.withValues(alpha:0.55),
+          backgroundColor: ColorConst.kAccent,
+          disabledBackgroundColor: ColorConst.kAccent.withValues(alpha:0.55),
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -950,9 +941,9 @@ InputDecoration _fieldDecoration({
   return InputDecoration(
     labelText: label,
     hintText: hint,
-    hintStyle: const TextStyle(fontSize: 13, color: _kTextMuted),
+    hintStyle: const TextStyle(fontSize: 13, color: ColorConst.kTextMuted),
     labelStyle: const TextStyle(
-        fontSize: 13, color: _kTextMuted, fontWeight: FontWeight.w500),
+        fontSize: 13, color: ColorConst.kTextMuted, fontWeight: FontWeight.w500),
     prefixIcon: prefixIcon,
     suffixIcon: suffixIcon,
     filled: true,
@@ -960,52 +951,24 @@ InputDecoration _fieldDecoration({
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _kBorder)),
+        borderSide: const BorderSide(color: ColorConst.kBorder)),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
         color: isTouched
-            ? (isValid ? _kSuccess.withValues(alpha:0.5) : _kError.withValues(alpha:0.4))
-            : _kBorder,
+            ? (isValid ? ColorConst.success.withValues(alpha:0.5) : ColorConst.error.withValues(alpha:0.4))
+            : ColorConst.kBorder,
       ),
     ),
     focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _kAccent, width: 1.5)),
+        borderSide: const BorderSide(color: ColorConst.kAccent, width: 1.5)),
     errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _kError, width: 1.5)),
+        borderSide: const BorderSide(color: ColorConst.error, width: 1.5)),
     focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _kError, width: 1.5)),
+        borderSide: const BorderSide(color: ColorConst.error, width: 1.5)),
   );
 }
 
-// ─── Text formatters ──────────────────────────────────────────────────────────
-
-/// Formats Aadhaar as XXXX XXXX XXXX
-class _AadhaarInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue old, TextEditingValue next) {
-    final digits = next.text.replaceAll(' ', '');
-    final buffer = StringBuffer();
-    for (int i = 0; i < digits.length; i++) {
-      if (i == 4 || i == 8) buffer.write(' ');
-      buffer.write(digits[i]);
-    }
-    final str = buffer.toString();
-    return next.copyWith(
-      text: str,
-      selection: TextSelection.collapsed(offset: str.length),
-    );
-  }
-}
-
-/// Forces text to uppercase (for PAN)
-class UpperCaseTextFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue old, TextEditingValue next) =>
-      next.copyWith(text: next.text.toUpperCase());
-}

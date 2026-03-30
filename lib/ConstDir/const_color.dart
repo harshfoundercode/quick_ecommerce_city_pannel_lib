@@ -45,4 +45,5 @@ class ColorConst {
   static const kTextHead    = Color(0xFF1E293B);
   static const kTextMuted   = Color(0xFF94A3B8);
   static const kWarning     = Color(0xFFF59E0B);
+
 }

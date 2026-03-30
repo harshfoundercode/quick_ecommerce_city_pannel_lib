@@ -36,3 +36,24 @@ class UpperCaseTextFormatter extends TextInputFormatter {
     );
   }
 }
+
+// ─── Text formatters ──────────────────────────────────────────────────────────
+
+/// Formats Aadhaar as XXXX XXXX XXXX
+class AadhaarInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue old, TextEditingValue next) {
+    final digits = next.text.replaceAll(' ', '');
+    final buffer = StringBuffer();
+    for (int i = 0; i < digits.length; i++) {
+      if (i == 4 || i == 8) buffer.write(' ');
+      buffer.write(digits[i]);
+    }
+    final str = buffer.toString();
+    return next.copyWith(
+      text: str,
+      selection: TextSelection.collapsed(offset: str.length),
+    );
+  }
+}
