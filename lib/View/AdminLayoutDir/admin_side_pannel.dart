@@ -389,46 +389,123 @@ class _AdminSidebarState extends State<AdminSidebar>
   void _showClassyLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) {
         return Dialog(
+          backgroundColor: Colors.transparent,
           child: Container(
             width: Responsive.value(
               context: context,
               mobile: Responsive.width(context) * 0.9,
               tablet: Responsive.width(context) * 0.5,
-              desktop: Responsive.width(context) * 0.24,
+              desktop: Responsive.width(context) * 0.26,
             ),
             padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  "Exit Admin Panel?",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                /// 🔴 Icon container (premium touch)
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.logout_rounded,
+                    color: Colors.red,
+                    size: 28,
+                  ),
                 ),
-                const SizedBox(height: 16),
+
+                const SizedBox(height: 18),
+
+                /// Title
                 const Text(
-                  "You're about to logout.",
+                  "Logout Confirmation",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                /// Subtitle
+                const Text(
+                  "Are you sure you want to exit the admin panel?\nYou will need to login again.",
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF6B7280),
+                    height: 1.4,
+                  ),
                 ),
+
                 const SizedBox(height: 24),
+
+                /// Buttons
                 Row(
                   children: [
+                    /// Cancel
                     Expanded(
                       child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(
+                            color: Color(0xFF374151),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
+
                     const SizedBox(width: 12),
+
+                    /// Logout
                     Expanded(
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade500,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                         onPressed: () async {
                           Navigator.pop(context);
-                          final adminVm = Provider.of<AdminViewModel>(context,listen: false);
+
+                          final adminVm =
+                          Provider.of<AdminViewModel>(context, listen: false);
+
                           await adminVm.performLogout(context);
                         },
-                        child: const Text("Logout"),
+                        child: const Text(
+                          "Logout",
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                   ],
