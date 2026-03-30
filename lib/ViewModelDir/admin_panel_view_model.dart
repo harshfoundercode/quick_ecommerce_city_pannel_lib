@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/my_profile_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
@@ -10,6 +11,7 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_add_hub_
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_list_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/bulk_transfer_to_hub.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_request_to_admin_history.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_stock_request_to_admin.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_stock_screen_new_data.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/transfer_stock_to_hub.dart';
@@ -69,6 +71,7 @@ class AdminViewModel extends ChangeNotifier {
 
   final List<MenuItem> menuItems = [
 
+
     MenuItem(
       icon: Icons.dashboard,
       title: "Dashboard",
@@ -97,6 +100,7 @@ class AdminViewModel extends ChangeNotifier {
         // SubMenuItem(title: "City Stocks", screen: CityStockScreen()),
         SubMenuItem(title: "City Stocks", screen: CityStockListScreen()),
         SubMenuItem(title: "City Stocks History", screen: CityHubHistoryScreen()),
+        SubMenuItem(title: "City Stocks Request To Admin", screen: RequestStockToAdminScreen()),
         SubMenuItem(title: "City Stocks Admin Request History", screen: CityRequestHistoryScreen()),
         SubMenuItem(title: "Stocks Transfer to Hub", screen: TransferStockScreen()),
         SubMenuItem(title: "Bulk Stock Transfer To Hub", screen: BulkTransferScreen()),

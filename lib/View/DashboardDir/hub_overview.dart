@@ -222,10 +222,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
                 children: [
                   hubIcon(icon: Icons.dashboard),
                   const SizedBox(width: 12),
-                  hubText(
-                      name: hub.hubName ?? "N/n",
-                      location: hub.address ?? "N/n"
-                  ),
+                  hubText(name: hub.hubName ?? "N/n", location: hub.address ?? "N/n"),
                 ],
               ),
             ),

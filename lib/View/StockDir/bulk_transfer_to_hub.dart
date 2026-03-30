@@ -121,10 +121,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
   PreferredSizeWidget _buildAppBar() => AppBar(
     backgroundColor: ColorConst.primaryGreen,
     elevation: 0,
-    leading: IconButton(
-      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
-      onPressed: () => Navigator.pop(context),
-    ),
+    automaticallyImplyLeading: false,
     title: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Bulk Transfer', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
       Text('Select products & quantities', style: TextStyle(color: Colors.white70, fontSize: 11)),

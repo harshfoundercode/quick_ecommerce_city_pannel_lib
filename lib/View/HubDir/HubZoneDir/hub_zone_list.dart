@@ -328,8 +328,7 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                     child: _ZoneDetailSheet(
                       zone: _selectedZone!,
                       zoneColor: _zoneColors[
-                      hvm.hubZones.indexOf(_selectedZone!) %
-                          _zoneColors.length],
+                      hvm.hubZones.indexOf(_selectedZone!) % _zoneColors.length],
                       onClose: _closeBottomSheet,
                       onEdit: () {
                         final zoneToEdit = _selectedZone!;
@@ -347,16 +346,11 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                               ).then((_) {
                                 // Refresh list after edit
                                 if (context.mounted) {
-                                  context
-                                      .read<HubZoneViewModel>()
-                                      .getHubZoneListDataApi(context)
-                                      .then((_) {
-                                    _buildMapOverlays(
-                                      context
-                                          .read<HubZoneViewModel>()
-                                          .hubZones,
-                                    );
+                                  final hubZoneData = Provider.of<HubZoneViewModel>(context,listen: false);
+                                  hubZoneData.getHubZoneListDataApi(context).then((_){
+                                    _buildMapOverlays(hubZoneData.hubZones);
                                   });
+                                  print("hhcygcguycugv");
                                 }
                               });
                             }

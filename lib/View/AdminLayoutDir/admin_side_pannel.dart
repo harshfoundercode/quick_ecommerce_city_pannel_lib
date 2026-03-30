@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/my_profile_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/profile_view_model.dart';
 
@@ -20,8 +23,8 @@ class _AdminSidebarState extends State<AdminSidebar>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      final profileData = Provider.of<ProfileViewModel>(context,listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profileData = Provider.of<ProfileViewModel>(context, listen: false);
       profileData.getProfileDataApi(context);
     });
     super.initState();
@@ -39,15 +42,15 @@ class _AdminSidebarState extends State<AdminSidebar>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AdminViewModel,ProfileViewModel>(
-      builder: (context, avm,pvm, child) {
+    return Consumer2<AdminViewModel, ProfileViewModel>(
+      builder: (context, avm, pvm, child) {
         /// 🔥 MOBILE → use as drawer content
         if (Responsive.isMobile(context)) {
-          return SafeArea(child: _buildSidebarContent(avm,pvm));
+          return SafeArea(child: _buildSidebarContent(avm, pvm));
         }
 
         /// 🔥 TABLET & DESKTOP → fixed sidebar
-        return _buildSidebarContent(avm,pvm);
+        return _buildSidebarContent(avm, pvm);
       },
     );
   }
@@ -102,9 +105,7 @@ class _AdminSidebarState extends State<AdminSidebar>
         ),
       ),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +119,7 @@ class _AdminSidebarState extends State<AdminSidebar>
                   gradient: LinearGradient(
                     colors: [
                       ColorConst.primaryGreen,
-                      ColorConst.primaryGreen.withValues(alpha:0.8),
+                      ColorConst.primaryGreen.withValues(alpha: 0.8),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(14),
@@ -132,17 +133,29 @@ class _AdminSidebarState extends State<AdminSidebar>
               const Expanded(
                 child: Text(
                   "City Admin",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          SizedBox(height: Sizes.screenHeight*0.012,),
-          CustomText.bold(pvm.profileData?.data?.name ?? "",color: Colors.black,),
-          CustomText.medium(pvm.profileData?.data?.phone ?? "",color: Colors.black,)
+          SizedBox(height: Sizes.screenHeight * 0.012),
+          CustomText.bold(
+            pvm.profileData?.data?.name ?? "",
+            color: Colors.black,
+          ),
+          CustomText.medium(
+            pvm.profileData?.data?.phone ?? "",
+            color: Colors.black,
+          ),
+          InkWell(
+            onTap: () {
+              openRightDrawer(context, ProfileScreen());
+            },
+            child: Text(
+              "View Profile",
+              style: TextStyle(color: ColorConst.primaryGreen),
+            ),
+          ),
         ],
       ),
     );
@@ -186,13 +199,10 @@ class _AdminSidebarState extends State<AdminSidebar>
             },
             borderRadius: BorderRadius.circular(14),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? ColorConst.primaryLightGreen.withValues(alpha:0.15)
+                    ? ColorConst.primaryLightGreen.withValues(alpha: 0.15)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -233,11 +243,7 @@ class _AdminSidebarState extends State<AdminSidebar>
         /// Sub menu
         if (isExpanded && menuItem.subItems.isNotEmpty)
           Container(
-            margin: const EdgeInsets.only(
-              left: 32,
-              right: 12,
-              bottom: 8,
-            ),
+            margin: const EdgeInsets.only(left: 32, right: 12, bottom: 8),
             child: Column(
               children: menuItem.subItems
                   .map((e) => _buildSubMenuItem(e, avm))
@@ -292,7 +298,6 @@ class _AdminSidebarState extends State<AdminSidebar>
   // ================= LOGOUT =================
 
   Widget _buildSubMenuItem(SubMenuItem item, AdminViewModel avm) {
-
     bool isSelected = avm.selectedSubMenu == item;
 
     return InkWell(
@@ -316,9 +321,7 @@ class _AdminSidebarState extends State<AdminSidebar>
           /// 🔥 LEFT BORDER (MAIN HIGHLIGHT)
           border: Border(
             left: BorderSide(
-              color: isSelected
-                  ? ColorConst.primaryGreen
-                  : Colors.transparent,
+              color: isSelected ? ColorConst.primaryGreen : Colors.transparent,
               width: 3,
             ),
           ),
@@ -341,8 +344,7 @@ class _AdminSidebarState extends State<AdminSidebar>
                 item.title,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight:
-                  isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   color: isSelected
                       ? ColorConst.primaryGreen
                       : Colors.grey.shade700,
@@ -403,10 +405,7 @@ class _AdminSidebarState extends State<AdminSidebar>
               children: [
                 const Text(
                   "Exit Admin Panel?",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -427,9 +426,9 @@ class _AdminSidebarState extends State<AdminSidebar>
                       child: ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(context);
-                          await context
-                              .read<AdminViewModel>()
-                              .performLogout(context);
+                          await context.read<AdminViewModel>().performLogout(
+                            context,
+                          );
                         },
                         child: const Text("Logout"),
                       ),

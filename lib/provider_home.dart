@@ -27,7 +27,6 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => LoginViewModel()),
     ChangeNotifierProvider(create: (context) => ProfileViewModel()),
     ChangeNotifierProvider(create: (context) => CityZoneListViewModel()),
-    ChangeNotifierProvider(create: (context) => CreateZoneViewModel()),
     ChangeNotifierProvider(create: (context) => UserViewModel()),
     ChangeNotifierProvider(create: (context) => HubZoneViewModel()),
     ChangeNotifierProvider(create: (context) => DashboardViewModel()),

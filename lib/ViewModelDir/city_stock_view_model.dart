@@ -1,10 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_hub_history_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_request_history_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_stock_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/city_stock_repo.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
 
 class CityStockViewModel with ChangeNotifier {
   final _cityStockListRepo = CityStockListRepo();
@@ -107,6 +111,13 @@ class CityStockViewModel with ChangeNotifier {
           title: 'Oh Snap!',
           type: SnackBarType.error,
         );
+        final adminVM = Provider.of<AdminViewModel>(context, listen: false);
+        adminVM.changeScreen(const DashboardContent(), 0);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesName.adminSliderLayoutScreen,
+              (route) => false,
+        );
       }
     } catch (e) {
       if (kDebugMode) print('❌ transfer error: $e');
@@ -178,10 +189,11 @@ class CityStockViewModel with ChangeNotifier {
   }
 
   Future<void> cityRequestApi(BuildContext context, String remarks, List<Map<String, dynamic>> items,) async {
+    print("dabduiabdua");
     if (!context.mounted) return;
-
+    print("dcisgdius");
     _setCityRequestLoading(true);
-
+    print("saiiadibd");
     final data = {
       "items": items,
       "remarks": remarks,
@@ -205,6 +217,17 @@ class CityStockViewModel with ChangeNotifier {
 
         Navigator.pop(context);
       } else {
+        print("dhdvgks");
+        final adminVM = Provider.of<AdminViewModel>(context, listen: false);
+        print("siduisbgdiabid");
+        adminVM.changeScreen(const DashboardContent(), 0);
+        print("sidbiuabdsib");
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesName.adminSliderLayoutScreen,
+              (route) => false,
+        );
+        print("siduisbgdiabisdgiusgida");
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Request Failed',
@@ -214,7 +237,7 @@ class CityStockViewModel with ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) print('❌ request error: $e');
-
+      print("adiasuigdiuagdguad");
       if (context.mounted) {
         CustomSnackBar.show(
           context,
@@ -224,6 +247,7 @@ class CityStockViewModel with ChangeNotifier {
         );
       }
     } finally {
+      print("adiuuaubdi");
       _setCityRequestLoading(false);
     }
   }

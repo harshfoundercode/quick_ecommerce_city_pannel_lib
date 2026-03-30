@@ -591,7 +591,7 @@ class _AllHubScreenState extends State<AllHubScreen>
       builder: (context, vm, child) {
         final allHubs = vm.hubListModel?.data?.hubs ?? [];
         final filtered = _filteredHubs(allHubs);
-        final showLimited = filtered.length > 4;
+        final showLimited = filtered.length >= 4;
         final displayList = showLimited ? filtered.take(4).toList() : filtered;
 
         return FadeTransition(

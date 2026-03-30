@@ -57,7 +57,7 @@ _SnackBarConfig _getSnackBarConfig(SnackBarType type) {
     case SnackBarType.success:
       return _SnackBarConfig(
         backgroundColor: ColorConst.primaryGreen,
-        iconColor: ColorConst.primaryGreen,
+        iconColor: ColorConst.primaryLightGreen,
         textColor: ColorConst.primaryLightGreen,
         icon: Icons.check_circle_rounded,
       );

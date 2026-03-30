@@ -19,6 +19,7 @@ class HubListRepo {
       rethrow;
     }
   }
+
   Future<dynamic> hubListDetailsApi(String hubId) async {
     await _apiServices.initializeToken();
     try {

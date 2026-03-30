@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -131,6 +131,18 @@ class AddHubViewModel extends ChangeNotifier {
     pincodeController.clear();
     coverageRadiusController.clear();
     stateController.clear();
+
+    latitudeController.clear();
+    longitudeController.clear();
+    hubZoneAddress.clear();
+    pincodeHubZone.clear();
+
+    managerAddressController.clear();
+    managerAdharNumber.clear();
+    managerPanNumber.clear();
+    managerImage.clear();
+    managerEmailController.clear();
+    managerPasswordController.clear();
   }
 
   @override
@@ -205,6 +217,11 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        clearForm();
+        latitudeController.clear();
+        longitudeController.clear();
+        hubZoneAddress.clear();
+        pincodeHubZone.clear();
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
         adminVM.changeScreen(const DashboardContent(), 0);
         Navigator.pushNamedAndRemoveUntil(
@@ -222,7 +239,7 @@ class AddHubViewModel extends ChangeNotifier {
         );
       }
     } catch (e) {
-      if (kDebugMode) print('❌ loginApi error: $e');
+      if (kDebugMode) print('❌ hub zone create error: $e');
       if (context.mounted) {
         CustomSnackBar.show(
           context,
@@ -244,8 +261,8 @@ class AddHubViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  File? _managerImageFile;
-  File? get managerImageFile => _managerImageFile;
+  XFile? _managerImageFile;
+  XFile? get managerImageFile => _managerImageFile;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -256,13 +273,46 @@ class AddHubViewModel extends ChangeNotifier {
     );
 
     if (picked != null) {
-      _managerImageFile = File(picked.path);
-
-      /// convert to base64
-      final bytes = await _managerImageFile!.readAsBytes();
-      managerImage.text = base64Encode(bytes);
-
+      _managerImageFile = picked;
       notifyListeners();
+    }
+  }
+
+  String cloudName = "ddsnwfgaw";
+  String preset = "FastoDriver";
+
+  Future<String?> uploadToCloudinary(XFile file) async {
+    try {
+      final url = Uri.parse(
+        "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
+      );
+
+      final request = http.MultipartRequest('POST', url);
+
+      request.fields['upload_preset'] = preset;
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          await file.readAsBytes(),
+          filename: file.name,
+        ),
+      );
+
+      final response = await request.send();
+      final resData = await response.stream.bytesToString();
+
+      final jsonData = jsonDecode(resData);
+
+      if (response.statusCode == 200) {
+        return jsonData['secure_url'];
+      } else {
+        debugPrint("Cloudinary Error: $jsonData");
+        return null;
+      }
+    } catch (e) {
+      debugPrint("Upload Error: $e");
+      return null;
     }
   }
 
@@ -270,6 +320,24 @@ class AddHubViewModel extends ChangeNotifier {
     if (!context.mounted) return;
 
     _setAddLoading(true);
+    String imageUrl = '';
+
+    if (_managerImageFile != null) {
+      final uploadedUrl = await uploadToCloudinary(_managerImageFile!);
+
+      if (uploadedUrl != null) {
+        imageUrl = uploadedUrl;
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: 'Image upload failed',
+          title: 'Error',
+          type: SnackBarType.error,
+        );
+        _setAddLoading(false);
+        return;
+      }
+    }
     final data = {
       "hubzoneid": hubZoneId,
       "name": managerNameController.text.trim(),
@@ -277,8 +345,7 @@ class AddHubViewModel extends ChangeNotifier {
       "address": managerAddressController.text.trim(),
       "adharno": managerAdharNumber.text.trim(),
       "panno": managerPanNumber.text.trim(),
-      // "img":  managerImage.text,
-      "img":  "FUYUYFU",
+      "img":  imageUrl,
       "email": managerEmailController.text.trim(),
       "password": managerPasswordController.text.trim(),
     };
@@ -306,6 +373,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        clearManagerForm();
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
         adminVM.changeScreen(const DashboardContent(), 0);
         Navigator.pushNamedAndRemoveUntil(
@@ -334,5 +402,23 @@ class AddHubViewModel extends ChangeNotifier {
     } finally {
       _setAddLoading(false);
     }
+  }
+
+  void clearManagerForm() {
+    managerNameController.clear();
+    managerContactController.clear();
+    managerAddressController.clear();
+    managerAdharNumber.clear();
+    managerPanNumber.clear();
+    managerEmailController.clear();
+    managerPasswordController.clear();
+
+    // ✅ Clear image
+    _managerImageFile = null;
+
+    // ✅ Reset dropdown
+    _selectedHubZoneId = null;
+
+    notifyListeners();
   }
 }

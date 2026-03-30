@@ -82,14 +82,6 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
       appBar: AppBar(
         backgroundColor: ColorConst.primaryGreen,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
-            size: 18,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

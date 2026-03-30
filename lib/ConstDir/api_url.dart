@@ -5,7 +5,6 @@ class ApiUrl {
 
   static const String loginUrl = "${configUrl1}citylogin";
   static const String profileUrl = "${configUrl1}cityprofile";
-  static const String createZoneUrl = "${configUrl1}hubzone/create";
   static const String cityZoneListUrl = "${configUrl1}cityzone_list";
   static const String hubZoneCreateUrl = "${configUrl1}hubzone/create";
   static const String hubManagerCreateUrl = "${configUrl1}hubmanager/create";

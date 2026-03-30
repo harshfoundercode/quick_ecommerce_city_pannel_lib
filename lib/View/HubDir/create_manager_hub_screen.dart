@@ -48,6 +48,7 @@ class _AddManagerScreenState extends State<AddManagerScreen>
       if (!mounted) return;
       Provider.of<HubZoneViewModel>(context, listen: false)
           .getHubZoneListDataApi(context);
+      print("giygi");
     });
   }
 
@@ -431,9 +432,19 @@ class _HeroCard extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: vm.managerImageFile != null
-                  ? Image.file(vm.managerImageFile!, fit: BoxFit.cover)
-                  : const Icon(Icons.person_rounded,
-                  size: 34, color: Colors.white),
+                  ? FutureBuilder(
+                future: vm.managerImageFile!.readAsBytes(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return Image.memory(
+                    snapshot.data!,
+                    fit: BoxFit.cover,
+                  );
+                },
+              )
+                  : const Icon(Icons.person_rounded, size: 34, color: Colors.white),
             ),
             // Camera badge
             Positioned(
