@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/MapDir/map_picker.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_zone_list_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
 class AddHubScreen extends StatefulWidget {
   const AddHubScreen({super.key});
@@ -111,10 +113,13 @@ class _AddHubScreenState extends State<AddHubScreen> {
                         context,
                         listen: false,
                       );
+                      final hubZoneVM = Provider.of<HubZoneViewModel>(context, listen: false);
+
 
                       // 🚀 Ensure data is loaded BEFORE opening popup
                       if (cityVM.cityZoneDataModel == null) {
                         await cityVM.getCityZoneDataApi(context);
+                        await hubZoneVM.getHubZoneListDataApi(context);
                       }
 
                       final zone = cityVM.cityZoneDataModel?.data?.firstWhere(
@@ -122,11 +127,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
                       );
 
                       if (zone == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("City zone not available"),
-                          ),
-                        );
+                        CustomSnackBar.show(context, message: "City zone not available", type: SnackBarType.error);
                         return;
                       }
 
