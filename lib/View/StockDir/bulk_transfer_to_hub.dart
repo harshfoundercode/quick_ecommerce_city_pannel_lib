@@ -56,11 +56,11 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
     return ColorConst.primaryGreen;
   }
 
-  final CityStockViewModel _cityStockViewModel = CityStockViewModel();
 
-  List<CityStockData> get filteredItems =>
-      (_cityStockViewModel.cityStockModel?.data ?? [])
-          .where((item) => _searchQuery.isEmpty ||
+  List<CityStockData> filteredItems(CityStockViewModel vm) =>
+      (vm.cityStockModel?.data ?? [])
+          .where((item) =>
+      _searchQuery.isEmpty ||
           (item.product?.name ?? '')
               .toLowerCase()
               .contains(_searchQuery.toLowerCase()))
@@ -101,7 +101,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
             _buildTopPanel(hubVm),
 
             // ── Product search dropdown ────────────────────────────
-            _buildProductSearchSection(),
+            _buildProductSearchSection(vm),
 
             // ── Selection strip ────────────────────────────────────
             if (_hasSelections) _buildSelectionStrip(),
@@ -211,8 +211,8 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
 
   // ── Product search dropdown ────────────────────────────────────────────────
 
-  Widget _buildProductSearchSection() {
-    final filtered = filteredItems;
+  Widget _buildProductSearchSection(CityStockViewModel vm) {
+    final filtered = filteredItems(vm);
     return Container(
       color: const Color(0xFFF4F6FA),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -411,10 +411,15 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
   // ── Selected product list (qty steppers) ───────────────────────────────────
 
   Widget _buildSelectedList() {
-    final cityStockData = Provider.of<CityStockViewModel>(context).cityStockModel?.data;
-    final selected = cityStockData!.where((i) => i.productid != null && _selectedQty.containsKey(i.productid))
-        .toList();
+    final cityStockData =
+        Provider.of<CityStockViewModel>(context).cityStockModel?.data ?? [];
 
+    final selected = cityStockData
+        .where((i) =>
+    i.productid != null &&
+        _selectedQty.containsKey(i.productid))
+        .toList();
+    
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       itemCount: selected.length,
