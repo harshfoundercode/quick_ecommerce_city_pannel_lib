@@ -48,7 +48,6 @@ class _AddManagerScreenState extends State<AddManagerScreen>
       if (!mounted) return;
       Provider.of<HubZoneViewModel>(context, listen: false)
           .getHubZoneListDataApi(context);
-      print("giygi");
     });
   }
 

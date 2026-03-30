@@ -59,7 +59,7 @@ class _ProductPickerSheetState extends State<_ProductPickerSheet> {
           child: Row(children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: ColorConst.primaryGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: ColorConst.primaryGreen.withValues(alpha:0.1), borderRadius: BorderRadius.circular(10)),
               child: const Icon(Icons.inventory_2_outlined, color: ColorConst.primaryGreen, size: 18),
             ),
             const SizedBox(width: 10),
@@ -131,9 +131,9 @@ class _ProductPickerSheetState extends State<_ProductPickerSheet> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSel ? ColorConst.primaryGreen.withOpacity(0.06) : Colors.transparent,
+                    color: isSel ? ColorConst.primaryGreen.withValues(alpha:0.06) : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border: isSel ? Border.all(color: ColorConst.primaryGreen.withOpacity(0.3)) : null,
+                    border: isSel ? Border.all(color: ColorConst.primaryGreen.withValues(alpha:0.3)) : null,
                   ),
                   child: Row(children: [
                     Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
@@ -150,7 +150,7 @@ class _ProductPickerSheetState extends State<_ProductPickerSheet> {
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                            decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.08), borderRadius: BorderRadius.circular(5)),
+                            decoration: BoxDecoration(color: const Color(0xFF2563EB).withValues(alpha:0.08), borderRadius: BorderRadius.circular(5)),
                             child: Text(item.variant?.name!, style: const TextStyle(fontSize: 9, color: Color(0xFF2563EB), fontWeight: FontWeight.w700)),
                           ),
                         ],

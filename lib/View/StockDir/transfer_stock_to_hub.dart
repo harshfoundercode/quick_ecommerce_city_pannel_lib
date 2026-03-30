@@ -168,13 +168,13 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: p != null
-                ? ColorConst.primaryGreen.withOpacity(0.4)
+                ? ColorConst.primaryGreen.withValues(alpha:0.4)
                 : const Color(0xFFE5E7EB),
             width: p != null ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha:0.03),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -187,7 +187,7 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
               decoration: BoxDecoration(
                 color:
                     (p != null ? ColorConst.primaryGreen : Colors.grey.shade400)
-                        .withOpacity(0.1),
+                        .withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
@@ -249,7 +249,7 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
                                 decoration: BoxDecoration(
                                   color: const Color(
                                     0xFF2563EB,
-                                  ).withOpacity(0.08),
+                                  ).withValues(alpha:0.08),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: Text(
@@ -317,7 +317,7 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -456,7 +456,7 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: ColorConst.primaryGreen.withOpacity(0.1),
+                                color: ColorConst.primaryGreen.withValues(alpha:0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(
@@ -573,12 +573,12 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: ok
-                            ? ColorConst.primaryGreen.withOpacity(0.08)
+                            ? ColorConst.primaryGreen.withValues(alpha:0.08)
                             : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: ok
-                              ? ColorConst.primaryGreen.withOpacity(0.3)
+                              ? ColorConst.primaryGreen.withValues(alpha:0.3)
                               : Colors.grey.shade200,
                         ),
                       ),
@@ -606,10 +606,10 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E3A5F).withOpacity(0.07),
+                      color: const Color(0xFF1E3A5F).withValues(alpha:0.07),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFF1E3A5F).withOpacity(0.2),
+                        color: const Color(0xFF1E3A5F).withValues(alpha:0.2),
                       ),
                     ),
                     child: const Text(
@@ -725,9 +725,9 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: ColorConst.primaryGreen.withOpacity(0.05),
+        color: ColorConst.primaryGreen.withValues(alpha:0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorConst.primaryGreen.withOpacity(0.2)),
+        border: Border.all(color: ColorConst.primaryGreen.withValues(alpha:0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -883,9 +883,9 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: ColorConst.primaryGreen.withOpacity(0.08),
+        color: ColorConst.primaryGreen.withValues(alpha:0.08),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: ColorConst.primaryGreen.withOpacity(0.3)),
+        border: Border.all(color: ColorConst.primaryGreen.withValues(alpha:0.3)),
       ),
       child: Icon(icon, color: ColorConst.primaryGreen, size: 20),
     ),

@@ -350,7 +350,6 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                                   hubZoneData.getHubZoneListDataApi(context).then((_){
                                     _buildMapOverlays(hubZoneData.hubZones);
                                   });
-                                  print("hhcygcguycugv");
                                 }
                               });
                             }

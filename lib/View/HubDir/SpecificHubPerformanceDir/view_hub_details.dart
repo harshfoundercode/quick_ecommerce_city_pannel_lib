@@ -190,7 +190,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                 height: 48,
                 decoration: BoxDecoration(
                   color:
-                  ColorConst.primaryGreen.withOpacity(0.1),
+                  ColorConst.primaryGreen.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(Icons.store_outlined,
@@ -321,7 +321,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                         (successRate / 100).clamp(0.0, 1.0),
                         backgroundColor:
                         _rateColor(successRate)
-                            .withOpacity(0.12),
+                            .withValues(alpha:0.12),
                         valueColor: AlwaysStoppedAnimation<Color>(
                             _rateColor(successRate)),
                         minHeight: 7,
@@ -359,7 +359,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                       padding: const EdgeInsets.all(9),
                       decoration: BoxDecoration(
                         color: const Color(0xFF7C3AED)
-                            .withOpacity(0.1),
+                            .withValues(alpha:0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -453,7 +453,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                 child: LinearProgressIndicator(
                   value: activeRatio.clamp(0.0, 1.0),
                   backgroundColor:
-                  const Color(0xFF059669).withOpacity(0.12),
+                  const Color(0xFF059669).withValues(alpha:0.12),
                   valueColor: const AlwaysStoppedAnimation<Color>(
                       Color(0xFF059669)),
                   minHeight: 7,
@@ -473,7 +473,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
         padding: const EdgeInsets.symmetric(
             horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.07),
+          color: color.withValues(alpha:0.07),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -517,7 +517,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: _rankColor(rank).withOpacity(0.12),
+                        color: _rankColor(rank).withValues(alpha:0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -536,7 +536,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                     CircleAvatar(
                       radius: 18,
                       backgroundColor: ColorConst.primaryGreen
-                          .withOpacity(0.12),
+                          .withValues(alpha:0.12),
                       child: Text(
                         _initials(boy.name?.toString() ?? '?'),
                         style: TextStyle(
@@ -585,7 +585,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                           horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: ColorConst.primaryGreen
-                            .withOpacity(0.08),
+                            .withValues(alpha:0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
@@ -640,7 +640,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: meta.color.withOpacity(0.1),
+                        color: meta.color.withValues(alpha:0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(Icons.warning_amber_rounded,
@@ -789,7 +789,7 @@ class _ViewHubDetailsState extends State<ViewHubDetails> {
     border: Border.all(color: Colors.grey.shade100),
     boxShadow: [
       BoxShadow(
-          color: Colors.black.withOpacity(0.04),
+          color: Colors.black.withValues(alpha:0.04),
           blurRadius: 8,
           offset: const Offset(0, 2)),
     ],
@@ -840,9 +840,9 @@ class _StatusChip extends StatelessWidget {
       padding:
       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: meta.color.withOpacity(0.1),
+        color: meta.color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: meta.color.withOpacity(0.3)),
+        border: Border.all(color: meta.color.withValues(alpha:0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

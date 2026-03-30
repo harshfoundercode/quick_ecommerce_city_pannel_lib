@@ -170,16 +170,16 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['cityzoneid'] = this.cityzoneid;
-    data['name'] = this.name;
-    data['address'] = this.address;
-    data['pincode'] = this.pincode;
-    data['radiuskm'] = this.radiuskm;
-    data['lat'] = this.lat;
-    data['long'] = this.long;
-    data['status'] = this.status;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['cityzoneid'] = cityzoneid;
+    data['name'] = name;
+    data['address'] = address;
+    data['pincode'] = pincode;
+    data['radiuskm'] = radiuskm;
+    data['lat'] = lat;
+    data['long'] = long;
+    data['status'] = status;
     return data;
   }
 }

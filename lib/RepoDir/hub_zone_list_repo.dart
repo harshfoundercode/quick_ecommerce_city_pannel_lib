@@ -14,7 +14,6 @@ class HubZoneListRepo {
     final data = {
       "cityzoneid":profileData.profileData?.data?.cityzoneid.toString()
     };
-    print("sdjshdgj");
     try {
       dynamic response = await _apiServices.getPostApiResponse(ApiUrl.hubZoneListUrl,data);
       return response;

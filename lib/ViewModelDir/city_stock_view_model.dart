@@ -189,11 +189,8 @@ class CityStockViewModel with ChangeNotifier {
   }
 
   Future<void> cityRequestApi(BuildContext context, String remarks, List<Map<String, dynamic>> items,) async {
-    print("dabduiabdua");
     if (!context.mounted) return;
-    print("dcisgdius");
     _setCityRequestLoading(true);
-    print("saiiadibd");
     final data = {
       "items": items,
       "remarks": remarks,
@@ -217,17 +214,13 @@ class CityStockViewModel with ChangeNotifier {
 
         Navigator.pop(context);
       } else {
-        print("dhdvgks");
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
-        print("siduisbgdiabid");
         adminVM.changeScreen(const DashboardContent(), 0);
-        print("sidbiuabdsib");
         Navigator.pushNamedAndRemoveUntil(
           context,
           RoutesName.adminSliderLayoutScreen,
               (route) => false,
         );
-        print("siduisbgdiabisdgiusgida");
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Request Failed',
@@ -237,7 +230,6 @@ class CityStockViewModel with ChangeNotifier {
       }
     } catch (e) {
       if (kDebugMode) print('❌ request error: $e');
-      print("adiasuigdiuagdguad");
       if (context.mounted) {
         CustomSnackBar.show(
           context,
@@ -247,7 +239,6 @@ class CityStockViewModel with ChangeNotifier {
         );
       }
     } finally {
-      print("adiuuaubdi");
       _setCityRequestLoading(false);
     }
   }

@@ -1696,9 +1696,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   late AnimationController _slideCtrl;
   late Animation<double> _slideAnim;
 
-  // ── Web: track pointer for tap simulation ────────────────────────────────
-  LatLng? _pendingWebTap;
-
   @override
   void initState() {
     super.initState();
@@ -1718,8 +1715,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<HubZoneViewModel>(context, listen: false)
           .getHubZoneListDataApi(context);
-      Provider.of<CityZoneListViewModel>(context, listen: false)
-          .getCityZoneDataApi(context);
+      // Provider.of<CityZoneListViewModel>(context, listen: false)
+      //     .getCityZoneDataApi(context);
       _fetchAddress(_selectedLocation);
       Future.delayed(const Duration(milliseconds: 500), _fitCityBoundary);
     });
@@ -2097,14 +2094,18 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       'pincode': _pincode,
       'radius': _hubRadius,
     });
-    print({
+    if (kDebugMode) {
+      print({
       'lat': _selectedLocation.latitude,
       'lng': _selectedLocation.longitude,
       'address': _fullAddress,
       'pincode': _pincode,
       'radius': _hubRadius,
     });
-    print("dkkgjg");
+    }
+    if (kDebugMode) {
+      print("dkkgjg");
+    }
   }
 
   void _showSnack(String msg, {bool isError = false}) {

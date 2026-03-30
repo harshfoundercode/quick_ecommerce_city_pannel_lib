@@ -216,7 +216,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
         ),
         child: Row(
           children: [
-            Container(
+            SizedBox(
               width: Sizes.screenWidth*0.34,
               child: Row(
                 children: [
@@ -359,7 +359,7 @@ class _HubManagementTableState extends State<HubManagementTable> {
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
       ),
       const SizedBox(height: 2),
-      Container(
+      SizedBox(
         width: Sizes.screenWidth*0.22,
         child: Text(
           location,

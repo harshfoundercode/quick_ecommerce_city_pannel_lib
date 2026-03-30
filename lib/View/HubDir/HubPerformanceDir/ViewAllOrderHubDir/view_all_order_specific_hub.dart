@@ -1,10 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/ViewAllOrderHubDir/order_left_side_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/ViewAllOrderHubDir/order_right_side_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
@@ -54,7 +52,7 @@ class _ViewAllOrderSpecificHubState extends State<ViewAllOrderSpecificHub>
 
         return Material(
           color: const Color(0xFFF4F6F9),
-          child: Container(
+          child: SizedBox(
             width: Sizes.screenWidth,
             height: Sizes.screenHeight,
             child: Column(

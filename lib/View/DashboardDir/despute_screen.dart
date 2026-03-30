@@ -154,18 +154,4 @@ class _DisputeCardState extends State<DisputeCard> {
       ),
     );
   }
-
-  /// ✅ STATUS COLOR HANDLER
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return Colors.red;
-      case "pending":
-        return Colors.orange;
-      case "resolved":
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -195,8 +194,6 @@ class AddHubViewModel extends ChangeNotifier {
       "lat": latitudeController.text.trim(),
       "long": longitudeController.text.trim(),
     };
-    print(data);
-    print("egdieguigiueb");
     try {
       final response = await _hubZoneCreateRepo.hubZoneCreateApi(data);
 
@@ -352,8 +349,6 @@ class AddHubViewModel extends ChangeNotifier {
       "email": managerEmailController.text.trim(),
       "password": managerPasswordController.text.trim(),
     };
-    print(data);
-    print("egdieguigiueb");
     try {
       final response = await _hubManagerCreateRepo.hubManagerCreateApi(data);
 

@@ -34,7 +34,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: ColorConst.primaryGreen.withValues(alpha:0.07),
+                  color: ColorConst.primaryGreen.withValues(alpha: 0.07),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: ColorConst.primaryGreen.withValues(alpha: 0.2),
@@ -45,7 +45,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: ColorConst.primaryGreen.withValues(alpha:0.12),
+                        color: ColorConst.primaryGreen.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -107,20 +107,34 @@ class _AddHubScreenState extends State<AddHubScreen> {
                   // Map picker button
                   GestureDetector(
                     onTap: () async {
-                      // final result = await showDialog(
-                      //   context: context,
-                      //   builder: (_) => const MapPickerPopup(),
-                      // );
-                      final zone = Provider.of<CityZoneListViewModel>(context,listen: false).cityZoneDataModel?.data?.firstWhere(
-                            (z) => z.status == 1,
+                      final cityVM = Provider.of<CityZoneListViewModel>(
+                        context,
+                        listen: false,
                       );
+
+                      // 🚀 Ensure data is loaded BEFORE opening popup
+                      if (cityVM.cityZoneDataModel == null) {
+                        await cityVM.getCityZoneDataApi(context);
+                      }
+
+                      final zone = cityVM.cityZoneDataModel?.data?.firstWhere(
+                        (z) => z.status == 1,
+                      );
+
+                      if (zone == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("City zone not available"),
+                          ),
+                        );
+                        return;
+                      }
 
                       final result = await showDialog(
                         context: context,
                         builder: (_) => MapPickerPopup(cityZone: zone),
                       );
-                      await Provider.of<CityZoneListViewModel>(context, listen: false)
-                          .getCityZoneDataApi(context);
+
                       if (result != null) {
                         vm.locationController.text = result['address'] ?? '';
                         vm.latitudeController.text = result['lat'].toString();
@@ -139,12 +153,12 @@ class _AddHubScreenState extends State<AddHubScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
                         color: _locationPicked
-                            ? ColorConst.primaryGreen.withValues(alpha:0.07)
+                            ? ColorConst.primaryGreen.withValues(alpha: 0.07)
                             : const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _locationPicked
-                              ? ColorConst.primaryGreen.withValues(alpha:0.4)
+                              ? ColorConst.primaryGreen.withValues(alpha: 0.4)
                               : const Color(0xFFE5E7EB),
                           width: _locationPicked ? 1.5 : 1,
                         ),
@@ -155,7 +169,9 @@ class _AddHubScreenState extends State<AddHubScreen> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: _locationPicked
-                                  ? ColorConst.primaryGreen.withValues(alpha:0.12)
+                                  ? ColorConst.primaryGreen.withValues(
+                                      alpha: 0.12,
+                                    )
                                   : const Color(0xFFF3F4F6),
                               shape: BoxShape.circle,
                             ),
@@ -322,7 +338,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: ColorConst.primaryGreen.withValues(alpha:0.1),
+            color: ColorConst.primaryGreen.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 15, color: ColorConst.primaryGreen),
@@ -351,7 +367,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -445,9 +461,11 @@ class _AddHubScreenState extends State<AddHubScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: ColorConst.primaryGreen.withValues(alpha:0.05),
+        color: ColorConst.primaryGreen.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: ColorConst.primaryGreen.withValues(alpha:0.15)),
+        border: Border.all(
+          color: ColorConst.primaryGreen.withValues(alpha: 0.15),
+        ),
       ),
       child: Row(
         children: [

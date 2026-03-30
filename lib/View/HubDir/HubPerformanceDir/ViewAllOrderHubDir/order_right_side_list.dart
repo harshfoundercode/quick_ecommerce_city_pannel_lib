@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_performance_view_order_details_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
 
@@ -384,7 +383,7 @@ class _OrderDetailView extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF111827))),
                 const Spacer(),
-                if (trailing != null) trailing,
+                ?trailing,
               ],
             ),
           ),

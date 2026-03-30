@@ -529,7 +529,6 @@ import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_list_model.dart';
@@ -1383,7 +1382,7 @@ class _HubDesktopRow extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: _isActive
                         ? const LinearGradient(
-                      colors: [Color(0xFF16A34A), Color(0xFF15803D)],
+                      colors: [ColorConst.primaryGreen, ColorConst.primaryGreen],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     )

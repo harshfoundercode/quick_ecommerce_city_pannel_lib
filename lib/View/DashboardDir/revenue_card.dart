@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
@@ -8,11 +7,9 @@ import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.da
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const _kGreen      = ColorConst.primaryExtraLightGreen;
 const _kGreenDark  = ColorConst.primaryGreen;
-const _kGreenMid   = ColorConst.primaryLightGreen;
 const _kGreenLight = Color(0xFFD1FAE5);
 const _kGreenBg    = Color(0xFFF0FDF4);
 const _kAmber      = Color(0xFFD97706);
-const _kAmberLight = Color(0xFFFEF3C7);
 const _kTextHead   = Color(0xFF111827);
 const _kTextSub    = Color(0xFF374151);
 const _kTextMuted  = Color(0xFF9CA3AF);
@@ -108,7 +105,7 @@ class _RevenueCardState extends State<RevenueCard>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: _kGreen.withOpacity(0.3),
+                    color: _kGreen.withValues(alpha:0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -409,7 +406,7 @@ class _HubBar extends StatelessWidget {
                   top: Radius.circular(8)),
               boxShadow: isTop && hasRev
                   ? [BoxShadow(
-                color: _kGreen.withOpacity(0.35),
+                color: _kGreen.withValues(alpha:0.35),
                 blurRadius: 8,
                 offset: const Offset(0, -2),
               )]
@@ -473,7 +470,7 @@ class _TopHubBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withOpacity(0.25),
+            color: _kGreen.withValues(alpha:0.25),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -484,7 +481,7 @@ class _TopHubBanner extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.15),
+            color: Colors.white.withValues(alpha:0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(Icons.workspace_premium_rounded,
@@ -643,7 +640,7 @@ class _CardWrapper extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha:0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),

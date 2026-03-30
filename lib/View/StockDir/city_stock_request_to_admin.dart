@@ -18,7 +18,6 @@ class _RequestStockToAdminScreenState extends State<RequestStockToAdminScreen> {
   // Each entry: { product, qty, note }
   final List<_RequestEntry> _entries = [];
   final TextEditingController _remarkController = TextEditingController();
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
@@ -882,7 +881,7 @@ class _RequestStockToAdminScreenState extends State<RequestStockToAdminScreen> {
 class _RequestEntry {
   CityStockData? selectedProduct;
   final TextEditingController qtyController = TextEditingController();
-  _RequestEntry({this.selectedProduct,});
+  _RequestEntry();
 
   void dispose() {
     qtyController.dispose();

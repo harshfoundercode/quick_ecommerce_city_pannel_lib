@@ -54,8 +54,6 @@ class LoginViewModel extends ChangeNotifier {
       "password": passwordController.text.trim(),
       "fcm_token": "",
     };
-    print(data);
-    print("egdieguigiueb");
     try {
       final response = await _authRepository.loginApi(data);
 

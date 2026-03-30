@@ -181,8 +181,6 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
       final res = await http.get(uri);
       if (!mounted) return;
       if (res.statusCode == 200) {
-        print(uri);
-        print("uri");
         final json = jsonDecode(res.body);
         final preds = (json['predictions'] as List)
             .map((p) => _PlaceSuggestion(
