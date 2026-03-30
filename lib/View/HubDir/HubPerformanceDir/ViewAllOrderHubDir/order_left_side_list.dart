@@ -109,7 +109,7 @@ class _OrdersListPanelState extends State<OrdersListPanel> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.receipt_long_outlined,
-                color: Color(0xFF16A34A), size: 16),
+                color: ColorConst.primaryGreen, size: 16),
           ),
           const SizedBox(width: 10),
           const Text('Orders',
@@ -148,14 +148,14 @@ class _OrdersListPanelState extends State<OrdersListPanel> {
                     width: 6,
                     height: 6,
                     decoration: const BoxDecoration(
-                        color: Color(0xFF16A34A),
+                        color: ColorConst.primaryGreen,
                         shape: BoxShape.circle)),
                 const SizedBox(width: 5),
                 const Text('LIVE',
                     style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF16A34A),
+                        color: ColorConst.primaryGreen,
                         letterSpacing: 0.5)),
               ],
             ),
@@ -341,16 +341,16 @@ class _OrderListItem extends StatelessWidget {
 
   Color _statusColor(String s) {
     switch (s.toLowerCase()) {
-      case 'delivered':
-        return const Color(0xFF16A34A);
-      case 'in transit':
+      case '1':
+        return ColorConst.primaryGreen;
+      case '2':
         return const Color(0xFF2563EB);
-      case 'pending':
+      case '3':
         return const Color(0xFFCA8A04);
-      case 'cancelled':
+      case '4':
         return const Color(0xFFDC2626);
       default:
-        return const Color(0xFF9CA3AF);
+        return Colors.deepOrange;
     }
   }
 
@@ -374,12 +374,12 @@ class _OrderListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF16A34A).withValues(alpha: 0.04)
+              ? ColorConst.primaryGreen.withValues(alpha: 0.04)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF16A34A).withValues(alpha: 0.25)
+                ? ColorConst.primaryGreen.withValues(alpha: 0.25)
                 : Colors.transparent,
           ),
         ),
@@ -397,7 +397,7 @@ class _OrderListItem extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
                         color: isSelected
-                            ? const Color(0xFF16A34A)
+                            ? ColorConst.primaryGreen
                             : const Color(0xFF111827)),
                   ),
                 ],

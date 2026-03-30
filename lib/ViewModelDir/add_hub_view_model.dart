@@ -14,6 +14,8 @@ import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_manager_create_
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_zone_create_repo.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/profile_view_model.dart';
 
 class AddHubViewModel extends ChangeNotifier {
@@ -217,6 +219,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        Provider.of<HubZoneViewModel>(context, listen: false).getHubZoneListDataApi(context);
         clearForm();
         latitudeController.clear();
         longitudeController.clear();
@@ -373,6 +376,7 @@ class AddHubViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
+        Provider.of<AllHubViewModel>(context, listen: false).getHubListDataApi(context);
         clearManagerForm();
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
         adminVM.changeScreen(const DashboardContent(), 0);

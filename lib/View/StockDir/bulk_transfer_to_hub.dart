@@ -32,11 +32,12 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        context.read<AllHubViewModel>().getHubListDataApi(context));
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        context.read<CityStockViewModel>().getCityStockDataApi(context));
-
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      final allHubData = Provider.of<AllHubViewModel>(context,listen: false);
+      allHubData.getHubListDataApi(context);
+      final allCityStockData = Provider.of<CityStockViewModel>(context,listen: false);
+      allCityStockData.getCityStockDataApi(context);
+    });
   }
 
   @override
@@ -70,11 +71,14 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
   bool get _canConfirm      => _hubId != null && _hasSelections;
 
   void _toggle(CityStockData item) {
-    final id = item.productid as int?;
+    final id = item.productid;
     if (id == null || (item.stock ?? 0) == 0) return;
     setState(() {
-      if (_selectedQty.containsKey(id)) _selectedQty.remove(id);
-      else _selectedQty[id] = 1;
+      if (_selectedQty.containsKey(id)) {
+        _selectedQty.remove(id);
+      } else {
+        _selectedQty[id] = 1;
+      }
     });
   }
 
@@ -170,7 +174,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
                 child: Row(children: [
                   Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(color: ColorConst.primaryGreen.withOpacity(0.1), borderRadius: BorderRadius.circular(7)),
+                    decoration: BoxDecoration(color: ColorConst.primaryGreen.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(7)),
                     child: const Icon(Icons.store_outlined, size: 13, color: ColorConst.primaryGreen),
                   ),
                   const SizedBox(width: 10),
@@ -234,7 +238,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
                   color: _pickerOpen ? ColorConst.primaryGreen : const Color(0xFFE5E7EB),
                   width: _pickerOpen ? 1.5 : 1,
                 ),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.03), blurRadius: 6, offset: const Offset(0, 2))],
               ),
               child: Row(children: [
                 const SizedBox(width: 12),
@@ -286,7 +290,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: const Color(0xFFE5E7EB)),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4))],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.08), blurRadius: 16, offset: const Offset(0, 4))],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
@@ -363,7 +367,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: ColorConst.primaryGreen.withOpacity(0.08),
+                                  color: ColorConst.primaryGreen.withValues(alpha:0.08),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Icon(Icons.add_rounded, color: ColorConst.primaryGreen, size: 14),
@@ -386,11 +390,11 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
 
   Widget _buildSelectionStrip() => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    color: ColorConst.primaryGreen.withOpacity(0.06),
+    color: ColorConst.primaryGreen.withValues(alpha:0.06),
     child: Row(children: [
       Container(
         padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(color: ColorConst.primaryGreen.withOpacity(0.15), shape: BoxShape.circle),
+        decoration: BoxDecoration(color: ColorConst.primaryGreen.withValues(alpha:0.15), shape: BoxShape.circle),
         child: const Icon(Icons.check_rounded, size: 12, color: ColorConst.primaryGreen),
       ),
       const SizedBox(width: 8),
@@ -408,7 +412,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
 
   Widget _buildSelectedList() {
     final cityStockData = Provider.of<CityStockViewModel>(context).cityStockModel?.data;
-    final selected = cityStockData!.where((i) => i.productid != null && _selectedQty.containsKey(i.productid as int))
+    final selected = cityStockData!.where((i) => i.productid != null && _selectedQty.containsKey(i.productid))
         .toList();
 
     return ListView.builder(
@@ -427,8 +431,8 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: ColorConst.primaryGreen.withOpacity(0.25)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))],
+            border: Border.all(color: ColorConst.primaryGreen.withValues(alpha:0.25)),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.03), blurRadius: 6, offset: const Offset(0, 2))],
           ),
           child: Row(children: [
             // Remove button
@@ -534,9 +538,9 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
     child: Container(
       width: 28, height: 28,
       decoration: BoxDecoration(
-        color: onTap != null ? ColorConst.primaryGreen.withOpacity(0.08) : Colors.grey.shade100,
+        color: onTap != null ? ColorConst.primaryGreen.withValues(alpha:0.08) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(7),
-        border: Border.all(color: onTap != null ? ColorConst.primaryGreen.withOpacity(0.3) : Colors.grey.shade200),
+        border: Border.all(color: onTap != null ? ColorConst.primaryGreen.withValues(alpha:0.3) : Colors.grey.shade200),
       ),
       child: Icon(icon, size: 14, color: onTap != null ? ColorConst.primaryGreen : Colors.grey.shade300),
     ),

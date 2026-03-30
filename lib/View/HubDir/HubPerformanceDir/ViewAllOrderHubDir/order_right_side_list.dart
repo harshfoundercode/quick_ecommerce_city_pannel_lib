@@ -130,16 +130,16 @@ class _OrderDetailView extends StatelessWidget {
 
   Color _statusColor(String s) {
     switch (s.toLowerCase()) {
-      case 'delivered':
+      case '1':
         return const Color(0xFF16A34A);
-      case 'in transit':
+      case '2':
         return const Color(0xFF2563EB);
-      case 'pending':
+      case '3':
         return const Color(0xFFCA8A04);
-      case 'cancelled':
+      case '4':
         return const Color(0xFFDC2626);
       default:
-        return const Color(0xFF9CA3AF);
+        return Colors.deepOrange;
     }
   }
 

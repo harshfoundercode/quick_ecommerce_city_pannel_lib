@@ -85,7 +85,10 @@ class _CityStockListScreenState extends State<CityStockListScreen> {
         builder: (context, viewModel, child) {
           if (viewModel.cityStockModel == null) {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: ColorConst.primaryGreen,
+                strokeWidth: 2,
+              ),
             );
           }
 

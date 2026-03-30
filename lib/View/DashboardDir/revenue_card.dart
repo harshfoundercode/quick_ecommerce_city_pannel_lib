@@ -2,13 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/header_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const _kGreen      = ColorConst.primaryExtraLightGreen;
+const _kGreenDark  = ColorConst.primaryGreen;
+const _kGreenMid   = ColorConst.primaryLightGreen;
+const _kGreenLight = Color(0xFFD1FAE5);
+const _kGreenBg    = Color(0xFFF0FDF4);
+const _kAmber      = Color(0xFFD97706);
+const _kAmberLight = Color(0xFFFEF3C7);
+const _kTextHead   = Color(0xFF111827);
+const _kTextSub    = Color(0xFF374151);
+const _kTextMuted  = Color(0xFF9CA3AF);
+const _kBorder     = Color(0xFFE2E8F0);
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class RevenueCard extends StatefulWidget {
   final List<Hubs>? dashboardHubData;
   final Summary dashboardSummaryData;
+
   const RevenueCard({
     super.key,
     required this.dashboardHubData,
@@ -19,86 +34,622 @@ class RevenueCard extends StatefulWidget {
   State<RevenueCard> createState() => _RevenueCardState();
 }
 
-class _RevenueCardState extends State<RevenueCard> {
+class _RevenueCardState extends State<RevenueCard>
+    with SingleTickerProviderStateMixin {
+
+  late AnimationController _barCtrl;
+  late Animation<double>   _barAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _barCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 900));
+    _barAnim = CurvedAnimation(
+        parent: _barCtrl, curve: Curves.easeOutCubic);
+    _barCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _barCtrl.dispose();
+    super.dispose();
+  }
+
+  // ── helpers ───────────────────────────────────────────────────────────────
+
+  double _revenue(Hubs h) =>
+      double.tryParse(h.revenue ?? '0') ?? 0.0;
+
+  String _formatRevenue(double v) {
+    if (v >= 100000) return '₹${(v / 100000).toStringAsFixed(1)}L';
+    if (v >= 1000)   return '₹${(v / 1000).toStringAsFixed(1)}K';
+    return '₹${v.toStringAsFixed(0)}';
+  }
+
+  // ── build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
-    final mobileSize = Responsive.isMobile(context);
-    List<double> revenues = widget.dashboardHubData!
-        .map((e) => double.tryParse(e.revenue ?? "0") ?? 0.0)
-        .toList();
-    double maxRevenue = revenues.isNotEmpty
-        ? revenues.reduce((a, b) => a > b ? a : b)
-        : 1;
+    final hubs        = widget.dashboardHubData ?? [];
+    final displayList = hubs.length > 5 ? hubs.take(5).toList() : hubs;
+    final totalRev    = double.tryParse(
+        widget.dashboardSummaryData.revenue ?? '0') ?? 0.0;
+    final maxRevenue  = hubs.isEmpty
+        ? 1.0
+        : hubs
+        .map(_revenue)
+        .reduce((a, b) => a > b ? a : b)
+        .clamp(1.0, double.infinity);
 
-    return CustomWidgets.cardWrapper(
-      height: Sizes.screenHeight * 0.49,
+    // top hub
+    Hubs? topHub;
+    if (hubs.isNotEmpty) {
+      topHub = hubs.reduce(
+              (a, b) => _revenue(a) > _revenue(b) ? a : b);
+    }
+
+    return _CardWrapper(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomWidgets.hubHeader(
-            title: "Revenue Analytics",
-            subtitle: "Weekly earning performance",
-            titleSize: mobileSize ? 20 : 18,
-            subtitleSize: mobileSize ? 15 : 10,
-          ),
-          CustomWidgets.verticalSpace(0.012),
-          CustomText.bold(
-            "₹${widget.dashboardSummaryData.revenue ?? "0"}",
-            fontSize: 26,
-          ),
-          Spacer(),
 
-          SizedBox(
-            height: Sizes.screenHeight * 0.28,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(widget.dashboardHubData!.length, (index) {
-                final hub = widget.dashboardHubData![index];
-                double revenue = double.tryParse(hub.revenue ?? "0") ?? 0.0;
-
-                double barHeight = maxRevenue == 0
-                    ? 10
-                    : (revenue / maxRevenue) * 150;
-
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+          // ── Header ──────────────────────────────────────────────
+          Row(children: [
+            // Icon badge
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [_kGreenDark, _kGreen],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: _kGreen.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.bar_chart_rounded,
+                  size: 18, color: Colors.white),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      revenue.toStringAsFixed(0),
-                      style: TextStyle(fontSize: 10),
-                    ),
-                    SizedBox(height: Sizes.screenHeight * 0.012),
-                    Container(
-                      width: Sizes.screenWidth * 0.02,
-                      height: barHeight,
-                      decoration: BoxDecoration(
-                        color: revenue > 0
-                            ? ColorConst.primaryGreen
-                            : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
+                    Text('Revenue Analytics',
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: _kTextHead,
+                            letterSpacing: 0.2)),
+                    Text('Weekly earning performance',
+                        style: TextStyle(
+                            fontSize: 11, color: _kTextMuted)),
+                  ]),
+            ),
+            // View all
+            if (hubs.length > 5)
+              GestureDetector(
+                onTap: () => _showAllHubsDrawer(
+                    context, hubs, maxRevenue),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _kGreenBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: _kGreenLight),
+                  ),
+                  child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('View All',
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: ColorConst.black)),
+                      ]),
+                ),
+              ),
+          ]),
 
-                    SizedBox(height: Sizes.screenHeight * 0.012),
+          const SizedBox(height: 14),
 
-                    SizedBox(
-                      width: Sizes.screenWidth * 0.07,
-                      child: Text(
-                        hub.hubName ?? "",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  ],
-                );
-              }),
+          // ── Total revenue ────────────────────────────────────────
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Total Revenue',
+                  style: TextStyle(
+                      fontSize: 11,
+                      color: _kTextMuted,
+                      fontWeight: FontWeight.w500)),
+              const SizedBox(height: 3),
+              Text(
+                _formatRevenue(totalRev),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: _kTextHead,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // ── Top hub highlight ────────────────────────────────────
+          if (topHub != null)
+            _TopHubBanner(
+              hub: topHub,
+              revenue: _revenue(topHub),
+              formatRevenue: _formatRevenue,
+            ),
+
+          const SizedBox(height: 14),
+
+          // ── Bar chart ────────────────────────────────────────────
+          const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Hub Performance',
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: _kTextSub)),
+                Text('This week',
+                    style: TextStyle(
+                        fontSize: 11, color: _kTextMuted)),
+              ]),
+
+          const SizedBox(height: 10),
+
+          Expanded(
+            child: AnimatedBuilder(
+              animation: _barAnim,
+              builder: (_, __) => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: List.generate(
+                    displayList.length,
+                        (i) {
+                      final hub      = displayList[i];
+                      final rev      = _revenue(hub);
+                      final isTopHub = topHub != null &&
+                          hub.hubId == topHub.hubId;
+                      final maxH = Sizes.screenHeight * 0.06;
+                      final barH = maxRevenue == 0
+                          ? 8.0
+                          : (rev / maxRevenue) *
+                          maxH *
+                          _barAnim.value;
+
+                      return _HubBar(
+                        hub: hub,
+                        revenue: rev,
+                        barHeight: barH.clamp(8.0, maxH),
+                        isTop: isTopHub,
+                        formatRevenue: _formatRevenue,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // ── Legend ───────────────────────────────────────────────
+          Row(children: [
+            _LegendDot(color: _kGreen, label: 'Revenue'),
+            const SizedBox(width: 14),
+            _LegendDot(color: _kAmber, label: 'Top Hub'),
+            const SizedBox(width: 14),
+            _LegendDot(color: Color(0xFFE5E7EB), label: 'No revenue'),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  // ── All hubs drawer ───────────────────────────────────────────────────────
+
+  void _showAllHubsDrawer(
+      BuildContext context, List<Hubs> hubs, double maxRevenue) {
+    openRightDrawer(
+      context,
+      Material(
+        color: Colors.white,
+        child: Container(
+          width: Sizes.screenWidth * 0.42,
+          padding: const EdgeInsets.all(20),
+          child: Column(children: [
+            // Header
+            Row(children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _kGreenBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.hub_rounded,
+                    size: 16, color: _kGreen),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      Text('All Hubs Revenue',
+                          style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: _kTextHead)),
+                      Text('Performance overview',
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: _kTextMuted)),
+                    ]),
+              ),
+            ]),
+
+            const SizedBox(height: 16),
+            const Divider(color: _kBorder),
+            const SizedBox(height: 8),
+
+            // Hub list with bars
+            Expanded(
+              child: ListView.separated(
+                itemCount: hubs.length,
+                separatorBuilder: (_, __) =>
+                const SizedBox(height: 10),
+                itemBuilder: (_, i) {
+                  final hub = hubs[i];
+                  final rev = double.tryParse(
+                      hub.revenue ?? '0') ?? 0.0;
+                  final progress = maxRevenue == 0
+                      ? 0.0
+                      : (rev / maxRevenue).clamp(0.0, 1.0);
+                  final isTop = hubs
+                      .map((h) =>
+                  double.tryParse(h.revenue ?? '0') ?? 0.0)
+                      .reduce((a, b) => a > b ? a : b) ==
+                      rev;
+
+                  return _DrawerHubRow(
+                    hub: hub,
+                    revenue: rev,
+                    progress: progress,
+                    isTop: isTop,
+                    formatRevenue: (v) {
+                      if (v >= 100000) {
+                        return '₹${(v / 100000).toStringAsFixed(1)}L';
+                      }
+                      if (v >= 1000) {
+                        return '₹${(v / 1000).toStringAsFixed(1)}K';
+                      }
+                      return '₹${v.toStringAsFixed(0)}';
+                    },
+                  );
+                },
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Hub bar (chart column) ───────────────────────────────────────────────────
+
+class _HubBar extends StatelessWidget {
+  final Hubs hub;
+  final double revenue;
+  final double barHeight;
+  final bool isTop;
+  final String Function(double) formatRevenue;
+
+  const _HubBar({
+    required this.hub,
+    required this.revenue,
+    required this.barHeight,
+    required this.isTop,
+    required this.formatRevenue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRev = revenue > 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Revenue label
+          Text(
+            formatRevenue(revenue),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: isTop ? _kGreenDark : _kTextSub,
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          // Bar
+          Container(
+            width: isTop ? 22 : 16,
+            height: barHeight,
+            decoration: BoxDecoration(
+              gradient: hasRev
+                  ? LinearGradient(
+                colors: isTop
+                    ? [ColorConst.primaryGreen, ColorConst.primaryGreen]
+                    : [_kGreenDark, _kGreen],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              )
+                  : null,
+              color: hasRev ? null : Colors.grey.shade200,
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(8)),
+              boxShadow: isTop && hasRev
+                  ? [BoxShadow(
+                color: _kGreen.withOpacity(0.35),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              )]
+                  : [],
+            ),
+          ),
+
+          // Crown for top hub
+          if (isTop)
+            const Padding(
+              padding: EdgeInsets.only(top: 3),
+              child: Icon(Icons.workspace_premium_rounded,
+                  size: 12, color: _kAmber),
+            )
+          else
+            const SizedBox(height: 5),
+
+          const SizedBox(height: 4),
+
+          // Hub name
+          SizedBox(
+            width: 52,
+            child: Text(
+              hub.hubName ?? '',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight:
+                isTop ? FontWeight.w700 : FontWeight.w500,
+                color: isTop ? _kGreenDark : _kTextMuted,
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Top hub banner ───────────────────────────────────────────────────────────
+
+class _TopHubBanner extends StatelessWidget {
+  final Hubs hub;
+  final double revenue;
+  final String Function(double) formatRevenue;
+
+  const _TopHubBanner({
+    required this.hub,
+    required this.revenue,
+    required this.formatRevenue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: ColorConst.primaryGreen,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: _kGreen.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(children: [
+        // Crown icon
+        Container(
+          padding: const EdgeInsets.all(7),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(Icons.workspace_premium_rounded,
+              size: 18, color: ColorConst.white),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Top Performing Hub',
+                    style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.4)),
+                const SizedBox(height: 2),
+                Text(
+                  hub.hubName ?? '—',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ]),
+        ),
+        // Revenue only
+        Text(
+          formatRevenue(revenue),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+// ─── Drawer hub row ───────────────────────────────────────────────────────────
+
+class _DrawerHubRow extends StatelessWidget {
+  final Hubs hub;
+  final double revenue;
+  final double progress;
+  final bool isTop;
+  final String Function(double) formatRevenue;
+
+  const _DrawerHubRow({
+    required this.hub,
+    required this.revenue,
+    required this.progress,
+    required this.isTop,
+    required this.formatRevenue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: isTop ? _kGreenBg : const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isTop ? _kGreenLight : const Color(0xFFE5E7EB),
+        ),
+      ),
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              if (isTop)
+                const Padding(
+                  padding: EdgeInsets.only(right: 6),
+                  child: Icon(Icons.workspace_premium_rounded,
+                      size: 14, color: _kAmber),
+                ),
+              Expanded(
+                child: Text(
+                  hub.hubName ?? '—',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isTop ? _kGreenDark : _kTextSub,
+                  ),
+                ),
+              ),
+              Text(
+                formatRevenue(revenue),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: isTop ? _kGreenDark : _kTextSub,
+                ),
+              ),
+            ]),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 5,
+                backgroundColor: const Color(0xFFE5E7EB),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    isTop ? _kGreenDark : _kGreen),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${(progress * 100).toStringAsFixed(0)}% of top revenue',
+              style: const TextStyle(fontSize: 9, color: _kTextMuted),
+            ),
+          ]),
+    );
+  }
+}
+
+// ─── Legend dot ───────────────────────────────────────────────────────────────
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Container(
+        width: 8, height: 8,
+        decoration: BoxDecoration(
+            color: color, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: 4),
+      Text(label,
+          style: const TextStyle(
+              fontSize: 10, color: _kTextMuted)),
+    ]);
+  }
+}
+
+// ─── Card wrapper ─────────────────────────────────────────────────────────────
+
+class _CardWrapper extends StatelessWidget {
+  final Widget child;
+  const _CardWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: Sizes.screenHeight * 0.52,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

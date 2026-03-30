@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
@@ -49,7 +50,10 @@ class _NotificationViewState extends State<NotificationView> {
 
                 // 🔹 Loading
                 if (nvm.notificationModel == null) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator(
+                    color: ColorConst.primaryGreen,
+                    strokeWidth: 2,
+                  ));
                 }
 
                 final data = nvm.notificationModel!.data;

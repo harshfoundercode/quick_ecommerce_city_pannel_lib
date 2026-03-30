@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,7 +14,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          color: ColorConst.primaryGreen,
+          strokeWidth: 2,
+        ),
       ),
     );
   }

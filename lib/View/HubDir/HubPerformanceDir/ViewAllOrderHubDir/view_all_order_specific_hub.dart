@@ -128,11 +128,7 @@ class _ViewAllOrderSpecificHubState extends State<ViewAllOrderSpecificHub>
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF16A34A), Color(0xFF15803D)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+             color: ColorConst.primaryGreen,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.account_tree_outlined,

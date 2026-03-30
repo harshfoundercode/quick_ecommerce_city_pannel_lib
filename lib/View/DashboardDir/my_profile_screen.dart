@@ -50,47 +50,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.dispose();
   }
 
-  void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Logout',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-        ),
-        content: const Text(
-          'Are you sure you want to logout?',
-          style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Color(0xFF6B7280)),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Add your logout logic here
-              // e.g., clear SharedPreferences, navigate to login
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ProfileViewModel>(
@@ -105,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
         return Material(
           color: ColorConst.white,
-          child: Container(
+          child: SizedBox(
             width: Sizes.screenWidth*0.3,
             child: FadeTransition(
               opacity: _fadeAnim,
@@ -383,91 +342,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  // ── Stats Row ─────────────────────────────────────────────────────────────
-  Widget _buildStatsRow(dynamic profile) {
-    return Row(
-      children: [
-        _buildStatCard(
-          icon: Icons.location_city_rounded,
-          label: 'Zone',
-          value: '#${profile?.cityzoneid ?? "-"}',
-          color: ColorConst.primaryGreen,
-        ),
-        const SizedBox(width: 10),
-        _buildStatCard(
-          icon: Icons.verified_user_rounded,
-          label: 'Status',
-          value: (profile?.status ?? 0) == 1 ? 'Active' : 'Inactive',
-          color: (profile?.status ?? 0) == 1
-              ? const Color(0xFF16A34A)
-              : const Color(0xFFDC2626),
-        ),
-        const SizedBox(width: 10),
-        _buildStatCard(
-          icon: Icons.badge_rounded,
-          label: 'ID',
-          value: '#${profile?.id ?? "-"}',
-          color: const Color(0xFF7C3AED),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 10,
-                color: Color(0xFF9CA3AF),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ── Info Card ─────────────────────────────────────────────────────────────
   Widget _buildInfoCard(List<_InfoItem> items) {
     return Container(
@@ -694,37 +568,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  // ── Logout Button ─────────────────────────────────────────────────────────
-  Widget _buildLogoutButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: _showLogoutDialog,
-        icon: const Icon(
-          Icons.logout_rounded,
-          color: Color(0xFFEF4444),
-          size: 18,
-        ),
-        label: const Text(
-          'Logout',
-          style: TextStyle(
-            color: Color(0xFFEF4444),
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
-        ),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: const Color(0xFFFFF1F2),
-        ),
-      ),
-    );
-  }
-
   // ── Section Label ─────────────────────────────────────────────────────────
   Widget _buildSectionLabel(String label) {
     return Row(
@@ -766,7 +609,6 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 }
 
-// ── Data class ────────────────────────────────────────────────────────────────
 class _InfoItem {
   final IconData icon;
   final String label;
