@@ -204,63 +204,97 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
     _removeOverlay();
     FocusScope.of(context).unfocus();
 
-    // Show a brief loading snack
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(children: [
-          SizedBox(
-            width: 16, height: 16,
-            child: CircularProgressIndicator(
-                strokeWidth: 2, color: Colors.white),
-          ),
-          SizedBox(width: 12),
-          Text('Fetching location…'),
-        ]),
-        duration: Duration(seconds: 2),
-        backgroundColor: _kAccent,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-
     try {
       final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
       final res = await http.get(uri);
-      if (!mounted) return;
-      if (res.statusCode == 200) {
-        final json   = jsonDecode(res.body);
-        final result = json['data'];
-        final loc    = result['geometry']['location'];
-        final lat    = (loc['lat'] as num).toDouble();
-        final lng    = (loc['lng'] as num).toDouble();
-        final addr   = result['formatted_address'] as String;
 
-        // Extract pincode from address_components
+      if (!mounted) return;
+
+      if (res.statusCode == 200) {
+        final json = jsonDecode(res.body);
+
+        double lat = 0;
+        double lng = 0;
+        String address = '';
         String pincode = '';
-        for (final comp in result['address_components']) {
-          final types = List<String>.from(comp['types']);
-          if (types.contains('postal_code')) {
-            pincode = comp['long_name'];
-            break;
+
+        /// ✅ CASE 1: Your backend structured response
+        if (json['data'] != null && json['data'] is Map) {
+          final data = json['data'];
+
+          /// 🔹 Shape A: direct lat/lng
+          if (data['lat'] != null && data['lng'] != null) {
+            lat = (data['lat'] as num).toDouble();
+            lng = (data['lng'] as num).toDouble();
+            address = data['address']?.toString() ?? '';
+          }
+
+          /// 🔹 Shape B: Google-like nested
+          else if (data['geometry'] != null) {
+            final loc = data['geometry']['location'];
+            lat = (loc['lat'] as num).toDouble();
+            lng = (loc['lng'] as num).toDouble();
+            address = data['formatted_address'] ?? '';
+
+            /// Extract pincode
+            if (data['address_components'] != null) {
+              for (final comp in data['address_components']) {
+                final types = List<String>.from(comp['types'] ?? []);
+                if (types.contains('postal_code')) {
+                  pincode = comp['long_name'];
+                  break;
+                }
+              }
+            }
           }
         }
 
-        // Apply to fields + map
-        _onLocationPicked(LatLng(lat, lng));
-        _addressCtrl.text = addr;
-        if (pincode.isNotEmpty) _pincodeCtrl.text = pincode;
-        _searchCtrl.text  = addr;
+        /// ✅ CASE 2: Raw Google API response
+        else if (json['results'] != null &&
+            json['results'] is List &&
+            json['results'].isNotEmpty) {
+          final result = json['results'][0];
 
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        _showLocationAppliedSnack(addr);
+          final loc = result['geometry']['location'];
+          lat = (loc['lat'] as num).toDouble();
+          lng = (loc['lng'] as num).toDouble();
+          address = result['formatted_address'] ?? '';
+
+          /// Extract pincode
+          for (final comp in result['address_components']) {
+            final types = List<String>.from(comp['types'] ?? []);
+            if (types.contains('postal_code')) {
+              pincode = comp['long_name'];
+              break;
+            }
+          }
+        }
+
+        /// ❌ If still invalid
+        if (lat == 0 && lng == 0) {
+          throw Exception("Invalid location data");
+        }
+
+        /// ✅ APPLY DATA
+        _onLocationPicked(LatLng(lat, lng));
+        _addressCtrl.text = address;
+
+        if (pincode.isNotEmpty) {
+          _pincodeCtrl.text = pincode;
+        }
+
+        _searchCtrl.text = address;
+
+        _showLocationAppliedSnack(address);
       }
     } catch (e) {
+      debugPrint("PlaceDetails ERROR: $e");
+
       if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Could not fetch location details'),
-            backgroundColor: _kError,
-            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
           ),
         );
       }
