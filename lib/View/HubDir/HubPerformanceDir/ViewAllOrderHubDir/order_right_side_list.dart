@@ -537,7 +537,7 @@ class _OrderDetailView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9),
                   border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
-                child: const Icon(Icons.shopping_bag_outlined, size: 20, color: Color(0xFFD1D5DB)),
+                child: Image.network(item.img),
               ),
               const SizedBox(width: 12),
               Expanded(

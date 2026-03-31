@@ -165,14 +165,16 @@ class Items {
   dynamic price;
   dynamic qty;
   dynamic totalPrice;
+  dynamic img;
 
-  Items({this.productName, this.price, this.qty, this.totalPrice});
+  Items({this.productName, this.price, this.qty, this.totalPrice,this.img});
 
   Items.fromJson(Map<String, dynamic> json) {
     productName = json['product_name'];
     price = json['price'];
     qty = json['qty'];
     totalPrice = json['total_price'];
+    img = json['img'];
   }
 
   Map<String, dynamic> toJson() {
@@ -181,6 +183,7 @@ class Items {
     data['price'] = price;
     data['qty'] = qty;
     data['total_price'] = totalPrice;
+    data['img'] = img;
     return data;
   }
 }
