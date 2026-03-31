@@ -953,9 +953,13 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
       final lat = double.tryParse(zone.lat?.toString() ?? '');
       final lng = double.tryParse(zone.long?.toString() ?? '');
       if (lat != null && lng != null) return LatLng(lat, lng);
+      print(zone.latitude);
+      print(zone.longitude);
+      print("sdguyvdu");
     } catch (_) {}
     // Fallback: use hub location itself (boundary check will be skipped gracefully)
     return LatLng(zone.latitude, zone.longitude);
+
   }
 
   double _cityZoneRadius(HubZoneListData zone) {
@@ -1101,8 +1105,11 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                       // ── FIX: Corrected Navigator call ─────────────────────
                       onEdit: () {
                         final zoneToEdit = _selectedZone!;
+                        print(_selectedZone?.radiusInKm);
+                        print(_selectedZone?.long);
+                        print(_selectedZone?.lat);
+                        print("evduwve");
                         _closeBottomSheet();
-
                         Future.delayed(
                           const Duration(milliseconds: 300),
                               () {
@@ -1113,13 +1120,6 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                               MaterialPageRoute(
                                 builder: (_) => HubZoneEditScreen(
                                   zone: zoneToEdit,
-
-                                  // ✅ Pass city zone center + radius
-                                  // so boundary validation works in edit screen.
-                                  //
-                                  // Change .cityZoneLat / .cityZoneLng /
-                                  // .cityZoneRadiusKm to the actual field
-                                  // names in your HubZoneListData model.
                                   cityZoneCenter: _cityZoneCenter(zoneToEdit),
                                   cityZoneRadiusKm: _cityZoneRadius(zoneToEdit),
                                 ),
@@ -1135,6 +1135,7 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                                 _buildMapOverlays(hubZoneData.hubZones);
                               });
                             });
+                            print("evduwve");
                           },
                         );
                       },
