@@ -182,8 +182,7 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
       if (!mounted) return;
       if (res.statusCode == 200) {
         final json = jsonDecode(res.body);
-        final preds = (json['predictions'] as List)
-            .map((p) => _PlaceSuggestion(
+        final preds = (json['data'] as List).map((p) => _PlaceSuggestion(
           placeId:       p['place_id'],
           mainText:      p['structured_formatting']['main_text'],
           secondaryText: p['structured_formatting']
@@ -229,7 +228,7 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
       if (!mounted) return;
       if (res.statusCode == 200) {
         final json   = jsonDecode(res.body);
-        final result = json['result'];
+        final result = json['data'];
         final loc    = result['geometry']['location'];
         final lat    = (loc['lat'] as num).toDouble();
         final lng    = (loc['lng'] as num).toDouble();
