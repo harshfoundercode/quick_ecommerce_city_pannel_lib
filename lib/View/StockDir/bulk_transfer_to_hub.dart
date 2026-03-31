@@ -515,7 +515,7 @@ class _BulkTransferScreenState extends State<BulkTransferScreen> {
               final product = vm.cityStockModel?.data?.firstWhere((i) => i.productid == e.key);
               return {'productid': e.key, 'variantid': product?.variantid ?? 0, 'qty': e.value};
             }).toList();
-            vm.cityTransferToHubApi(context, _hubId!,
+            vm.cityTransferToHubBulkApi(context, _hubId!,
                 _remarksCtrl.text.trim().isEmpty ? 'Bulk transfer from city panel' : _remarksCtrl.text.trim(),
                 items);
           } : null,

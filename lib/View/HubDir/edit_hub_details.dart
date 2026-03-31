@@ -240,7 +240,7 @@ class _EditCityDrawerState extends State<EditCityDrawer> {
   Widget _buildProfileStrip() {
     final managerData = Provider.of<ProfileViewModel>(context,listen: false);
     final d = managerData.managerProfileData?.data;
-    final isActive = (d?.status == 1 || d?.status == '1');
+    final isActive = (d?.hubDetails?.status == 1 || d?.hubDetails?.status == '1');
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -285,7 +285,7 @@ class _EditCityDrawerState extends State<EditCityDrawer> {
                   children: [
                     _infoTag(
                         Icons.hub_outlined,
-                        'Zone ID: ${d?.hubzoneid ?? '—'}',
+                        'Zone ID: ${d?.hubDetails?.hubId ?? '—'}',
                         const Color(0xFF2563EB)),
                     const SizedBox(width: 8),
                     _statusTag(isActive),
@@ -558,7 +558,7 @@ class _EditCityDrawerState extends State<EditCityDrawer> {
     vm.hubManagerEditApi(
       context,
       d!.id?.toString() ?? '',
-      d.hubzoneid?.toString() ?? '',
+      d.hubDetails?.hubId?.toString() ?? '',
       _nameCtrl.text.trim(),
       _phoneCtrl.text.trim(),
       _adharCtrl.text.trim(),

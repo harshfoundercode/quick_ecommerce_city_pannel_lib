@@ -134,6 +134,82 @@ class CityStockViewModel with ChangeNotifier {
     }
   }
 
+  Future<void> cityTransferToHubBulkApi(
+      BuildContext context,
+      String hubManagerId,
+      String remarks,
+      final List<Map<String, dynamic>> items
+      ) async {
+    if (!context.mounted) return;
+
+    _setTransferLoading(true);
+
+    final data = {
+      "hubmanagerid": hubManagerId,
+      "remarks": remarks,
+      "items": items,
+      // "items": [
+      //   {
+      //     "productid": 1,
+      //     "variantid": 1,
+      //     "qty": 20
+      //   },
+      // ]
+    };
+
+    try {
+      final response = await _cityStockListRepo.cityTransferToHubApi(data);
+
+      if (!context.mounted) {
+        _setTransferLoading(false);
+        return;
+      }
+
+      final statusCode = response['statusCode'] ?? 0;
+      final body = response['body'] ?? {};
+
+      if (statusCode == 200 || statusCode == 201) {
+        if (!context.mounted) {
+          _setTransferLoading(false);
+          return;
+        }
+        CustomSnackBar.show(
+          context,
+          message: body['message'] ?? 'transfer Successful',
+          title: 'Success',
+          type: SnackBarType.success,
+        );
+        Navigator.pop(context);
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body['message'] ?? 'transfer Failed',
+          title: 'Oh Snap!',
+          type: SnackBarType.error,
+        );
+        final adminVM = Provider.of<AdminViewModel>(context, listen: false);
+        adminVM.changeScreen(const DashboardContent(), 0);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesName.adminSliderLayoutScreen,
+              (route) => true,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) print('❌ transfer error: $e');
+      if (context.mounted) {
+        CustomSnackBar.show(
+          context,
+          message: 'Something went wrong',
+          title: 'Oh Snap!',
+          type: SnackBarType.warning,
+        );
+      }
+    } finally {
+      _setTransferLoading(false);
+    }
+  }
+
 
   ///========================== CITY REQUEST TO ADMIN ========================
   // ================= LOADING =================
