@@ -96,7 +96,7 @@ class AdminViewModel extends ChangeNotifier {
       icon: Icons.analytics,
       title: "City Stocks",
       subItems: [
-        SubMenuItem(title: "City Stocks", screen: CityStockListScreen()),
+        SubMenuItem(title: "City Stocks", screen: CityStockScreen()),
         SubMenuItem(title: "City Stocks Request To Admin", screen: RequestStockToAdminScreen()),
         SubMenuItem(title: "Stocks Transfer to Hub", screen: TransferStockScreen()),
         SubMenuItem(title: "Bulk Stock Transfer To Hub", screen: BulkTransferScreen()),

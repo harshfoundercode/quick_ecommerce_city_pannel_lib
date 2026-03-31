@@ -218,6 +218,7 @@ class AddHubViewModel extends ChangeNotifier {
         );
         Provider.of<HubZoneViewModel>(context, listen: false).getHubZoneListDataApi(context);
         clearForm();
+        hubNameController.clear();
         latitudeController.clear();
         longitudeController.clear();
         hubZoneAddress.clear();

@@ -254,12 +254,7 @@ class _AddHubScreenState extends State<AddHubScreen> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       if (!_locationPicked) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please pick a location on the map'),
-                            backgroundColor: Colors.orange,
-                          ),
-                        );
+                        CustomSnackBar.show(context, message: 'Please pick a location on the map', type: SnackBarType.error);
                         return;
                       }
                       vm.hubZoneCreateApi(context);
