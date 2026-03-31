@@ -373,10 +373,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         color: const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 22,
-                          color: Color(0xFF9CA3AF)),
+                      child: Image.network(item.img),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
