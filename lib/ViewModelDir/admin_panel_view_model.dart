@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DisputeDir/DisputeProducts/complaint_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DisputeDir/disputeOrderDir/dispute_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_list.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
@@ -104,14 +106,14 @@ class AdminViewModel extends ChangeNotifier {
         SubMenuItem(title: "City Stocks Admin Request History", screen: CityRequestHistoryScreen()),
       ],
     ),
-    // MenuItem(
-    //   icon: Icons.attach_money,
-    //   title: "Revenue",
-    //   subItems: [
-    //     SubMenuItem(title: "Revenue", screen: RevenueView()),
-    //     SubMenuItem(title: "Dispute", screen: DisputeScreen()),
-    //   ],
-    // ),
+    MenuItem(
+      icon: Icons.attach_money,
+      title: "Dispute",
+      subItems: [
+        SubMenuItem(title: "Dispute", screen: DisputeScreen()),
+        SubMenuItem(title: "Complaint", screen: ComplaintScreen()),
+      ],
+    ),
   ];
 
   Future<void> performLogout(BuildContext context) async {

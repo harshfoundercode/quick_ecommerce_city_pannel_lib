@@ -97,6 +97,8 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
   // ── Scroll (mobile) ───────────────────────────────────────────────────────
   final ScrollController _scrollCtrl = ScrollController();
 
+  final LayerLink _layerLink = LayerLink();
+
   @override
   void initState() {
     super.initState();
@@ -233,7 +235,9 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
     });
     _latCtrl.text = pos.latitude.toStringAsFixed(6);
     _lngCtrl.text = pos.longitude.toStringAsFixed(6);
-    _mapController?.animateCamera(CameraUpdate.newLatLng(pos));
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _moveCamera(pos);
+    });
 
     // ✅ FIX: Show snackbar with clear message
     if (outside) {
@@ -297,7 +301,11 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
           );
         }).toList();
         setState(() => _suggestions = preds);
-        if (preds.isNotEmpty) _showOverlay();
+        if (preds.isNotEmpty) {
+          _showOverlay();
+        } else {
+          _removeOverlay();
+        }
       }
     } catch (_) {
     } finally {
@@ -312,8 +320,6 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
       _suggestions = [];
       _searchLoading = true;
     });
-    _searchFocus.unfocus();
-    _removeOverlay();
     try {
       final res = await http.get(Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId)));
       if (!mounted) return;
@@ -368,43 +374,33 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
       final newPos = LatLng(lat, lng);
       final outside = !_isInsideCity(newPos);
 
+// update UI text
       _searchCtrl.text = address.isNotEmpty
           ? address
           : '${lat.toStringAsFixed(5)}, ${lng.toStringAsFixed(5)}';
+
       _addressCtrl.text = address;
       if (pincode.isNotEmpty) _pincodeCtrl.text = pincode;
 
+// 🔥 MAIN FIX — always use central handler
+      _onLocationPicked(newPos);
+
+// banner
       setState(() {
-        _pickedLatLng = newPos;
-        _isOutsideZone = outside;
-        // ✅ FIX: Show/hide banner based on result
         _showOutsideBanner = outside;
         _outsideBannerMsg = outside
-            ? 'Searched location is outside the city zone boundary "${widget.zone?.name ?? ""}".'
-                  ' Only locations inside the blue circle are allowed.'
+            ? 'Searched location is outside the city zone.'
             : '';
       });
-      _latCtrl.text = lat.toStringAsFixed(6);
-      _lngCtrl.text = lng.toStringAsFixed(6);
 
-      if (_mapController != null) {
-        _mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(target: newPos, zoom: 14),
-          ),
-        );
-      } else {
-        // retry after small delay (important for web)
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (_mapController != null) {
-            _mapController!.animateCamera(
-              CameraUpdate.newCameraPosition(
-                CameraPosition(target: newPos, zoom: 14),
-              ),
-            );
-          }
-        });
-      }
+// 🔥 IMPORTANT: move camera AFTER small delay (web fix)
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _moveCamera(newPos);
+      });
+
+// 🔥 VERY IMPORTANT: remove overlay AFTER camera
+      _searchFocus.unfocus();
+      _removeOverlay();
 
       if (outside) {
         _showSnack(
@@ -482,7 +478,7 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
     return Positioned(
       width: w,
       child: CompositedTransformFollower(
-        link: LayerLink(), // mobile uses its own LayerLink
+        link: _layerLink,
         showWhenUnlinked: false,
         offset: const Offset(0, 58),
         child: Material(
@@ -555,6 +551,22 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
     );
   }
 
+  void _moveCamera(LatLng pos) {
+    if (_mapController == null) return;
+
+    try {
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: pos, zoom: 14),
+        ),
+      );
+    } catch (e) {
+      // 🔥 Web fallback (very important)
+      _mapController!.moveCamera(
+        CameraUpdate.newLatLngZoom(pos, 14),
+      );
+    }
+  }
   // ─────────────────────────────────────────────────────────────────────────
   // BUILD
   // ─────────────────────────────────────────────────────────────────────────
@@ -708,12 +720,8 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
                   hasCityBoundary: _cityRadiusKm != double.infinity,
                   onMapCreated: (c) {
                     _mapController = c;
-
-                    // ensure map moves to current selected position
                     Future.delayed(const Duration(milliseconds: 300), () {
-                      _mapController?.animateCamera(
-                        CameraUpdate.newLatLng(_pickedLatLng),
-                      );
+                      _moveCamera(_pickedLatLng);
                     });
                   },
                   onTap: _onLocationPicked,
@@ -747,17 +755,20 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
                         const SizedBox(height: 12),
 
                         // ✅ FIX: Use GlobalKey on search bar for web overlay
-                        _SearchBarWidget(
-                          key: _searchBarKey,
-                          controller: _searchCtrl,
-                          focusNode: _searchFocus,
-                          isLoading: _searchLoading,
-                          onChanged: _onSearchChanged,
-                          onClear: () {
-                            _searchCtrl.clear();
-                            _removeOverlay();
-                            setState(() => _suggestions = []);
-                          },
+                        CompositedTransformTarget(
+                          link: _layerLink,
+                          child: _SearchBarWidget(
+                            key: _searchBarKey,
+                            controller: _searchCtrl,
+                            focusNode: _searchFocus,
+                            isLoading: _searchLoading,
+                            onChanged: _onSearchChanged,
+                            onClear: () {
+                              _searchCtrl.clear();
+                              _removeOverlay();
+                              setState(() => _suggestions = []);
+                            },
+                          ),
                         ),
 
                         // ✅ FIX: Persistent outside banner in form panel
@@ -837,8 +848,9 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
                                 ],
                                 validator: (v) {
                                   if (v == null || v.isEmpty) return 'Required';
-                                  if (double.tryParse(v) == null)
+                                  if (double.tryParse(v) == null) {
                                     return 'Invalid';
+                                  }
                                   return null;
                                 },
                               ),
@@ -1015,17 +1027,20 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: _SearchBarWidget(
-                    key: _searchBarKey,
-                    controller: _searchCtrl,
-                    focusNode: _searchFocus,
-                    isLoading: _searchLoading,
-                    onChanged: _onSearchChanged,
-                    onClear: () {
-                      _searchCtrl.clear();
-                      _removeOverlay();
-                      setState(() => _suggestions = []);
-                    },
+                  child: CompositedTransformTarget(
+                    link: _layerLink,
+                    child: _SearchBarWidget(
+                      key: _searchBarKey,
+                      controller: _searchCtrl,
+                      focusNode: _searchFocus,
+                      isLoading: _searchLoading,
+                      onChanged: _onSearchChanged,
+                      onClear: () {
+                        _searchCtrl.clear();
+                        _removeOverlay();
+                        setState(() => _suggestions = []);
+                      },
+                    ),
                   ),
                 ),
 

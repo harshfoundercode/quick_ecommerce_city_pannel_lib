@@ -642,23 +642,16 @@ class _RequestStockToAdminScreenState extends State<RequestStockToAdminScreen> {
       child: Row(
         children: [
           if (product.category?.mainCategoryName != null)
-            _infoChip(Icons.category_outlined, product.category?.mainCategoryName,
-                const Color(0xFF6366F1)),
+            _infoChip(Icons.category_outlined, product.category?.mainCategoryName, const Color(0xFF6366F1)),
           if (product.category != null)
-            _infoChip(Icons.label_outline_rounded, product.category?.mainCategoryName,
-                const Color(0xFF0891B2)),
+            _infoChip(Icons.label_outline_rounded, product.category?.mainCategoryName, const Color(0xFF0891B2)),
           if (product.category?.subcategoryName != null)
-            _infoChip(
-                Icons.subdirectory_arrow_right_rounded,
-                product.category?.subcategoryName,
-                const Color(0xFF059669)),
-          if (product.variant!.name != null &&
-              product.variant!.name != 'Default')
-            _infoChip(Icons.tune_rounded, product.variant!.name,
-                const Color(0xFFF59E0B)),
-          _infoChip(Icons.download_rounded,
-              'Received: ${product.totalReceived ?? "0"}',
-              const Color(0xFF8B5CF6)),
+            _infoChip(Icons.subdirectory_arrow_right_rounded, product.category?.subcategoryName, const Color(0xFF059669)),
+          if (product.variant!.name != null && product.variant!.name != 'Default')
+            _infoChip(Icons.tune_rounded, product.variant!.name, const Color(0xFFF59E0B)),
+            _infoChip(Icons.download_rounded, 'Received: ${product.totalReceived ?? "0"}', const Color(0xFF8B5CF6)),
+          if (product.variant?.value != null)
+            _infoChip(Icons.line_weight, 'Weight: ${product..variant?.value}', const Color(0xFF8B5CF6)),
         ],
       ),
     );

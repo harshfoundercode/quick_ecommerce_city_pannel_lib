@@ -1,5 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DisputeDir/DisputeProducts/complaint_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
@@ -8,6 +9,7 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/auth_view_mode
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_zone_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/dashboard_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/dispute_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_manager_edit_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_performance_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_edit_view_model.dart';
@@ -33,5 +35,7 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => HubManagerEditViewModel()),
     ChangeNotifierProvider(create: (context) => CityStockViewModel()),
     ChangeNotifierProvider(create: (context) => HubPerformanceViewModel()),
+    ChangeNotifierProvider(create: (context) => DisputeViewModel()),
+    ChangeNotifierProvider(create: (context) => ComplaintViewModel()),
   ];
 }
