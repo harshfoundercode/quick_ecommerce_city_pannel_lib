@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/RepoDir/hub_zone_create_repo.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
 class HubZoneEditViewModel extends ChangeNotifier {
   final HubZoneCreateRepo _editZoneRepo = HubZoneCreateRepo();
@@ -64,9 +68,14 @@ class HubZoneEditViewModel extends ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
-        Navigator.pushReplacementNamed(
+        final hvm = Provider.of<HubZoneViewModel>(context, listen: false);
+        hvm.getHubZoneListDataApi(context);
+        final adminVM = Provider.of<AdminViewModel>(context, listen: false);
+        adminVM.changeScreen(const DashboardContent(), 0);
+        Navigator.pushNamedAndRemoveUntil(
           context,
           RoutesName.adminSliderLayoutScreen,
+              (route) => false,
         );
       } else {
         CustomSnackBar.show(
