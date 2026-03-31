@@ -1397,7 +1397,6 @@ class _CityStockListScreenState extends State<CityStockListScreen>
   Widget _buildStockCard(CityStockData stock) {
     final current = stock.stock ?? 0;
     final received = int.tryParse(stock.totalReceived ?? '0') ?? 0;
-    final sold = received - current;
     final progress =
     received > 0 ? (current / received).clamp(0.0, 1.0) : 0.0;
     final color = _stockColor(current);
@@ -1548,13 +1547,7 @@ class _CityStockListScreenState extends State<CityStockListScreen>
                     color: const Color(0xFF10B981),
                     icon: Icons.download_rounded,
                   ),
-                  _vDivider(),
-                  _StatCell(
-                    label: 'Sold',
-                    value: '$sold',
-                    color: const Color(0xFFEF4444),
-                    icon: Icons.shopping_cart_rounded,
-                  ),
+
                 ],
               ),
 
@@ -1924,7 +1917,6 @@ class _StockDetailsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final current = stock.stock ?? 0;
     final received = int.tryParse(stock.totalReceived ?? '0') ?? 0;
-    final sold = received - current;
     final progress =
     received > 0 ? (current / received).clamp(0.0, 1.0) : 0.0;
 
@@ -2102,13 +2094,6 @@ class _StockDetailsSheet extends StatelessWidget {
                             value: '$received',
                             icon: Icons.download_rounded,
                             color: const Color(0xFF10B981),
-                          ),
-                          const SizedBox(width: 10),
-                          _BigStatCard(
-                            label: 'Sold',
-                            value: '$sold',
-                            icon: Icons.shopping_cart_rounded,
-                            color: const Color(0xFFEF4444),
                           ),
                         ],
                       ),

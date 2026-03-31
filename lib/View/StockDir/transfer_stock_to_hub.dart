@@ -304,7 +304,6 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
     final p = _product!;
     final stock = p.stock ?? 0;
     final received = int.tryParse(p.totalReceived ?? '0') ?? 0;
-    final sold = received - stock;
     final color = _stockColor(stock);
     final isOut = stock == 0;
 
@@ -332,7 +331,6 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
                 child: _stat('Received', '$received', const Color(0xFF059669)),
               ),
               Container(width: 1, height: 32, color: const Color(0xFFF3F4F6)),
-              Expanded(child: _stat('Sold', '$sold', const Color(0xFF6B7280))),
             ],
           ),
           if (isOut) ...[

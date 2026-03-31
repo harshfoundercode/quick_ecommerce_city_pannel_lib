@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/orders_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_details_screen_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/order_view_model.dart';
@@ -105,6 +107,13 @@ class _OrderListScreenState extends State<OrderListScreen>
 
           final summary = vm.orderDataModel!.data;
           final allOrders = summary?.orders ?? [];
+
+          if (allOrders == null || allOrders.isEmpty) {
+            return Padding(
+              padding:  EdgeInsets.symmetric(vertical: Sizes.screenHeight*0.4),
+              child: Center(child: CustomText.bold("No Orders found")),
+            );
+          }
 
           return Column(
             children: [
