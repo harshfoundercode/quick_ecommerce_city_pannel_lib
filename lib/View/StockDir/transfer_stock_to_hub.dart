@@ -80,6 +80,7 @@ class _TransferStockScreenState extends State<TransferStockScreen> {
       appBar: AppBar(
         backgroundColor: ColorConst.primaryGreen,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

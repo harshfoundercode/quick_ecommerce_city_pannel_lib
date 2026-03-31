@@ -315,20 +315,20 @@ class CityStockViewModel with ChangeNotifier {
     }
   }
 
-  Future<void> bulkRequestStock(BuildContext context, String remarks) async {
-    if (_selectedProductIds.isEmpty) return;
-
-    final items = _selectedProductIds.map((id) {
-      return {
-        "productid": id,
-        "qty": _selectedQty[id] ?? 1,
-      };
-    }).toList();
-
-    await cityRequestApi(context, remarks, items);
-
-    clearSelection();
-  }
+  // Future<void> bulkRequestStock(BuildContext context, String remarks) async {
+  //   if (_selectedProductIds.isEmpty) return;
+  //
+  //   final items = _selectedProductIds.map((id) {
+  //     return {
+  //       "productid": id,
+  //       "qty": _selectedQty[id] ?? 1,
+  //     };
+  //   }).toList();
+  //
+  //   await cityRequestApi(context, remarks, items);
+  //
+  //   clearSelection();
+  // }
 
   ///============== CITY REQUEST TO HUB HISTORY API ====================================
 
