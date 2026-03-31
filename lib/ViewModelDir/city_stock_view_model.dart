@@ -103,14 +103,6 @@ class CityStockViewModel with ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
-       Navigator.pop(context);
-      } else {
-        CustomSnackBar.show(
-          context,
-          message: body['message'] ?? 'transfer Failed',
-          title: 'Oh Snap!',
-          type: SnackBarType.error,
-        );
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
         adminVM.changeScreen(const DashboardContent(), 0);
         Navigator.pushNamedAndRemoveUntil(
@@ -118,6 +110,14 @@ class CityStockViewModel with ChangeNotifier {
           RoutesName.adminSliderLayoutScreen,
               (route) => false,
         );
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body['message'] ?? 'transfer Failed',
+          title: 'Oh Snap!',
+          type: SnackBarType.error,
+        );
+
       }
     } catch (e) {
       if (kDebugMode) print('❌ transfer error: $e');
@@ -179,20 +179,19 @@ class CityStockViewModel with ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
-        Navigator.pop(context);
-      } else {
-        CustomSnackBar.show(
-          context,
-          message: body['message'] ?? 'transfer Failed',
-          title: 'Oh Snap!',
-          type: SnackBarType.error,
-        );
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
         adminVM.changeScreen(const DashboardContent(), 0);
         Navigator.pushNamedAndRemoveUntil(
           context,
           RoutesName.adminSliderLayoutScreen,
               (route) => true,
+        );
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body['message'] ?? 'transfer Failed',
+          title: 'Oh Snap!',
+          type: SnackBarType.error,
         );
       }
     } catch (e) {
