@@ -342,6 +342,7 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                                 MaterialPageRoute(
                                   builder: (_) =>
                                       HubZoneEditScreen(zone: zoneToEdit),
+
                                 ),
                               ).then((_) {
                                 // Refresh list after edit
