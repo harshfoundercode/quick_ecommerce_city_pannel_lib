@@ -117,7 +117,6 @@ class CityStockViewModel with ChangeNotifier {
           title: 'Oh Snap!',
           type: SnackBarType.error,
         );
-
       }
     } catch (e) {
       if (kDebugMode) print('❌ transfer error: $e');
@@ -286,9 +285,6 @@ class CityStockViewModel with ChangeNotifier {
           title: 'Success',
           type: SnackBarType.success,
         );
-
-        Navigator.pop(context);
-      } else {
         final adminVM = Provider.of<AdminViewModel>(context, listen: false);
         adminVM.changeScreen(const DashboardContent(), 0);
         Navigator.pushNamedAndRemoveUntil(
@@ -296,6 +292,7 @@ class CityStockViewModel with ChangeNotifier {
           RoutesName.adminSliderLayoutScreen,
               (route) => false,
         );
+      } else {
         CustomSnackBar.show(
           context,
           message: body['message'] ?? 'Request Failed',
