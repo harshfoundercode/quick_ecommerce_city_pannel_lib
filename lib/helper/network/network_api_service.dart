@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/constant_popup.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/helper/network/api_exception.dart';
@@ -293,6 +295,11 @@ class NetworkApiServices extends BaseApiServices {
       jsonBody = {};
     }
 
+    /// 🔥 🔥 🔥 AUTO LOGOUT HERE
+    if (statusCode == 401) {
+      _handleAutoLogout();
+    }
+
     // Return ALL responses as structured data, don't throw for client errors
     if (statusCode >= 200 && statusCode < 300) {
       return {
@@ -330,6 +337,33 @@ class NetworkApiServices extends BaseApiServices {
       default:
         throw FetchDataException(
             'Unexpected error: $statusCode');
+    }
+  }
+
+  bool _isLoggingOut = false;
+
+  Future<void> _handleAutoLogout() async {
+    if (_isLoggingOut) return;
+    _isLoggingOut = true;
+
+    try {
+      final context = navigatorKey.currentContext;
+
+      if (context != null) {
+        final userProvider =
+        Provider.of<UserViewModel>(context, listen: false);
+
+        await userProvider.clearToken();
+
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          RoutesName.adminLoginScreen,
+              (route) => false,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Logout Error: $e");
+      }
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/app_initializer.dart'
     show AppInitializer;
 import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
@@ -20,6 +21,8 @@ void main() async {
   // if (kDebugMode) {
   //   print("✅ FCM Token: $fcmToken");
   // }
+  final userVM = UserViewModel();
+  await userVM.init();
   runApp(const MyApp());
 }
 
@@ -49,26 +52,24 @@ class _MyAppState extends State<MyApp> {
 
     return MultiProvider(
       providers: ProvidersHome().providers,
-      child: AppInitializer(
-        child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Fasto City Panel',
-          theme: ThemeData(
-            scaffoldBackgroundColor: ColorConst.bgColor,
-            fontFamily: "Poppins",
-          ),
-          navigatorKey: navigatorKey,
-          initialRoute: RoutesName.splashScreen,
-          onGenerateRoute: (settings) {
-            if (settings.name != null) {
-              return CupertinoPageRoute(
-                builder: Routers.generateRoute(settings.name!),
-                settings: settings,
-              );
-            }
-            return null;
-          },
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Fasto City Panel',
+        theme: ThemeData(
+          scaffoldBackgroundColor: ColorConst.bgColor,
+          fontFamily: "Poppins",
         ),
+        navigatorKey: navigatorKey,
+        initialRoute: RoutesName.appInitializer,
+        onGenerateRoute: (settings) {
+          if (settings.name != null) {
+            return CupertinoPageRoute(
+              builder: Routers.generateRoute(settings.name!),
+              settings: settings,
+            );
+          }
+          return null;
+        },
       ),
     );
   }

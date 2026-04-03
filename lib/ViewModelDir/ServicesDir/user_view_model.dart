@@ -1,20 +1,13 @@
-// import 'package:flutter/material.dart';
-// import 'package:quick_ecommerce_city_panel_redefined/ModelDir/user_data_model.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-//
+import 'package:flutter/material.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ModelDir/user_data_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 // class UserViewModel with ChangeNotifier {
-//
-//   /// REMOVE USER DATA (LOGOUT)
-//   Future<void> removeUser() async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     await sp.clear();
-//     notifyListeners();
-//   }
 //
 //   /// SAVE TOKEN
 //   Future<bool> saveToken(String token) async {
 //     SharedPreferences sp = await SharedPreferences.getInstance();
-//     sp.setString('token', token);
+//     await sp.setString('token', token);
 //     notifyListeners();
 //     return true;
 //   }
@@ -25,25 +18,19 @@
 //     return sp.getString('token');
 //   }
 //
-//
-//   ///==========================================================================
-//   Future<bool> saveUser(token) async {
+//   /// SAVE USER ID
+//   Future<bool> saveUser(String userId) async {
 //     SharedPreferences sp = await SharedPreferences.getInstance();
-//     sp.setString('user_id', token);
+//     await sp.setString('user_id', userId);
 //     notifyListeners();
 //     return true;
 //   }
 //
+//   /// GET USER
 //   Future<User> getUser() async {
 //     SharedPreferences sp = await SharedPreferences.getInstance();
 //     String userId = sp.getString('user_id') ?? "0";
-//     return User(id: userId.toString());
-//   }
-//
-//   Future<bool> remove() async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     bool userIdRemoved = await sp.remove('user_id');
-//     return userIdRemoved;
+//     return User(id: userId);
 //   }
 //
 //   /// 🔥 LOGOUT (REMOVE EVERYTHING)
@@ -54,46 +41,70 @@
 //     notifyListeners();
 //   }
 // }
-import 'package:flutter/material.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ModelDir/user_data_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 class UserViewModel with ChangeNotifier {
 
-  /// SAVE TOKEN
-  Future<bool> saveToken(String token) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
+  String? _token;
+  String? _userId;
+
+  /// ---------------- INIT (optional but useful) ----------------
+  Future<void> init() async {
+    final sp = await SharedPreferences.getInstance();
+    _token = sp.getString('token');
+    _userId = sp.getString('user_id');
+  }
+
+  /// ---------------- GETTERS ----------------
+  String? get token => _token;
+  String? get userId => _userId;
+
+  /// ---------------- SAVE TOKEN ----------------
+  Future<void> saveToken(String token) async {
+    final sp = await SharedPreferences.getInstance();
     await sp.setString('token', token);
-    notifyListeners();
-    return true;
+
+    _token = token;
   }
 
-  /// GET TOKEN
+  /// ---------------- GET TOKEN (fallback safe) ----------------
   Future<String?> getToken() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    return sp.getString('token');
+    if (_token != null) return _token;
+
+    final sp = await SharedPreferences.getInstance();
+    _token = sp.getString('token');
+    return _token;
   }
 
-  /// SAVE USER ID
-  Future<bool> saveUser(String userId) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
+  /// ---------------- SAVE USER ----------------
+  Future<void> saveUser(String userId) async {
+    final sp = await SharedPreferences.getInstance();
     await sp.setString('user_id', userId);
-    notifyListeners();
-    return true;
+
+    _userId = userId;
   }
 
-  /// GET USER
+  /// ---------------- GET USER ----------------
   Future<User> getUser() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String userId = sp.getString('user_id') ?? "0";
-    return User(id: userId);
+    if (_userId != null) {
+      return User(id: _userId!);
+    }
+
+    final sp = await SharedPreferences.getInstance();
+    final id = sp.getString('user_id') ?? "0";
+    _userId = id;
+
+    return User(id: id);
   }
 
-  /// 🔥 LOGOUT (REMOVE EVERYTHING)
-  Future<void> logout() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
+  /// ---------------- LOGOUT / CLEAR ----------------
+  Future<void> clearToken() async {
+    final sp = await SharedPreferences.getInstance();
+
     await sp.remove('token');
     await sp.remove('user_id');
-    notifyListeners();
+
+    _token = null;
+    _userId = null;
+
+    notifyListeners(); // only here makes sense
   }
 }

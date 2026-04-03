@@ -114,7 +114,7 @@ class AdminViewModel extends ChangeNotifier {
   ];
 
   Future<void> performLogout(BuildContext context) async {
-    await Provider.of<UserViewModel>(context, listen: false).logout();
+    await Provider.of<UserViewModel>(context, listen: false).clearToken();
     _currentScreen = const DashboardContent();
     _selectedIndex = 0;
     _expandedIndex = null;
