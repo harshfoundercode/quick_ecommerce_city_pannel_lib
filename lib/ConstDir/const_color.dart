@@ -4,11 +4,14 @@ class ColorConst {
 
   static const Color black  = Colors.black;
   static const Color white  = Colors.white;
+  static const Color textBlack  = Color(0xFF111827);   // softer than pure black
+  static const inkDark    = Color(0xFF2C3020);
 
 
-  static const Color primaryGreen = Color(0xff6CC51D);
-  static const Color primaryLightGreen  = Color(0xffAEDC81);
-  static const Color primaryExtraLightGreen  = Color(0xffEBFFD7);
+  static const Color primaryGreen = Color(0xFF14532D);
+  static const Color primaryLightGreen  = Color(0xFF4ADE80);
+  static const Color primaryExtraLightGreen  = Color(0xFFF0FDF4);
+
   static const Color bgColor = Color(0xFFF5F7FA);
   static const Color cardColor = Colors.white;
   static const Color textPrimary = Color(0xFF111827);

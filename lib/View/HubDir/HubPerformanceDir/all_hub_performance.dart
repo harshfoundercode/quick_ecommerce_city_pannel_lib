@@ -217,9 +217,9 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen>
 
   // ── Performance Card ─────────────────────────────────────────────────────
 
-  Widget _buildPerformanceCard(
-      BuildContext context, List<Hubs> allHubs, List<Hubs> displayList) {
+  Widget _buildPerformanceCard(BuildContext context, List<Hubs> allHubs, List<Hubs> displayList) {
     return Container(
+      height: Sizes.screenHeight*0.7,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),

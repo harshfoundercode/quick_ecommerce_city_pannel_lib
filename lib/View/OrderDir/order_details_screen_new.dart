@@ -373,7 +373,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         color: const Color(0xFFF3F4F6),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Image.network(item.img),
+                      child: Image.network(item.img ?? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxQrrnCsyMqf3xE9kOwJweYZVZWhgg6y5teg&s"),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

@@ -72,11 +72,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         color: ColorConst.primaryGreen,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
-                        Icons.apartment,
-                        color: Colors.white,
-                        size: 32,
-                      ),
+                      child: Image.asset("Assets/app_logo.png")
                     ),
 
                     CustomWidgets.verticalSpace(0.03),

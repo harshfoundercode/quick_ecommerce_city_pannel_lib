@@ -100,7 +100,7 @@ class _AppBtnState extends State<AppBtn> with SingleTickerProviderStateMixin {
                 width: 43,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                color: ColorConst.primaryLightGreen,
+                color: ColorConst.primaryGreen,
                   borderRadius: BorderRadius.circular(widget.borderRadius),
                 ),
                 padding: const EdgeInsets.all(12),

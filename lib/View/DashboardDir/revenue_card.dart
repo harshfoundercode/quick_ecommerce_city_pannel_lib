@@ -4,19 +4,6 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/dialog_box.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const _kGreen      = ColorConst.primaryExtraLightGreen;
-const _kGreenDark  = ColorConst.primaryGreen;
-const _kGreenLight = Color(0xFFD1FAE5);
-const _kGreenBg    = Color(0xFFF0FDF4);
-const _kAmber      = Color(0xFFD97706);
-const _kTextHead   = Color(0xFF111827);
-const _kTextSub    = Color(0xFF374151);
-const _kTextMuted  = Color(0xFF9CA3AF);
-const _kBorder     = Color(0xFFE2E8F0);
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 class RevenueCard extends StatefulWidget {
   final List<Hubs>? dashboardHubData;
   final Summary dashboardSummaryData;
@@ -97,15 +84,11 @@ class _RevenueCardState extends State<RevenueCard>
             Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [_kGreenDark, _kGreen],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: ColorConst.primaryGreen,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: _kGreen.withValues(alpha:0.3),
+                    color: ColorConst.primaryLightGreen.withValues(alpha:0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -123,11 +106,11 @@ class _RevenueCardState extends State<RevenueCard>
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
-                            color: _kTextHead,
+                            color: ColorConst.textBlack,
                             letterSpacing: 0.2)),
                     Text('Weekly earning performance',
                         style: TextStyle(
-                            fontSize: 11, color: _kTextMuted)),
+                            fontSize: 11, color: ColorConst.textBlack)),
                   ]),
             ),
             // View all
@@ -139,10 +122,10 @@ class _RevenueCardState extends State<RevenueCard>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
-                    color: _kGreenBg,
+                    color: ColorConst.primaryExtraLightGreen,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: _kGreenLight),
+                        color: ColorConst.primaryExtraLightGreen),
                   ),
                   child: const Row(
                       mainAxisSize: MainAxisSize.min,
@@ -166,7 +149,7 @@ class _RevenueCardState extends State<RevenueCard>
               const Text('Total Revenue',
                   style: TextStyle(
                       fontSize: 11,
-                      color: _kTextMuted,
+                      color: ColorConst.textBlack,
                       fontWeight: FontWeight.w500)),
               const SizedBox(height: 3),
               Text(
@@ -174,7 +157,7 @@ class _RevenueCardState extends State<RevenueCard>
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
-                  color: _kTextHead,
+                  color: ColorConst.textBlack,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -201,10 +184,10 @@ class _RevenueCardState extends State<RevenueCard>
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: _kTextSub)),
+                        color: ColorConst.textSecondary)),
                 Text('This week',
                     style: TextStyle(
-                        fontSize: 11, color: _kTextMuted)),
+                        fontSize: 11, color: ColorConst.textBlack)),
               ]),
 
           const SizedBox(height: 10),
@@ -248,9 +231,9 @@ class _RevenueCardState extends State<RevenueCard>
 
           // ── Legend ───────────────────────────────────────────────
           Row(children: [
-            _LegendDot(color: _kGreen, label: 'Revenue'),
+            _LegendDot(color: ColorConst.primaryLightGreen, label: 'Revenue'),
             const SizedBox(width: 14),
-            _LegendDot(color: _kAmber, label: 'Top Hub'),
+            _LegendDot(color: ColorConst.criticalYellowLight, label: 'Top Hub'),
             const SizedBox(width: 14),
             _LegendDot(color: Color(0xFFE5E7EB), label: 'No revenue'),
           ]),
@@ -276,11 +259,11 @@ class _RevenueCardState extends State<RevenueCard>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _kGreenBg,
+                  color: ColorConst.primaryExtraLightGreen,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.hub_rounded,
-                    size: 16, color: _kGreen),
+                    size: 16, color: ColorConst.primaryGreen),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -292,17 +275,17 @@ class _RevenueCardState extends State<RevenueCard>
                           style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: _kTextHead)),
+                              color: ColorConst.textBlack)),
                       Text('Performance overview',
                           style: TextStyle(
                               fontSize: 11,
-                              color: _kTextMuted)),
+                              color: ColorConst.textBlack)),
                     ]),
               ),
             ]),
 
             const SizedBox(height: 16),
-            const Divider(color: _kBorder),
+            const Divider(color: ColorConst.borderColor),
             const SizedBox(height: 8),
 
             // Hub list with bars
@@ -381,7 +364,7 @@ class _HubBar extends StatelessWidget {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: isTop ? _kGreenDark : _kTextSub,
+              color: isTop ? ColorConst.primaryLightGreen : ColorConst.textSecondary,
             ),
           ),
 
@@ -396,7 +379,7 @@ class _HubBar extends StatelessWidget {
                   ? LinearGradient(
                 colors: isTop
                     ? [ColorConst.primaryGreen, ColorConst.primaryGreen]
-                    : [_kGreenDark, _kGreen],
+                    : [ColorConst.primaryLightGreen, ColorConst.primaryLightGreen],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
               )
@@ -406,7 +389,7 @@ class _HubBar extends StatelessWidget {
                   top: Radius.circular(8)),
               boxShadow: isTop && hasRev
                   ? [BoxShadow(
-                color: _kGreen.withValues(alpha:0.35),
+                color: ColorConst.primaryLightGreen.withValues(alpha:0.35),
                 blurRadius: 8,
                 offset: const Offset(0, -2),
               )]
@@ -419,7 +402,7 @@ class _HubBar extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.only(top: 3),
               child: Icon(Icons.workspace_premium_rounded,
-                  size: 12, color: _kAmber),
+                  size: 12, color: ColorConst.criticalYellowLight),
             )
           else
             const SizedBox(height: 5),
@@ -438,7 +421,7 @@ class _HubBar extends StatelessWidget {
                 fontSize: 9,
                 fontWeight:
                 isTop ? FontWeight.w700 : FontWeight.w500,
-                color: isTop ? _kGreenDark : _kTextMuted,
+                color: isTop ? ColorConst.primaryLightGreen : ColorConst.textBlack,
               ),
             ),
           ),
@@ -470,7 +453,7 @@ class _TopHubBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: _kGreen.withValues(alpha:0.25),
+            color: ColorConst.primaryLightGreen.withValues(alpha:0.25),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -545,10 +528,10 @@ class _DrawerHubRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
-        color: isTop ? _kGreenBg : const Color(0xFFF9FAFB),
+        color: isTop ? ColorConst.primaryExtraLightGreen : const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isTop ? _kGreenLight : const Color(0xFFE5E7EB),
+          color: isTop ? ColorConst.primaryExtraLightGreen : const Color(0xFFE5E7EB),
         ),
       ),
       child: Column(
@@ -559,7 +542,7 @@ class _DrawerHubRow extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.only(right: 6),
                   child: Icon(Icons.workspace_premium_rounded,
-                      size: 14, color: _kAmber),
+                      size: 14, color: ColorConst.criticalYellow),
                 ),
               Expanded(
                 child: Text(
@@ -567,7 +550,7 @@ class _DrawerHubRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isTop ? _kGreenDark : _kTextSub,
+                    color: isTop ? ColorConst.black : ColorConst.textSecondary,
                   ),
                 ),
               ),
@@ -576,7 +559,7 @@ class _DrawerHubRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: isTop ? _kGreenDark : _kTextSub,
+                  color: isTop ? ColorConst.black : ColorConst.textSecondary,
                 ),
               ),
             ]),
@@ -588,13 +571,13 @@ class _DrawerHubRow extends StatelessWidget {
                 minHeight: 5,
                 backgroundColor: const Color(0xFFE5E7EB),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                    isTop ? _kGreenDark : _kGreen),
+                    isTop ? ColorConst.primaryExtraLightGreen : ColorConst.primaryLightGreen),
               ),
             ),
             const SizedBox(height: 4),
             Text(
               '${(progress * 100).toStringAsFixed(0)}% of top revenue',
-              style: const TextStyle(fontSize: 9, color: _kTextMuted),
+              style: const TextStyle(fontSize: 9, color: ColorConst.textBlack),
             ),
           ]),
     );
@@ -619,7 +602,7 @@ class _LegendDot extends StatelessWidget {
       const SizedBox(width: 4),
       Text(label,
           style: const TextStyle(
-              fontSize: 10, color: _kTextMuted)),
+              fontSize: 10, color: ColorConst.textBlack)),
     ]);
   }
 }
