@@ -14,6 +14,8 @@ class CityZoneListViewModel with ChangeNotifier {
     notifyListeners();
   }
 
+
+
   Future<void> getCityZoneDataApi(context) async {
     _cityZoneDataModel = null;
     notifyListeners();

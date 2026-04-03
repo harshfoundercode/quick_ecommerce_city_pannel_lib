@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_edit.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_zone_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
 class HubZoneMapScreen extends StatefulWidget {
@@ -35,6 +36,15 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
     const Color(0xFF06B6D4),
   ];
 
+  LatLng? _cityCenter;
+  double? _cityRadiusKm;
+  void _setCityZone(double lat, double lng, double radiusKm) {
+    _cityCenter = LatLng(lat, lng);
+    _cityRadiusKm = radiusKm;
+
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,8 +65,14 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final hvm = Provider.of<HubZoneViewModel>(context, listen: false);
+      final cityVM = Provider.of<CityZoneListViewModel>(context, listen: false);
       if (hvm.hubZones.isEmpty) {
-        hvm.getHubZoneListDataApi(context).then((_) {
+        hvm.getHubZoneListDataApi(context).then((_) async {
+          await cityVM.getCityZoneDataApi(context);
+          final city = cityVM.cityZoneDataModel?.data?.first;
+          if (city != null && city.lat != null && city.long != null && city.radiuskm != null) {
+            _setCityZone(double.parse(city.lat!), double.parse(city.long!), double.parse(city.radiuskm!));
+          }
           _buildMapOverlays(hvm.hubZones);
           if (hvm.hubZones.isNotEmpty && hvm.hubZones.first.hasValidCoordinates) {
             _onZoneTap(hvm.hubZones.first);
@@ -64,11 +80,20 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
           _fabController.forward();
         });
       } else {
-        _buildMapOverlays(hvm.hubZones);
-        if (hvm.hubZones.isNotEmpty && hvm.hubZones.first.hasValidCoordinates) {
-          _onZoneTap(hvm.hubZones.first);
-        }
-        _fabController.forward();
+        Future.wait([
+          hvm.getHubZoneListDataApi(context),
+          cityVM.getCityZoneDataApi(context),
+        ]).then((_) {
+          final city = cityVM.cityZoneDataModel?.data?.first;
+          if (city != null && city.lat != null && city.long != null && city.radiuskm != null) {
+            _setCityZone(double.parse(city.lat!), double.parse(city.long!), double.parse(city.radiuskm!));
+          }
+          _buildMapOverlays(hvm.hubZones);
+          if (hvm.hubZones.isNotEmpty && hvm.hubZones.first.hasValidCoordinates) {
+            _onZoneTap(hvm.hubZones.first);
+          }
+          _fabController.forward();
+        });
       }
     });
   }
@@ -84,6 +109,20 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
   void _buildMapOverlays(List<HubZoneListData> zones) {
     _markers.clear();
     _circles.clear();
+
+    /// ✅ CITY ZONE (from separate API)
+    if (_cityCenter != null && _cityRadiusKm != null) {
+      _circles.add(
+        Circle(
+          circleId: const CircleId('city_zone'),
+          center: _cityCenter!,
+          radius: _cityRadiusKm! * 1000,
+          fillColor: Colors.blue.withOpacity(0.08),
+          strokeColor: Colors.blue.withOpacity(0.6),
+          strokeWidth: 2,
+        ),
+      );
+    }
 
     for (int i = 0; i < zones.length; i++) {
       final zone = zones[i];
@@ -121,8 +160,8 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
     _mapController?.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(zone.latitude, zone.longitude),
-          zoom:   _radiusToZoom(zone.radiusInKm),
+          target: _cityCenter!,
+          zoom:   _radiusToZoom(_cityRadiusKm!),
         ),
       ),
     );
@@ -180,12 +219,7 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
   // }
 
   LatLng _cityZoneCenter(HubZoneListData zone) {
-    final lat = zone.latitude;
-    final lng = zone.longitude;
-
-    if (lat != null && lng != null) {
-      return LatLng(lat, lng);
-    }
+    return LatLng(zone.latitude, zone.longitude);
   }
 
   double _cityZoneRadius(HubZoneListData zone) {

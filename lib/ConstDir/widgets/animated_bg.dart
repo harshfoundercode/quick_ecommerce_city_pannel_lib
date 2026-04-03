@@ -9,7 +9,7 @@ class PremiumBg extends StatefulWidget {
 }
 
 class _PremiumBgState extends State<PremiumBg>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
