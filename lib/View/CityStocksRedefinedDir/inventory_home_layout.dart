@@ -3,9 +3,9 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/CityStocksRedefinedDir/demo_data.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/CityStocksRedefinedDir/incoming_stock_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/CityStocksRedefinedDir/inventory_screen.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/CityStocksRedefinedDir/models.dart' show CartItem, ShipmentStatus, RequestStatus;
+import 'package:quick_ecommerce_city_panel_redefined/View/CityStocksRedefinedDir/models.dart'
+    show CartItem, ShipmentStatus, RequestStatus;
 import 'package:quick_ecommerce_city_panel_redefined/View/CityStocksRedefinedDir/my_requests_screen.dart';
-
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -23,15 +23,31 @@ class _HomeShellState extends State<HomeShell> {
   void _onCartUpdated() => setState(() {});
 
   static const _tabs = [
-    _TabMeta(label: 'Inventory', icon: Icons.inventory_2_rounded, activeIcon: Icons.inventory_2_rounded),
-    _TabMeta(label: 'Requests', icon: Icons.pending_actions_outlined, activeIcon: Icons.pending_actions_rounded),
-    _TabMeta(label: 'Incoming', icon: Icons.move_to_inbox_outlined, activeIcon: Icons.move_to_inbox_rounded),
+    _TabMeta(
+      label: 'Inventory',
+      icon: Icons.inventory_2_rounded,
+      activeIcon: Icons.inventory_2_rounded,
+    ),
+    _TabMeta(
+      label: 'Requests',
+      icon: Icons.pending_actions_outlined,
+      activeIcon: Icons.pending_actions_rounded,
+    ),
+    _TabMeta(
+      label: 'Incoming',
+      icon: Icons.move_to_inbox_outlined,
+      activeIcon: Icons.move_to_inbox_rounded,
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final pendingReqs = demoRequests.where((r) => r.status == RequestStatus.pending).length;
-    final arrivedShip = demoShipments.where((s) => s.status == ShipmentStatus.arrived).length;
+    final pendingReqs = demoRequests
+        .where((r) => r.status == RequestStatus.pending)
+        .length;
+    final arrivedShip = demoShipments
+        .where((s) => s.status == ShipmentStatus.arrived)
+        .length;
 
     return Scaffold(
       backgroundColor: ColorConst.bgColor,
@@ -56,12 +72,17 @@ class _HomeShellState extends State<HomeShell> {
         ),
       ),
 
-      // ── Bottom Navigation Bar ──
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: ColorConst.cardColor,
           border: const Border(top: BorderSide(color: ColorConst.borderColor)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .06), blurRadius: 12, offset: const Offset(0, -2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .06),
+              blurRadius: 12,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: SafeArea(
           top: false,
@@ -86,41 +107,68 @@ class _HomeShellState extends State<HomeShell> {
                             children: [
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 5,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isActive ? ColorConst.primaryExtraLightGreen : Colors.transparent,
+                                  color: isActive
+                                      ? ColorConst.primaryExtraLightGreen
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Icon(
                                   isActive ? meta.activeIcon : meta.icon,
                                   size: 22,
-                                  color: isActive ? ColorConst.primaryGreen : ColorConst.textSecondary,
+                                  color: isActive
+                                      ? ColorConst.primaryGreen
+                                      : ColorConst.textSecondary,
                                 ),
                               ),
                               if (badge > 0)
                                 Positioned(
-                                  top: -2, right: -2,
+                                  top: -2,
+                                  right: -2,
                                   child: Container(
-                                    width: 16, height: 16,
+                                    width: 16,
+                                    height: 16,
                                     decoration: BoxDecoration(
-                                      color: i == 1 ? ColorConst.criticalRed : ColorConst.criticalYellowLightText,
+                                      color: i == 1
+                                          ? ColorConst.criticalRed
+                                          : ColorConst.criticalYellowLightText,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 1.5),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 1.5,
+                                      ),
                                     ),
                                     child: Center(
-                                      child: Text('$badge',
-                                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
+                                      child: Text(
+                                        '$badge',
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                             ],
                           ),
                           const SizedBox(height: 3),
-                          Text(meta.label,
+                          Text(
+                            meta.label,
                             style: TextStyle(
-                              fontSize: 11, fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                              color: isActive ? ColorConst.primaryGreen : ColorConst.textSecondary,
-                            )),
+                              fontSize: 11,
+                              fontWeight: isActive
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isActive
+                                  ? ColorConst.primaryGreen
+                                  : ColorConst.textSecondary,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -157,10 +205,12 @@ class _HomeShellState extends State<HomeShell> {
         children: [
           // Title block
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: ColorConst.primaryExtraLightGreen,
-              borderRadius: BorderRadius.circular(11)),
+              borderRadius: BorderRadius.circular(11),
+            ),
             child: Icon(icons[_tab], size: 20, color: ColorConst.primaryGreen),
           ),
           const SizedBox(width: 12),
@@ -168,11 +218,22 @@ class _HomeShellState extends State<HomeShell> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(titles[_tab],
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800,
-                      color: ColorConst.kTextHead, letterSpacing: -0.4)),
-                Text(subs[_tab],
-                  style: const TextStyle(fontSize: 11, color: ColorConst.textSecondary)),
+                Text(
+                  titles[_tab],
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: ColorConst.kTextHead,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                Text(
+                  subs[_tab],
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: ColorConst.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -185,12 +246,25 @@ class _HomeShellState extends State<HomeShell> {
                 color: ColorConst.primaryGreen,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.shopping_cart_rounded, size: 12, color: Colors.white),
-                const SizedBox(width: 4),
-                Text('${_cart.length}',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
-              ]),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.shopping_cart_rounded,
+                    size: 12,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${_cart.length}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -202,5 +276,9 @@ class _HomeShellState extends State<HomeShell> {
 class _TabMeta {
   final String label;
   final IconData icon, activeIcon;
-  const _TabMeta({required this.label, required this.icon, required this.activeIcon});
+  const _TabMeta({
+    required this.label,
+    required this.icon,
+    required this.activeIcon,
+  });
 }
