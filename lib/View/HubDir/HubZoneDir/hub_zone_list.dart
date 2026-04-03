@@ -186,7 +186,6 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
     if (lat != null && lng != null) {
       return LatLng(lat, lng);
     }
-    return LatLng(zone.latitude, zone.longitude);
   }
 
   double _cityZoneRadius(HubZoneListData zone) {

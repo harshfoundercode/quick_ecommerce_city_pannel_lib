@@ -1452,8 +1452,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_stock_model.dart' as prefix0;
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_stock_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
 
@@ -1788,7 +1786,6 @@ class _StockCardState extends State<_StockCard> {
     final p = widget.item.product;
     final brand = widget.item.brand;
     final category = widget.item.category;
-    final variant = widget.item.variant;
     final images = widget.item.images ?? [];
 
     final stock = widget.item.stock ?? 0;
@@ -1796,11 +1793,8 @@ class _StockCardState extends State<_StockCard> {
         widget.item.perUnitPrice?.toString() ?? '0') ??
         0;
     final originalPrice = p?.price ?? 0;
-    final discountPrice = p?.discountPrice ?? 0;
-    final totalReceived =
-        int.tryParse(widget.item.totalReceived?.toString() ?? '0') ?? 0;
-    final totalSent =
-        int.tryParse(widget.item.totalSent?.toString() ?? '0') ?? 0;
+    final totalReceived = int.tryParse(widget.item.totalReceived?.toString() ?? '0') ?? 0;
+    final totalSent = int.tryParse(widget.item.totalSent?.toString() ?? '0') ?? 0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -2058,7 +2052,6 @@ class _ExpandedDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = item.product;
-    final brand = item.brand;
     final category = item.category;
     final variant = item.variant;
 
@@ -2478,58 +2471,6 @@ class _BreadcrumbRow extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool primary;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.label,
-    required this.icon,
-    required this.primary,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: primary ? ColorConst.primaryGreen : ColorConst.containerGrey,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 14,
-                color: primary
-                    ? ColorConst.white
-                    : ColorConst.textSecondary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: primary
-                      ? ColorConst.white
-                      : ColorConst.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ─── Shimmer Card ─────────────────────────────────────────────────────────────
 class _ShimmerCard extends StatefulWidget {
   const _ShimmerCard();
@@ -2538,8 +2479,7 @@ class _ShimmerCard extends StatefulWidget {
   State<_ShimmerCard> createState() => _ShimmerCardState();
 }
 
-class _ShimmerCardState extends State<_ShimmerCard>
-    with SingleTickerProviderStateMixin {
+class _ShimmerCardState extends State<_ShimmerCard> with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _anim;
 

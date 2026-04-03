@@ -598,7 +598,7 @@ class _AllHubScreenState extends State<AllHubScreen>
           child: ListView(
             shrinkWrap: true,
             padding: EdgeInsets.symmetric(
-              horizontal: Sizes.screenWidth * (mobile ? 0.04 : 0.02),
+              horizontal: Sizes.screenWidth * (mobile ? 0.04 : 0.01),
             ),
             children: [
               Column(
@@ -715,7 +715,6 @@ class _AllHubScreenState extends State<AllHubScreen>
   Widget _buildSearchAndFilter(List<Hubs> allHubs) {
     final active = allHubs.where((h) => h.status == 1).length;
     final inactive = allHubs.length - active;
-    final mobile = Responsive.isMobile(context);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -793,8 +792,7 @@ class _AllHubScreenState extends State<AllHubScreen>
 
   // ── Hub List Section ──────────────────────────────────────────────────────
 
-  Widget _buildHubSection(AllHubViewModel vm, bool mobile, List<Hubs> filtered,
-      List<Hubs> displayList, List<Hubs> allHubs) {
+  Widget _buildHubSection(AllHubViewModel vm, bool mobile, List<Hubs> filtered, List<Hubs> displayList, List<Hubs> allHubs) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -835,15 +833,6 @@ class _AllHubScreenState extends State<AllHubScreen>
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF6B7280))),
                 ),
-                const Spacer(),
-                if (!mobile) ...[
-                  const Icon(Icons.sort_rounded,
-                      size: 14, color: Color(0xFF9CA3AF)),
-                  const SizedBox(width: 4),
-                  const Text('ID asc',
-                      style: TextStyle(
-                          fontSize: 11, color: Color(0xFF9CA3AF))),
-                ],
               ],
             ),
           ),
@@ -1371,113 +1360,64 @@ class _HubDesktopRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          // Hub details
-          Expanded(
-            flex: 3,
-            child: Row(
+          SizedBox(
+            width: Sizes.screenWidth*0.272,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    gradient: _isActive
-                        ? const LinearGradient(
-                      colors: [ColorConst.primaryGreen, ColorConst.primaryGreen],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                        : null,
-                    color: _isActive ? null : const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                  child: Icon(Icons.hub_outlined,
-                      color: _isActive
-                          ? Colors.white
-                          : const Color(0xFF9CA3AF),
-                      size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(hub.hubName ?? '—',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                              color: Color(0xFF111827))),
-                      const SizedBox(height: 3),
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 10, color: Color(0xFF9CA3AF)),
-                          const SizedBox(width: 3),
-                          Expanded(
-                            child: Text(hub.address ?? '—',
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Color(0xFF9CA3AF)),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 1),
-                      Text('Hub #${hub.hubId}',
-                          style: const TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFFD1D5DB),
-                              fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Manager
-          Expanded(
-            flex: 2,
-            child: _ManagerCell(hub: hub),
-          ),
-
-          // Workforce
-          Expanded(
-            child: Row(
-              children: [
-                const Icon(Icons.pedal_bike_outlined,
-                    size: 14, color: Color(0xFF9CA3AF)),
-                const SizedBox(width: 5),
-                Text('${hub.deliveryBoys ?? 0}',
+                Text(hub.hubName.toUpperCase() ?? "-",
                     style: const TextStyle(
-                        fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF374151))),
+                        fontSize: 13,
+                        color: ColorConst.textBlack)),
+                SizedBox(height: Sizes.screenHeight*0.001),
+                Row(
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 10, color: ColorConst.textGrey),
+                    SizedBox(width: Sizes.screenWidth*0.002),
+                    Text(hub.address ?? '—',
+                        style: const TextStyle(
+                            fontSize: 11,
+                            color: ColorConst.textGrey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                  ],
+                ),
               ],
             ),
           ),
-
+          SizedBox(
+            width: Sizes.screenWidth*0.17,
+              child: _ManagerCell(hub: hub)),
+          SizedBox(width: Sizes.screenWidth*0.014),
+          SizedBox(
+            width: Sizes.screenWidth*0.045,
+            child: Center(
+              child: Text('${hub.deliveryBoys ?? 0}',
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF374151))),
+            ),
+          ),
+          SizedBox(width: Sizes.screenWidth*0.04),
           // Orders
-          Expanded(
-            child: Row(
-              children: [
-                const Icon(Icons.receipt_long_outlined,
-                    size: 14, color: Color(0xFF9CA3AF)),
-                const SizedBox(width: 5),
-                Text('${hub.activeOrders ?? 0}',
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF374151))),
-              ],
+          SizedBox(
+            width: Sizes.screenWidth*0.035,
+            child: Center(
+              child: Text('${hub.activeOrders ?? 0}',
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF374151))),
             ),
           ),
-
+          SizedBox(width: Sizes.screenWidth*0.044),
           // Status
-          Expanded(
-            child: _StatusPill(isActive: _isActive),
-          ),
-
+          SizedBox(
+              width: Sizes.screenWidth*0.06,
+              child: _StatusPill(isActive: _isActive)),
+          Spacer(),
           // Actions
           SizedBox(
             width: 80,
@@ -1521,6 +1461,7 @@ class _StatusPill extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
               width: 5,
@@ -1585,37 +1526,20 @@ class _ManagerCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.person_outline_rounded,
-              size: 15, color: Color(0xFF2563EB)),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(hub.managerName ?? '—',
-                  style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF111827)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis),
-              if (hub.managerPhone != null)
-                Text(hub.managerPhone!,
-                    style: const TextStyle(
-                        fontSize: 11, color: Color(0xFF9CA3AF))),
-            ],
-          ),
-        ),
+        Text(hub.managerName ?? '—',
+            style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF111827)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis),
+        if (hub.managerPhone != null)
+          Text(hub.managerPhone!,
+              style: const TextStyle(
+                  fontSize: 11, color: Color(0xFF9CA3AF))),
       ],
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/dashboard_model.dart';
 
 class ViewAllHubsScreen extends StatefulWidget {
