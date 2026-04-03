@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/app_button.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/hub_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubZoneDir/hub_zone_edit.dart';
@@ -74,6 +75,7 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
             _setCityZone(double.parse(city.lat!), double.parse(city.long!), double.parse(city.radiuskm!));
           }
           _buildMapOverlays(hvm.hubZones);
+
           if (hvm.hubZones.isNotEmpty && hvm.hubZones.first.hasValidCoordinates) {
             _onZoneTap(hvm.hubZones.first);
           }
@@ -117,8 +119,8 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
           circleId: const CircleId('city_zone'),
           center: _cityCenter!,
           radius: _cityRadiusKm! * 1000,
-          fillColor: Colors.blue.withOpacity(0.08),
-          strokeColor: Colors.blue.withOpacity(0.6),
+          fillColor: Colors.blue.withValues(alpha: 0.08),
+          strokeColor: Colors.blue.withValues(alpha: 0.6),
           strokeWidth: 2,
         ),
       );
@@ -160,13 +162,12 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
     _mapController?.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: _cityCenter!,
-          zoom:   _radiusToZoom(_cityRadiusKm!),
+          target: LatLng(zone.latitude, zone.longitude),
+          zoom:   _radiusToZoom(zone.radiusInKm),
         ),
       ),
     );
   }
-
   double _radiusToZoom(double radiusKm) =>
       (14 - math.log(radiusKm) / math.log(2)).clamp(8.0, 16.0);
 
@@ -201,39 +202,23 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
     );
   }
 
-  // ── FIX: helper to safely parse city-zone boundary from the zone model ──────
-  // Adjust the field names below to match your actual HubZoneListData model.
-  // Common patterns: zone.cityZoneLat, zone.cityzone?.lat, zone.cityzonelat, etc.
-  // LatLng _cityZoneCenter(HubZoneListData zone) {
-  //   try {
-  //     final lat = double.tryParse(zone.lat?.toString() ?? '');
-  //     final lng = double.tryParse(zone.long?.toString() ?? '');
-  //     if (lat != null && lng != null) return LatLng(lat, lng);
-  //     print(zone.latitude);
-  //     print(zone.longitude);
-  //     print("sdguyvdu");
-  //   } catch (_) {}
-  //   // Fallback: use hub location itself (boundary check will be skipped gracefully)
-  //   return LatLng(zone.latitude, zone.longitude);
-  //
-  // }
 
   LatLng _cityZoneCenter(HubZoneListData zone) {
+    try {
+      final lat = double.tryParse(zone.lat?.toString() ?? '');
+      final lng = double.tryParse(zone.long?.toString() ?? '');
+      if (lat != null && lng != null) return LatLng(lat, lng);
+    } catch (_) {}
     return LatLng(zone.latitude, zone.longitude);
+
   }
 
   double _cityZoneRadius(HubZoneListData zone) {
-    // ❌ NEVER use hub radius here
-    // Instead use city radius from API (if available)
-
-    final cityRadius = zone.radiusInKm; // <-- CHECK YOUR MODEL
-
-    if (cityRadius != null && cityRadius > 0) {
+    final cityRadius = zone.radiusInKm;
+    if (cityRadius > 0) {
       return cityRadius;
     }
-
-    // TEMP FIX (so circle always shows)
-    return 5; // 5 km default
+    return 5;
   }
 
   @override
@@ -364,25 +349,17 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                     child: _ZoneDetailSheet(
                       zone: _selectedZone!,
                       zoneColor: _zoneColors[
-                      hvm.hubZones.indexOf(_selectedZone!) %
-                          _zoneColors.length],
+                      hvm.hubZones.indexOf(_selectedZone!) % _zoneColors.length],
                       onClose: _closeBottomSheet,
-
-                      // ── FIX: Corrected Navigator call ─────────────────────
                       onEdit: () {
                         final zoneToEdit = _selectedZone!;
-                        print(_selectedZone?.radiusInKm);
-                        print(_selectedZone?.long);
-                        print(_selectedZone?.lat);
-                        print("evduwve");
                         _closeBottomSheet();
                         Future.delayed(
                           const Duration(milliseconds: 300),
                               () {
                             if (!context.mounted) return;
 
-                            Navigator.push(
-                              context,
+                            Navigator.push(context,
                               MaterialPageRoute(
                                 builder: (_) => HubZoneEditScreen(
                                   zone: zoneToEdit,
@@ -392,16 +369,10 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
                               ),
                             ).then((_) {
                               if (!context.mounted) return;
-                              final hubZoneData = Provider.of<HubZoneViewModel>(
-                                  context,
-                                  listen: false);
-                              hubZoneData
-                                  .getHubZoneListDataApi(context)
-                                  .then((_) {
-                                _buildMapOverlays(hubZoneData.hubZones);
+                              final hubZoneData = Provider.of<HubZoneViewModel>(context, listen: false);
+                              hubZoneData.getHubZoneListDataApi(context).then((_) {_buildMapOverlays(hubZoneData.hubZones);
                               });
                             });
-                            print("evduwve");
                           },
                         );
                       },
@@ -474,8 +445,6 @@ class _HubZoneMapScreenState extends State<HubZoneMapScreen>
   }
 }
 
-// ── Floating map button ───────────────────────────────────────────────────────
-
 class _MapButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -514,8 +483,6 @@ class _MapButton extends StatelessWidget {
   }
 }
 
-// ── Bottom Detail Sheet ───────────────────────────────────────────────────────
-
 class _ZoneDetailSheet extends StatelessWidget {
   final HubZoneListData zone;
   final Color zoneColor;
@@ -534,278 +501,193 @@ class _ZoneDetailSheet extends StatelessWidget {
     final isActive = zone.status == 1 || zone.status == HubZoneStatus.active;
 
     return Container(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 24,
-            offset: Offset(0, -6),
-          ),
-        ],
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 12),
+
+          /// 🔹 drag handle
           Container(
-            width: 40,
-            height: 4,
+            width: 32,
+            height: 3,
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: zoneColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child:
-                  Icon(Icons.hub_rounded, color: zoneColor, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        zone.name.toString(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E293B),
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Row(
-                        children: [
-                          Container(
-                            width: 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              color: isActive
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            isActive ? 'Active' : 'Inactive',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: isActive
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFFEF4444),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: onClose,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.close_rounded,
-                        size: 18, color: Color(0xFF64748B)),
-                  ),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
 
-          const SizedBox(height: 16),
-          Divider(height: 1, color: Colors.grey.shade100),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Info
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                _InfoRow(
-                  icon: Icons.location_on_rounded,
-                  iconColor: const Color(0xFFEF4444),
-                  label: 'Address',
-                  value: zone.address?.toString() ?? 'N/A',
+          /// 🔹 Header
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: zoneColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 12),
-                Row(
+                child: Icon(Icons.hub_rounded,
+                    color: zoneColor, size: 18),
+              ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: _InfoTile(
-                        icon: Icons.radar_rounded,
-                        iconColor: zoneColor,
-                        label: 'Coverage',
-                        value: '${zone.radiusInKm.toStringAsFixed(1)} km',
+                    Text(
+                      zone.name.toString(),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E293B),
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _InfoTile(
-                        icon: Icons.pin_drop_rounded,
-                        iconColor: const Color(0xFF6366F1),
-                        label: 'Pincode',
-                        value: zone.pincode?.toString() ?? 'N/A',
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _InfoTile(
-                        icon: Icons.grid_view_rounded,
-                        iconColor: const Color(0xFFF59E0B),
-                        label: 'Zone ID',
-                        value: '#${zone.cityzoneid}',
-                      ),
-                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Container(
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFEF4444),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isActive ? "Active" : "Inactive",
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: isActive
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFEF4444),
+                          ),
+                        ),
+                      ],
+                    )
                   ],
                 ),
-              ],
-            ),
+              ),
+
+              GestureDetector(
+                onTap: onClose,
+                child: const Icon(Icons.close_rounded,
+                    size: 18, color: Color(0xFF64748B)),
+              )
+            ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Edit button
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-                20, 0, 20, MediaQuery.of(context).padding.bottom + 16),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_rounded, size: 18),
-                label: const Text(
-                  'Edit Hub Zone',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: zoneColor,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+          /// 🔹 Info Cards (clean grid)
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: _miniCard(
+                  icon: Icons.radar_rounded,
+                  label: "Coverage",
+                  value:
+                  "${zone.radiusInKm.toStringAsFixed(1)} km",
+                  color: zoneColor,
                 ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _miniCard(
+                  icon: Icons.pin_drop,
+                  label: "Pincode",
+                  value: zone.pincode?.toString() ?? "N/A",
+                  color: const Color(0xFF6366F1),
+                ),
+              ),
+            ],
           ),
+
+          const SizedBox(height: 8),
+
+          /// 🔹 Address (full width)
+          _miniCard(
+            icon: Icons.location_on,
+            label: "Address",
+            value: zone.address ?? "N/A",
+            color: const Color(0xFFEF4444),
+            isFull: true,
+          ),
+
+          const SizedBox(height: 14),
+
+          AppBtn(
+            height: 42,
+            borderRadius: 10,
+            onTap: onEdit,
+            title: "Edit Zone",
+            color: zoneColor,
+          )
         ],
       ),
     );
   }
-}
 
-// ── Info widgets ──────────────────────────────────────────────────────────────
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String value;
-
-  const _InfoRow({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 16, color: iconColor),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label,
-                  style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF94A3B8))),
-              const SizedBox(height: 2),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B))),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String value;
-
-  const _InfoTile({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  /// 🔥 Mini Card Widget (clean + compact)
+  Widget _miniCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    bool isFull = false,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment:
+        isFull ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: iconColor),
-          const SizedBox(height: 6),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1E293B))),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 10,
-                  color: Color(0xFF94A3B8),
-                  fontWeight: FontWeight.w500)),
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  maxLines: isFull ? 2 : 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
+
