@@ -8,17 +8,23 @@ class PremiumBg extends StatefulWidget {
   State<PremiumBg> createState() => _PremiumBgState();
 }
 
-class _PremiumBgState extends State<PremiumBg>
-    with TickerProviderStateMixin {
+class _PremiumBgState extends State<PremiumBg> with TickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
+    super.initState();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 16),
     )..repeat(reverse: true);
-    super.initState();
+
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

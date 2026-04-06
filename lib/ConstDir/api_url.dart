@@ -37,4 +37,6 @@ class ApiUrl {
       "${configUrl1}place_autocomplete?query=$query";
   static String mapPlaceDetailsUrl(String placeId) =>
       "${configUrl1}place_details?place_id=$placeId";
+
+  ///el do or h
 }

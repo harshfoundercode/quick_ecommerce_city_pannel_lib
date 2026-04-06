@@ -71,7 +71,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(10),
-                            child: Image.asset("Assets/app_logo.png"),
+                            child: Image.asset("Assets/app_logo.png",width: 55,
+                              height: 55,
+                              cacheWidth: 55,
+                              cacheHeight: 55,),
                           ),
                         ),
 

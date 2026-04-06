@@ -21,8 +21,7 @@ class _NotificationViewState extends State<NotificationView> {
     super.initState();
 
     Future.microtask(() {
-      Provider.of<NotificationViewModel>(context, listen: false)
-          .getNotificationDataApi(context);
+      Provider.of<NotificationViewModel>(context, listen: false).getNotificationDataApi(context);
     });
   }
 
