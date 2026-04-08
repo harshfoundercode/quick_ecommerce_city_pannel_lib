@@ -49,4 +49,22 @@ class ColorConst {
   static const kTextMuted   = Color(0xFF94A3B8);
   static const kWarning     = Color(0xFFF59E0B);
 
+  // ── Palette (botanical) ───────────────────────────────────────────────────────
+  static const green      = Color(0xFF16A34A);
+  static const greenDark  = Color(0xFF14532D);
+  static const greenLight = Color(0xFF4ADE80);
+  static const greenPale  = Color(0xFFF0FDF4);
+  static const greenSoft  = Color(0xFFDCFCE7);
+  static const cream      = Color(0xFFFAF7F2);
+  static const creamDeep  = Color(0xFFF2EDE4);
+  static const inkMid     = Color(0xFF5C5E4E);
+  static const inkLight   = Color(0xFF9A9C8A);
+  static const stroke     = Color(0xFFE0EAE0);
+  static const honey      = Color(0xFFD4A847);
+  static const honeyBg    = Color(0xFFFDF6E3);
+  static const terra      = Color(0xFFC4622D);
+  static const terraLight = Color(0xFFFAECE4);
+  static const danger     = Color(0xFFDC2626);
+  static const dangerBg   = Color(0xFFFEF2F2);
+
 }

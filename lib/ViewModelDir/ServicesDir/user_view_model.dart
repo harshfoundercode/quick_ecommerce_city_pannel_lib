@@ -2,45 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/user_data_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// class UserViewModel with ChangeNotifier {
-//
-//   /// SAVE TOKEN
-//   Future<bool> saveToken(String token) async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     await sp.setString('token', token);
-//     notifyListeners();
-//     return true;
-//   }
-//
-//   /// GET TOKEN
-//   Future<String?> getToken() async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     return sp.getString('token');
-//   }
-//
-//   /// SAVE USER ID
-//   Future<bool> saveUser(String userId) async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     await sp.setString('user_id', userId);
-//     notifyListeners();
-//     return true;
-//   }
-//
-//   /// GET USER
-//   Future<User> getUser() async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     String userId = sp.getString('user_id') ?? "0";
-//     return User(id: userId);
-//   }
-//
-//   /// 🔥 LOGOUT (REMOVE EVERYTHING)
-//   Future<void> logout() async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     await sp.remove('token');
-//     await sp.remove('user_id');
-//     notifyListeners();
-//   }
-// }
 class UserViewModel with ChangeNotifier {
 
   String? _token;
@@ -58,11 +19,13 @@ class UserViewModel with ChangeNotifier {
   String? get userId => _userId;
 
   /// ---------------- SAVE TOKEN ----------------
+
   Future<void> saveToken(String token) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setString('token', token);
 
     _token = token;
+    await updateLastActivity();
   }
 
   /// ---------------- GET TOKEN (fallback safe) ----------------
@@ -107,4 +70,27 @@ class UserViewModel with ChangeNotifier {
 
     notifyListeners(); // only here makes sense
   }
+
+  /// ---------------- SAVE LAST ACTIVITY ----------------
+  Future<void> updateLastActivity() async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setInt(
+      'last_activity',
+      DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  /// ---------------- CHECK SESSION EXPIRED ----------------
+  Future<bool> isSessionExpired() async {
+    final sp = await SharedPreferences.getInstance();
+    final lastActivity = sp.getInt('last_activity');
+
+    if (lastActivity == null) return true;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final difference = now - lastActivity;
+
+    return difference > (30 * 60 * 1000); // 30 min
+  }
+
 }

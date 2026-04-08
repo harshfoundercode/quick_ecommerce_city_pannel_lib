@@ -13,39 +13,39 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_vi
 class CityStockViewModel with ChangeNotifier {
   final _cityStockListRepo = CityStockListRepo();
 
-  CityStockModel? _cityStockModel;
-  CityStockModel? get cityStockModel => _cityStockModel;
-
-  void setCityStockModel(CityStockModel data) {
-    _cityStockModel = data;
-    notifyListeners();
-  }
-
-  Future<void> getCityStockDataApi(context) async {
-    _cityStockModel = null;
-    notifyListeners();
-    try {
-      final value = await _cityStockListRepo.cityStockListApi();
-      int statusCode = value['statusCode'] ?? 0;
-      Map<String, dynamic> body = value['body'] ?? {};
-
-      if (statusCode == 200) {
-        final cityStockDataModel = CityStockModel.fromJson(body);
-        setCityStockModel(cityStockDataModel);
-      } else {
-        CustomSnackBar.show(
-          context,
-          message: body["message"],
-          title: 'Error',
-          type: SnackBarType.error,
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
-    }
-  }
+  // CityStockModel? _cityStockModel;
+  // CityStockModel? get cityStockModel => _cityStockModel;
+  //
+  // void setCityStockModel(CityStockModel data) {
+  //   _cityStockModel = data;
+  //   notifyListeners();
+  // }
+  //
+  // Future<void> getCityStockDataApi(context) async {
+  //   _cityStockModel = null;
+  //   notifyListeners();
+  //   try {
+  //     final value = await _cityStockListRepo.cityStockListApi();
+  //     int statusCode = value['statusCode'] ?? 0;
+  //     Map<String, dynamic> body = value['body'] ?? {};
+  //
+  //     if (statusCode == 200) {
+  //       final cityStockDataModel = CityStockModel.fromJson(body);
+  //       setCityStockModel(cityStockDataModel);
+  //     } else {
+  //       CustomSnackBar.show(
+  //         context,
+  //         message: body["message"],
+  //         title: 'Error',
+  //         type: SnackBarType.error,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print(e);
+  //     }
+  //   }
+  // }
 
   ///============ CITY TRANSFER TO HUB API ===============================
 
@@ -254,9 +254,9 @@ class CityStockViewModel with ChangeNotifier {
     _selectedQty.clear();
 
     for (var item in items) {
-      if ((item.stock ?? 0) < 10 && item.productid != null) {
-        _selectedProductIds.add(item.productid!);
-        _selectedQty[item.productid!] = 5;
+      if ((item.totalStock ?? 0) < 10 && item.productId != null) {
+        _selectedProductIds.add(item.productId!);
+        _selectedQty[item.productId!] = 5;
       }
     }
     notifyListeners();

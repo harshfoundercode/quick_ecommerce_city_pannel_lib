@@ -1,7 +1,9 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDireyBgvn/providers/stock_provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/add_hub_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_city_stocks_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/auth_view_model.dart';
@@ -33,5 +35,7 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => HubManagerEditViewModel()),
     ChangeNotifierProvider(create: (context) => CityStockViewModel()),
     ChangeNotifierProvider(create: (context) => HubPerformanceViewModel()),
+    ChangeNotifierProvider(create: (context) => AdminStockListRecieveViewModel()),
+    ChangeNotifierProvider(create: (context) => StockProvider()),
   ];
 }

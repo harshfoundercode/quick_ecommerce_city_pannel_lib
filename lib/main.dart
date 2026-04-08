@@ -6,8 +6,7 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
-import 'package:quick_ecommerce_city_panel_redefined/app_initializer.dart'
-    show AppInitializer;
+import 'package:quick_ecommerce_city_panel_redefined/activity_tracker.dart';
 import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -52,24 +51,26 @@ class _MyAppState extends State<MyApp> {
 
     return MultiProvider(
       providers: ProvidersHome().providers,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Fasto City Panel',
-        theme: ThemeData(
-          scaffoldBackgroundColor: ColorConst.bgColor,
-          fontFamily: "Poppins",
+      child: ActivityTracker(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Fasto City Panel',
+          theme: ThemeData(
+            scaffoldBackgroundColor: ColorConst.bgColor,
+            fontFamily: "Poppins",
+          ),
+          navigatorKey: navigatorKey,
+          initialRoute: RoutesName.appInitializer,
+          onGenerateRoute: (settings) {
+            if (settings.name != null) {
+              return CupertinoPageRoute(
+                builder: Routers.generateRoute(settings.name!),
+                settings: settings,
+              );
+            }
+            return null;
+          },
         ),
-        navigatorKey: navigatorKey,
-        initialRoute: RoutesName.appInitializer,
-        onGenerateRoute: (settings) {
-          if (settings.name != null) {
-            return CupertinoPageRoute(
-              builder: Routers.generateRoute(settings.name!),
-              settings: settings,
-            );
-          }
-          return null;
-        },
       ),
     );
   }
