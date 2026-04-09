@@ -13,39 +13,39 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_vi
 class CityStockViewModel with ChangeNotifier {
   final _cityStockListRepo = CityStockListRepo();
 
-  // CityStockModel? _cityStockModel;
-  // CityStockModel? get cityStockModel => _cityStockModel;
-  //
-  // void setCityStockModel(CityStockModel data) {
-  //   _cityStockModel = data;
-  //   notifyListeners();
-  // }
-  //
-  // Future<void> getCityStockDataApi(context) async {
-  //   _cityStockModel = null;
-  //   notifyListeners();
-  //   try {
-  //     final value = await _cityStockListRepo.cityStockListApi();
-  //     int statusCode = value['statusCode'] ?? 0;
-  //     Map<String, dynamic> body = value['body'] ?? {};
-  //
-  //     if (statusCode == 200) {
-  //       final cityStockDataModel = CityStockModel.fromJson(body);
-  //       setCityStockModel(cityStockDataModel);
-  //     } else {
-  //       CustomSnackBar.show(
-  //         context,
-  //         message: body["message"],
-  //         title: 'Error',
-  //         type: SnackBarType.error,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print(e);
-  //     }
-  //   }
-  // }
+  CityStockModel? _cityStockModel;
+  CityStockModel? get cityStockModel => _cityStockModel;
+
+  void setCityStockModel(CityStockModel data) {
+    _cityStockModel = data;
+    notifyListeners();
+  }
+
+  Future<void> getCityStockDataApi(context) async {
+    _cityStockModel = null;
+    notifyListeners();
+    try {
+      final value = await _cityStockListRepo.cityStockListApi();
+      int statusCode = value['statusCode'] ?? 0;
+      Map<String, dynamic> body = value['body'] ?? {};
+
+      if (statusCode == 200) {
+        final cityStockDataModel = CityStockModel.fromJson(body);
+        setCityStockModel(cityStockDataModel);
+      } else {
+        CustomSnackBar.show(
+          context,
+          message: body["message"],
+          title: 'Error',
+          type: SnackBarType.error,
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
 
   ///============ CITY TRANSFER TO HUB API ===============================
 
@@ -335,23 +335,6 @@ class CityStockViewModel with ChangeNotifier {
   CityHubHistoryModel? _cityHubHistoryModel;
   CityHubHistoryModel? get cityHubHistoryModel => _cityHubHistoryModel;
 
-  List<HubGroup> get hubGroups {
-    final raw = _cityHubHistoryModel?.data ?? [];
-    final Map<int, HubGroup> map = {};
-    for (final item in raw) {
-      final id = item.hubId ?? 0;
-      if (!map.containsKey(id)) {
-        map[id] = HubGroup(
-          hubId: id,
-          hubName: item.hubName ?? '',
-          items: [],
-        );
-      }
-      map[id]!.items.add(item);
-    }
-    return map.values.toList();
-  }
-
   bool _historyLoading = false;
   bool get historyLoading => _historyLoading;
 
@@ -468,3 +451,4 @@ class CityStockViewModel with ChangeNotifier {
 
 
 }
+
