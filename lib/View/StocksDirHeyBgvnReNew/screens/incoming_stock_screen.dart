@@ -15,7 +15,7 @@ class IncomingStockScreen extends StatelessWidget {
     return Column(
       children: [
         const AppHeader(
-            title: 'Incoming Stock', subtitle: 'Deliveries receive karein'),
+            title: 'Incoming Stock', subtitle: 'Check your incomming stocks'),
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(14),
@@ -78,9 +78,9 @@ class _ShipmentCard extends StatelessWidget {
   String _dateLabel(DateTime dt) {
     final diff = dt.difference(DateTime.now()).inDays;
     if (diff < 0) return '${diff.abs()}d overdue';
-    if (diff == 0) return 'Aaj';
-    if (diff == 1) return 'Kal';
-    return '$diff din mein';
+    if (diff == 0) return 'Today';
+    if (diff == 1) return 'Tomorrow';
+    return '$diff days';
   }
 }
 
