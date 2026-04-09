@@ -23,6 +23,8 @@ class ApiUrl {
   static String cityStockListUrl = "${configUrl1}cityStock";
   static String cityTransferToHubUrl = "${configUrl1}citytransfer-to-hub";  /// stock send to hub
   static String cityRequestInventoryUrl = "${configUrl1}cityRequests"; /// stock request to admin
+  static String adminTransferHistoryUrl = "${configUrl1}admintransfer_history"; /// admin ke beje hue incoming stock history check
+  static String acceptTransferUrl = "${configUrl1}accept_transfer"; /// admin ke beje hue incoming stock accept
 
   ///city saman lene ke liye reuwst krega uska h yeh
   static String cityHubHistoryUrl = "${configUrl1}cityhub-history";

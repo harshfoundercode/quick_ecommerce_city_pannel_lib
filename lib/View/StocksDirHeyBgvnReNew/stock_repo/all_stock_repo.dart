@@ -17,5 +17,29 @@ class AllCityStockDataNewRepo {
       rethrow;
     }
   }
+  Future<dynamic> adminIncomingStockApi() async {
+    await _apiServices.initializeToken();
+    try {
+      dynamic response = await _apiServices.getGetApiResponse(ApiUrl.adminTransferHistoryUrl);
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred during adminTransferHistoryUrl api: $e');
+      }
+      rethrow;
+    }
+  }
+  Future<dynamic> adminIncomingStockAcceptApi(dynamic data) async {
+    await _apiServices.initializeToken();
+    try {
+      dynamic response = await _apiServices.getPostApiResponse(ApiUrl.acceptTransferUrl,data);
+      return response;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred during acceptTransferUrl api: $e');
+      }
+      rethrow;
+    }
+  }
 }
 

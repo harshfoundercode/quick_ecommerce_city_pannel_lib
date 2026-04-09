@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     StockOverviewScreen(),
     BulkRequestScreen(),
     HistoryScreen(),
-    IncomingStockScreen(),
+    AdminIncomingStockScreen(),
   ];
 
   @override

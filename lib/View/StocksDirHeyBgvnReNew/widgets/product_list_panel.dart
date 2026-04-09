@@ -3,7 +3,7 @@
 // import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 // import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/stock_provider_new.dart';
 // import '../providers/stock_provider.dart';
-// import '../models/models.dart';
+// import '../models/admin_incoming_models.dart';
 //
 // class ProductListPanel extends StatelessWidget {
 //   const ProductListPanel({super.key});
