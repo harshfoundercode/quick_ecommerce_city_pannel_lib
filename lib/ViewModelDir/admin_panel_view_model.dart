@@ -96,7 +96,6 @@ class AdminViewModel extends ChangeNotifier {
 
         SubMenuItem(title: "City Stocks", screen: MainScreen()),
         // SubMenuItem(title: "City Stocks", screen: HomeShell()),
-        // SubMenuItem(title: "City Stocks", screen: IncomingStockScreen()),
 
         // SubMenuItem(title: "City Stocks Old", screen: CityStockScreen()),
         // SubMenuItem(title: "City Stocks Request To Admin", screen: RequestStockToAdminScreen()),
