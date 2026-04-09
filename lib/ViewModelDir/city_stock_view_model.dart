@@ -267,6 +267,12 @@ class CityStockViewModel with ChangeNotifier {
     _setCityRequestLoading(true);
     final data = {
       "items": items,
+    //   "items": [
+    // {
+    // "productid": e.selectedProduct!.productId,
+    // "qty": int.tryParse(e.qtyController.text) ?? 1,
+    // };
+    //   ],
       "remarks": remarks,
     };
 

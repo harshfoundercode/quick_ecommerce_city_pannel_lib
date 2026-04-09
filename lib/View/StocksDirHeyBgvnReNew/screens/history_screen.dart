@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import '../providers/stock_provider.dart';
-import '../models/models.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/transfer_stock_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/stock_provider_new.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
 import '../widgets/app_header.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -14,6 +15,16 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   String _filter = 'all'; // all | admin | hub
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<CityStockViewModel>();
+      provider.cityRequestHistoryApi(context);
+      provider.cityHubHistoryApi(context);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final all = context.watch<StockProvider>().bulkRequests;

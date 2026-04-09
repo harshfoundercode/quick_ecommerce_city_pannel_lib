@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/incommin_stock_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/stock_provider_new.dart';
 import '../providers/stock_provider.dart';
 import '../models/models.dart';
 import '../widgets/app_header.dart';

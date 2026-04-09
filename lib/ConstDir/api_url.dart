@@ -21,8 +21,8 @@ class ApiUrl {
   static String hubZoneEditUrl = "${configUrl1}hubzone/update";
   static String hubManagerEditUrl = "${configUrl1}hubmanager/update";
   static String cityStockListUrl = "${configUrl1}cityStock";
-  static String cityTransferToHubUrl = "${configUrl1}citytransfer-to-hub";
-  static String cityRequestInventoryUrl = "${configUrl1}cityRequests";
+  static String cityTransferToHubUrl = "${configUrl1}citytransfer-to-hub";  /// stock send to hub
+  static String cityRequestInventoryUrl = "${configUrl1}cityRequests"; /// stock request to admin
 
   ///city saman lene ke liye reuwst krega uska h yeh
   static String cityHubHistoryUrl = "${configUrl1}cityhub-history";
@@ -38,5 +38,4 @@ class ApiUrl {
   static String mapPlaceDetailsUrl(String placeId) =>
       "${configUrl1}place_details?place_id=$placeId";
 
-  ///el do or h
 }

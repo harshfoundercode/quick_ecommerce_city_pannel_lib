@@ -18,7 +18,6 @@ class CityStockListRepo {
     }
   }
 
-
   Future<dynamic> cityTransferToHubApi(dynamic data) async {
     await _apiServices.initializeToken();
     try {

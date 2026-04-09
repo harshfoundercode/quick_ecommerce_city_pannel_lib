@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import '../providers/stock_provider.dart';
-import '../models/models.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/main_catsubcat_all_data_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/transfer_stock_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/stock_provider_new.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/all_hub_list_view_model.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
 import '../widgets/app_header.dart';
 
 class BulkRequestScreen extends StatefulWidget {
   const BulkRequestScreen({super.key});
+
   @override
   State<BulkRequestScreen> createState() => _BulkRequestScreenState();
 }
@@ -17,14 +21,14 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
   final TextEditingController _noteCtrl = TextEditingController();
   TransferType _transferType = TransferType.adminRequest;
 
-  static const List<String> _hubs = [
-    'Delhi Hub', 'Mumbai Hub', 'Bangalore Hub', 'Hyderabad Hub', 'Chennai Hub',
-  ];
+
   String? _selectedHub;
 
   @override
   void dispose() {
-    for (var c in _qtyCtrl.values) c.dispose();
+    for (var c in _qtyCtrl.values) {
+      c.dispose();
+    }
     _noteCtrl.dispose();
     super.dispose();
   }
@@ -33,15 +37,26 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
       _qtyCtrl[variantId] ??= TextEditingController(text: '0');
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      final allHubViewModel = Provider.of<AllHubViewModel>(context,listen: false);
+      allHubViewModel.getHubListDataApi(context);
+    });
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<StockProvider>();
-    // Always read from provider.selectedProducts — these are ALL selected products,
-    // even if filtered out in overview screen.
     final selected = provider.selectedProducts;
 
     return Column(
       children: [
-        const AppHeader(title: 'Stock Transfer', subtitle: 'Admin request ya Hub transfer'),
+        const AppHeader(
+            title: 'Stock Transfer',
+            subtitle: 'Admin request ya Hub transfer'
+        ),
         if (selected.isEmpty)
           _emptyState()
         else
@@ -66,7 +81,7 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
     );
   }
 
-  // ── Empty ──────────────────────────────────────────────────────────
+  // ── Empty State ────────────────────────────────────────────────────────
   Widget _emptyState() {
     return Expanded(
       child: Center(
@@ -74,18 +89,35 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 72, height: 72,
-              decoration: BoxDecoration(color: ColorConst.greenPale, borderRadius: BorderRadius.circular(18)),
-              child: const Icon(Icons.swap_horiz, color: ColorConst.primaryGreen, size: 32),
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: ColorConst.greenPale,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: const Icon(
+                Icons.swap_horiz,
+                color: ColorConst.primaryGreen,
+                size: 32,
+              ),
             ),
             const SizedBox(height: 18),
-            const Text('Koi product select nahi hai',
-                style: TextStyle(color: ColorConst.textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
+            const Text(
+              'Koi product select nahi hai',
+              style: TextStyle(
+                color: ColorConst.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
             const SizedBox(height: 6),
             const Text(
               'Stock Overview mein products select karein\nphir yahan transfer request banayein',
               textAlign: TextAlign.center,
-              style: TextStyle(color: ColorConst.textSecondary, fontSize: 13),
+              style: TextStyle(
+                color: ColorConst.textSecondary,
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -93,8 +125,8 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
     );
   }
 
-  // ── Selection bar ──────────────────────────────────────────────────
-  Widget _selectionBar(BuildContext ctx, StockProvider provider, List<Product> sel) {
+  // ── Selection Bar ──────────────────────────────────────────────────────
+  Widget _selectionBar(BuildContext context, StockProvider provider, List<Products> sel) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
@@ -105,23 +137,33 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
         children: [
           const Icon(Icons.check_circle, color: ColorConst.primaryGreen, size: 16),
           const SizedBox(width: 7),
-          Text('${sel.length} product(s) selected',
-              style: const TextStyle(color: ColorConst.primaryGreen, fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(
+            '${sel.length} product(s) selected',
+            style: const TextStyle(
+              color: ColorConst.primaryGreen,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
           const Spacer(),
           TextButton.icon(
-            onPressed: () { _qtyCtrl.clear(); provider.clearSelection(); },
+            onPressed: () {
+              _qtyCtrl.clear();
+              provider.clearProductSelection();
+            },
             icon: const Icon(Icons.close, size: 14),
             label: const Text('Clear All'),
             style: TextButton.styleFrom(
-                foregroundColor: ColorConst.error,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4)),
+              foregroundColor: ColorConst.error,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── Transfer type toggle ───────────────────────────────────────────
+  // ── Transfer Type Toggle ───────────────────────────────────────────────
   Widget _typeToggle() {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 12, 14, 0),
@@ -134,7 +176,7 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
       child: Row(
         children: [
           _toggleBtn('Admin Request', Icons.admin_panel_settings_outlined, TransferType.adminRequest),
-          _toggleBtn('Hub Transfer',  Icons.hub_outlined,                  TransferType.hubTransfer),
+          _toggleBtn('Hub Transfer', Icons.hub_outlined, TransferType.hubTransfer),
         ],
       ),
     );
@@ -144,21 +186,43 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
     final active = _transferType == type;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() { _transferType = type; _selectedHub = null; }),
+        onTap: () => setState(() {
+          _transferType = type;
+          _selectedHub = null;
+        }),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: active ? ColorConst.white : Colors.transparent,
             borderRadius: BorderRadius.circular(9),
-            boxShadow: active ? [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 6, offset: const Offset(0, 2))] : [],
+            boxShadow: active
+                ? [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.07),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              )
+            ]
+                : [],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 15, color: active ? ColorConst.primaryGreen : ColorConst.textGrey),
+              Icon(
+                icon,
+                size: 15,
+                color: active ? ColorConst.primaryGreen : ColorConst.textGrey,
+              ),
               const SizedBox(width: 6),
-              Text(label, style: TextStyle(fontSize: 13, fontWeight: active ? FontWeight.w700 : FontWeight.w400, color: active ? ColorConst.primaryGreen : ColorConst.textGrey)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w400,
+                  color: active ? ColorConst.primaryGreen : ColorConst.textGrey,
+                ),
+              ),
             ],
           ),
         ),
@@ -166,46 +230,97 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
     );
   }
 
-  // ── Hub dropdown ───────────────────────────────────────────────────
+  // ── Hub Dropdown ───────────────────────────────────────────────────────
+  /// 2. Purana _hubDropdown() method replace karo
+
   Widget _hubDropdown() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: ColorConst.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ColorConst.borderColor),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedHub,
-          hint: const Text('Hub select karein...', style: TextStyle(color: ColorConst.textGrey, fontSize: 13)),
-          isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, color: ColorConst.textGrey),
-          style: const TextStyle(color: ColorConst.textPrimary, fontSize: 14),
-          items: _hubs.map((h) => DropdownMenuItem(
-            value: h,
-            child: Row(children: [
-              const Icon(Icons.hub_outlined, size: 15, color: ColorConst.primaryGreen),
-              const SizedBox(width: 8),
-              Text(h),
-            ]),
-          )).toList(),
-          onChanged: (v) => setState(() => _selectedHub = v),
-        ),
-      ),
+    return Consumer<AllHubViewModel>(
+      builder: (context, hubProvider, child) {
+        final hubs = hubProvider.hubListModel?.data?.hubs ?? [];
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: ColorConst.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: ColorConst.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedHub,
+              hint: hubProvider.isLoading
+                  ? const Text(
+                'Loading hubs...',
+                style: TextStyle(
+                  color: ColorConst.textGrey,
+                  fontSize: 13,
+                ),
+              )
+                  : const Text(
+                'Hub select karein...',
+                style: TextStyle(
+                  color: ColorConst.textGrey,
+                  fontSize: 13,
+                ),
+              ),
+              isExpanded: true,
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                color: ColorConst.textGrey,
+              ),
+              style: const TextStyle(
+                color: ColorConst.textPrimary,
+                fontSize: 14,
+              ),
+              items: hubs.map<DropdownMenuItem<String>>((hub) {
+                return DropdownMenuItem<String>(
+                  value: hub.hubId.toString(),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.hub_outlined,
+                        size: 15,
+                        color: ColorConst.primaryGreen,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          hub.hubName?.toString() ?? 'Unnamed Hub',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedHub = value;
+                });
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
-  // ── Product card ───────────────────────────────────────────────────
-  Widget _productCard(Product product) {
+  // ── Product Card ───────────────────────────────────────────────────────
+  Widget _productCard(Products product) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: ColorConst.cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: ColorConst.borderColor),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 6, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,26 +331,60 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 34, height: 34,
-                  decoration: BoxDecoration(color: ColorConst.greenPale, borderRadius: BorderRadius.circular(9)),
-                  child: const Icon(Icons.inventory_2, color: ColorConst.primaryGreen, size: 17),
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: ColorConst.greenPale,
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: product.img != null && product.img.toString().isNotEmpty
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(9),
+                    child: Image.network(
+                      product.img.toString(),
+                      width: 34,
+                      height: 34,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.inventory_2,
+                        color: ColorConst.primaryGreen,
+                        size: 17,
+                      ),
+                    ),
+                  )
+                      : const Icon(
+                    Icons.inventory_2,
+                    color: ColorConst.primaryGreen,
+                    size: 17,
+                  ),
                 ),
                 const SizedBox(width: 10),
-                Expanded(child: Text(product.name,
-                    style: const TextStyle(color: ColorConst.textPrimary, fontSize: 14, fontWeight: FontWeight.w700))),
+                Expanded(
+                  child: Text(
+                    product.name?.toString() ?? 'Unnamed',
+                    style: const TextStyle(
+                      color: ColorConst.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
-          Divider(height: 1, color: ColorConst.borderColor),
+          const Divider(height: 1, color: ColorConst.borderColor),
           // Variants
-          ...product.variants.map((v) => _variantRow(product, v)),
+          if (product.variants != null)
+            ...product.variants!.map((v) => _variantRow(product, v)),
         ],
       ),
     );
   }
 
-  Widget _variantRow(Product product, ProductVariant variant) {
-    final ctrl = _ctrl(variant.id);
+  Widget _variantRow(Products product, Variants variant) {
+    final ctrl = _ctrl(variant.variantId.toString());
+    final stock = _parseInt(variant.stock);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
@@ -245,10 +394,23 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(variant.name, style: const TextStyle(color: ColorConst.textPrimary, fontSize: 13, fontWeight: FontWeight.w500)),
-                Text('SKU: ${variant.sku}', style: const TextStyle(color: ColorConst.textGrey, fontSize: 11)),
+                Text(
+                  variant.value?.toString() ?? 'Default',
+                  style: const TextStyle(
+                    color: ColorConst.textPrimary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'SKU: ${product.sku ?? 'N/A'} | Stock: $stock',
+                  style: const TextStyle(
+                    color: ColorConst.textGrey,
+                    fontSize: 11,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                _stockBadge(variant),
               ],
             ),
           ),
@@ -272,9 +434,16 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
                   child: TextField(
                     controller: ctrl,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: ColorConst.textPrimary, fontWeight: FontWeight.w700, fontSize: 14),
+                    style: const TextStyle(
+                      color: ColorConst.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
@@ -294,36 +463,31 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 30, height: 30,
-        decoration: BoxDecoration(color: ColorConst.greenSoft, borderRadius: BorderRadius.circular(8)),
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: ColorConst.greenSoft,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, color: ColorConst.primaryGreen, size: 15),
       ),
     );
   }
 
-  Widget _stockBadge(ProductVariant v) {
-    Color c; String label;
-    if (v.availableStock <= 0)       { c = ColorConst.error;   label = 'Out of Stock'; }
-    else if (v.availableStock <= 10) { c = ColorConst.warning; label = 'Low: ${v.availableStock}'; }
-    else                             { c = ColorConst.success; label = 'Avail: ${v.availableStock}'; }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-          color: c.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: c.withOpacity(0.3))),
-      child: Text(label, style: TextStyle(color: c, fontSize: 10, fontWeight: FontWeight.w600)),
-    );
-  }
-
-  // ── Submit section ─────────────────────────────────────────────────
-  Widget _submitSection(BuildContext context, StockProvider provider, List<Product> selected) {
+  // ── Submit Section ─────────────────────────────────────────────────────
+  Widget _submitSection(BuildContext context, StockProvider provider, List<Products> selected) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: ColorConst.white,
         border: Border(top: BorderSide(color: ColorConst.borderColor)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, -2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -336,7 +500,10 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
               hintStyle: const TextStyle(color: ColorConst.textGrey, fontSize: 13),
               filled: true,
               fillColor: ColorConst.containerGrey,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
               prefixIcon: const Icon(Icons.note_alt_outlined, color: ColorConst.textGrey, size: 18),
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
@@ -346,7 +513,10 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => _submit(context, provider, selected),
-              icon: Icon(_transferType == TransferType.hubTransfer ? Icons.hub : Icons.send, size: 18),
+              icon: Icon(
+                _transferType == TransferType.hubTransfer ? Icons.hub : Icons.send,
+                size: 18,
+              ),
               label: Text(
                 _transferType == TransferType.hubTransfer
                     ? 'Transfer to ${_selectedHub ?? "Hub"}'
@@ -369,52 +539,150 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
     );
   }
 
-  void _submit(BuildContext context, StockProvider provider, List<Product> selected) {
+
+  void _submit(
+      BuildContext context,
+      StockProvider provider,
+      List<Products> selected,
+      ) async {
+    final cityRequest = Provider.of<CityStockViewModel>(context,listen: false);
+
+    // validation for hub
     if (_transferType == TransferType.hubTransfer && _selectedHub == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Pehle hub select karein!'), backgroundColor: ColorConst.warning));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pehle hub select karein!'),
+          backgroundColor: ColorConst.warning,
+        ),
+      );
       return;
     }
 
     final items = <StockRequestItem>[];
+
+    /// for admin request api
+    final adminApiItems = <Map<String, dynamic>>[];
+
+    /// for hub transfer api
+    final hubApiItems = <Map<String, dynamic>>[];
+
     for (final p in selected) {
-      for (final v in p.variants) {
-        final qty = int.tryParse(_qtyCtrl[v.id]?.text ?? '0') ?? 0;
+      for (final v in p.variants ?? []) {
+        final qty = int.tryParse(_ctrl(v.variantId.toString()).text) ?? 0;
+
         if (qty > 0) {
-          items.add(StockRequestItem(
-            productId: p.id, productName: p.name,
-            variantId: v.id, variantName: v.name,
-            quantityRequested: qty,
-          ));
+          /// local
+          items.add(
+            StockRequestItem(
+              productId: p.productId.toString(),
+              productName: p.name?.toString() ?? 'Unknown',
+              variantId: v.variantId.toString(),
+              variantName: v.value?.toString() ?? 'Default',
+              quantityRequested: qty,
+            ),
+          );
+
+          /// admin api payload
+          adminApiItems.add({
+            "productid": p.productId,
+            "qty": qty,
+          });
+
+          /// hub transfer api payload
+          hubApiItems.add({
+            "productid": p.productId,
+            "variantid": v.variantId,
+            "qty": qty,
+          });
         }
       }
     }
 
     if (items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Kisi bhi variant mein quantity 0 hai!'), backgroundColor: ColorConst.warning));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kisi bhi variant mein quantity 0 hai!'),
+          backgroundColor: ColorConst.warning,
+        ),
+      );
       return;
     }
 
-    // Save which hub before we clear
-    final hubName = _selectedHub;
+    /// ====================================
+    /// ADMIN REQUEST API
+    /// ====================================
+    if (_transferType == TransferType.adminRequest) {
+      await cityRequest.cityRequestApi(
+        context,
+        _noteCtrl.text.trim(),
+        adminApiItems,
+      );
 
-    provider.submitBulkRequest(
-        items: items, note: _noteCtrl.text.trim(),
-        transferType: _transferType, hubName: hubName);
+      provider.clearProductSelection();
+      _noteCtrl.clear();
 
-    // Now clear selection from provider
-    provider.clearSelection();
+      for (var c in _qtyCtrl.values) {
+        c.text = '0';
+      }
 
-    // Reset local state
-    _noteCtrl.clear();
-    for (var c in _qtyCtrl.values) c.text = '0';
-    setState(() { _selectedHub = null; });
+      return;
+    }
 
-    final msg = _transferType == TransferType.hubTransfer
-        ? '✓ ${items.length} items $hubName ko transfer kiye!'
-        : '✓ ${items.length} items ka admin request submit hua!';
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: ColorConst.success));
+    /// ====================================
+    /// HUB TRANSFER API
+    /// ====================================
+    if (_transferType == TransferType.hubTransfer) {
+      /// validate qty should not exceed stock
+      for (final p in selected) {
+        for (final v in p.variants ?? []) {
+          final enteredQty =
+              int.tryParse(_ctrl(v.variantId.toString()).text) ?? 0;
+
+          final availableStock = _parseInt(v.stock);
+
+          if (enteredQty > availableStock) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${p.name} (${v.value}) ka quantity stock se zyada nahi ho sakta.\nAvailable: $availableStock',
+                ),
+                backgroundColor: ColorConst.error,
+              ),
+            );
+            return; // stop here
+          }
+        }
+      }
+
+      await cityRequest.cityTransferToHubBulkApi(
+        context,
+        _selectedHub.toString(),
+        _noteCtrl.text.trim(),
+        hubApiItems,
+      );
+
+      provider.clearProductSelection();
+      _noteCtrl.clear();
+
+      for (var c in _qtyCtrl.values) {
+        c.text = '0';
+      }
+
+      setState(() {
+        _selectedHub = null;
+      });
+
+      return;
+    }
+  }
+
+  // Helper parsing method
+  int _parseInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 }
