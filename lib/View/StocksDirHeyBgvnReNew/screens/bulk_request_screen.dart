@@ -85,41 +85,75 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
   Widget _emptyState() {
     return Expanded(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: ColorConst.greenPale,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(
-                Icons.swap_horiz,
-                color: ColorConst.primaryGreen,
-                size: 32,
-              ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
-            const SizedBox(height: 18),
-            const Text(
-              'Koi product select nahi hai',
-              style: TextStyle(
-                color: ColorConst.textPrimary,
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon Section
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ColorConst.primaryGreen.withOpacity(0.15),
+                        ColorConst.primaryGreen.withOpacity(0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: const Icon(
+                    Icons.inventory_2_outlined,
+                    color: ColorConst.primaryGreen,
+                    size: 36,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Title
+                const Text(
+                  'No products selected',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ColorConst.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Subtitle
+                const Text(
+                  'Go to Stock Overview, select products,\nand then create a transfer request here.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ColorConst.textSecondary,
+                    fontSize: 13.5,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+              ],
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Stock Overview mein products select karein\nphir yahan transfer request banayein',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: ColorConst.textSecondary,
-                fontSize: 13,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
