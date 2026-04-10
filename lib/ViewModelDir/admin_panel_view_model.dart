@@ -9,6 +9,7 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceD
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_manager_hub_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_add_hub_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_list_new.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_stock_screen_new_data.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/screens/main_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
@@ -95,7 +96,7 @@ class AdminViewModel extends ChangeNotifier {
       subItems: [
 
         SubMenuItem(title: "City Stocks", screen: MainScreen()),
-        SubMenuItem(title: "Add On Request", screen: ProductAddOnScreen()),
+        SubMenuItem(title: "Add On Request", screen: UrgentAddOnScreen()),
         // SubMenuItem(title: "City Stocks", screen: HomeShell()),
 
         // SubMenuItem(title: "City Stocks Old", screen: CityStockScreen()),

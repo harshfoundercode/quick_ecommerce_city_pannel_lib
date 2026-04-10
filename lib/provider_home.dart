@@ -1,5 +1,6 @@
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/AddOnDir/UrgentAddOnViewModel/urgent_add_on_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/admin_incomming_stock_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/stock_provider_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
@@ -39,5 +40,6 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => AdminStockListRecieveViewModel()),
     ChangeNotifierProvider(create: (context) => StockProvider()),
     ChangeNotifierProvider(create: (context) => AdminIncomingStockNewViewModel()),
+    ChangeNotifierProvider(create: (context) => UrgentAddOnViewModel()),
   ];
 }

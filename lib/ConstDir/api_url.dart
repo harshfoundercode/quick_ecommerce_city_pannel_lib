@@ -8,14 +8,12 @@ class ApiUrl {
   static const String cityZoneListUrl = "${configUrl1}cityzone_list";
   static const String hubZoneCreateUrl = "${configUrl1}hubzone/create";
   static const String hubManagerCreateUrl = "${configUrl1}hubmanager/create";
-  static String hubProfileUrl(String hubId) =>
-      "${configUrl1}hubprofile?id=$hubId";
+  static String hubProfileUrl(String hubId) => "${configUrl1}hubprofile?id=$hubId";
   static const String hubZoneListUrl = "${configUrl1}hubzone_list";
   static const String orderListUrl = "${configUrl1}orders";
   static const String orderDetailsUrl = "${configUrl1}orderprofile";
   static const String hubListUrl = "${configUrl1}hub_list";
-  static String hubListDetailsUrl(String hubId) =>
-      "${configUrl1}hub_details/$hubId";
+  static String hubListDetailsUrl(String hubId) => "${configUrl1}hub_details/$hubId";
   static String dashboardUrl = "${configUrl1}dashboard";
   static String notificationUrl = "${configUrl1}notifications";
   static String hubZoneEditUrl = "${configUrl1}hubzone/update";
@@ -29,15 +27,16 @@ class ApiUrl {
   ///city saman lene ke liye reuwst krega uska h yeh
   static String cityHubHistoryUrl = "${configUrl1}cityhub-history";
   static String hubPerformanceUrl = "${configUrl1}performance_hubs";
-  static String hubPerformanceOrderListUrl(String hubId) =>
-      "${configUrl1}hubs/$hubId/orders";
-  static String hubPerformanceViewOrderDetailsUrl(String orderId) =>
-      "${configUrl1}orders/$orderId";
+  static String hubPerformanceOrderListUrl(String hubId) => "${configUrl1}hubs/$hubId/orders";
+  static String hubPerformanceViewOrderDetailsUrl(String orderId) => "${configUrl1}orders/$orderId";
 
   static String cloudName = "ddsnwfgaw";
   static String preset = "FastoDriver";
   static String cloudinaryUrl = "https://api.cloudinary.com/v1_1/${cloudName.toString()}/image/upload";
 
+  /// CITY PANEL ASK ADMIN TO ADD ON PRODUCT API
+  static String mainCategoryListUrl = "${configUrl1}main-category-list";
+  static String categoryListUrl = "${configUrl1}category-fulllist";
 
 
   ///============================= MAP APIS ==================================
