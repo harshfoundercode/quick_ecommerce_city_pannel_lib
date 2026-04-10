@@ -56,7 +56,7 @@ class _RevenueCardState extends State<RevenueCard>
   @override
   Widget build(BuildContext context) {
     final hubs        = widget.dashboardHubData ?? [];
-    final displayList = hubs.length > 5 ? hubs.take(5).toList() : hubs;
+    final displayList = hubs.length > 4 ? hubs.take(4).toList() : hubs;
     final totalRev    = double.tryParse(
         widget.dashboardSummaryData.revenue ?? '0') ?? 0.0;
     final maxRevenue  = hubs.isEmpty
@@ -114,7 +114,7 @@ class _RevenueCardState extends State<RevenueCard>
                   ]),
             ),
             // View all
-            if (hubs.length > 5)
+            if (hubs.length > 4)
               GestureDetector(
                 onTap: () => _showAllHubsDrawer(
                     context, hubs, maxRevenue),
@@ -206,7 +206,7 @@ class _RevenueCardState extends State<RevenueCard>
                       final rev      = _revenue(hub);
                       final isTopHub = topHub != null &&
                           hub.hubId == topHub.hubId;
-                      final maxH = Sizes.screenHeight * 0.06;
+                      final maxH = Sizes.screenHeight * 0.065;
                       final barH = maxRevenue == 0
                           ? 8.0
                           : (rev / maxRevenue) *
@@ -398,14 +398,6 @@ class _HubBar extends StatelessWidget {
           ),
 
           // Crown for top hub
-          if (isTop)
-            const Padding(
-              padding: EdgeInsets.only(top: 3),
-              child: Icon(Icons.workspace_premium_rounded,
-                  size: 12, color: ColorConst.criticalYellowLight),
-            )
-          else
-            const SizedBox(height: 5),
 
           const SizedBox(height: 4),
 
@@ -414,7 +406,7 @@ class _HubBar extends StatelessWidget {
             width: 52,
             child: Text(
               hub.hubName ?? '',
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(

@@ -29,65 +29,93 @@ class _NotificationViewState extends State<NotificationView> {
   Widget build(BuildContext context) {
     final mobileSize = Responsive.isMobile(context);
 
-    return Material(
-      color: Colors.white,
-      child: SizedBox(
-        width: mobileSize?Sizes.screenWidth:Sizes.screenWidth*0.4,
-        child: Column(
-          children: [
-            SizedBox(height: Sizes.screenHeight*0.05,),
-            Row(
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: SizedBox(
+        width: mobileSize?Sizes.screenWidth:Sizes.screenWidth,
+        child: Consumer<NotificationViewModel>(
+          builder: (context, nvm, child) {
+
+            // 🔹 Loading
+            if (nvm.notificationModel == null) {
+              return const Center(child: CircularProgressIndicator(
+                color: ColorConst.primaryGreen,
+                strokeWidth: 2,
+              ));
+            }
+
+            final data = nvm.notificationModel!.data;
+            final notifications = data?.notifications;
+
+            // 🔹 No Data
+            if (notifications == null ||
+                (notifications.today!.isEmpty &&
+                    notifications.yesterday!.isEmpty &&
+                    notifications.earlier!.isEmpty)) {
+              return Padding(
+                padding:  EdgeInsets.symmetric(vertical: Sizes.screenHeight*0.4),
+                child: Center(child: CustomText.bold("No Notifications")),
+              );
+            }
+
+            return ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(12),
               children: [
-                AppBackBtn(color: Colors.black,),
-                SizedBox(width: Sizes.screenWidth*0.03,),
-                CustomText.bold("Notification",fontSize: 20,),
+                if (notifications.today!.isNotEmpty)
+                  _buildSection("Today", notifications.today!),
+                if (notifications.yesterday!.isNotEmpty)
+                  _buildSection("Yesterday", notifications.yesterday!),
+                if (notifications.earlier!.isNotEmpty)
+                  _buildSection("Earlier", notifications.earlier!),
               ],
-            ),
-
-            Consumer<NotificationViewModel>(
-              builder: (context, nvm, child) {
-
-                // 🔹 Loading
-                if (nvm.notificationModel == null) {
-                  return const Center(child: CircularProgressIndicator(
-                    color: ColorConst.primaryGreen,
-                    strokeWidth: 2,
-                  ));
-                }
-
-                final data = nvm.notificationModel!.data;
-                final notifications = data?.notifications;
-
-                // 🔹 No Data
-                if (notifications == null ||
-                    (notifications.today!.isEmpty &&
-                        notifications.yesterday!.isEmpty &&
-                        notifications.earlier!.isEmpty)) {
-                  return Padding(
-                    padding:  EdgeInsets.symmetric(vertical: Sizes.screenHeight*0.4),
-                    child: Center(child: CustomText.bold("No Notifications")),
-                  );
-                }
-
-                return ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(12),
-                  children: [
-                    if (notifications.today!.isNotEmpty)
-                      _buildSection("Today", notifications.today!),
-                    if (notifications.yesterday!.isNotEmpty)
-                      _buildSection("Yesterday", notifications.yesterday!),
-                    if (notifications.earlier!.isNotEmpty)
-                      _buildSection("Earlier", notifications.earlier!),
-                  ],
-                );
-              },
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: ColorConst.primaryGreen,
+      elevation: 0,
+      automaticallyImplyLeading: false,
+      title: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Notification',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            'Check your notification here',
+            style: TextStyle(color: Colors.white, fontSize: 11),
+          ),
+        ],
+      ),
+      actions: [
+        Consumer<NotificationViewModel>(
+          builder: (ctx, vm, _) => IconButton(
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+            onPressed: () => vm.getNotificationDataApi(ctx),
+            tooltip: 'Refresh',
+          ),
+        ),
+        const SizedBox(width: 4),
+
+      ],
+    );
+  }
+
 
   Widget _buildSection(String title, List list) {
     return Column(

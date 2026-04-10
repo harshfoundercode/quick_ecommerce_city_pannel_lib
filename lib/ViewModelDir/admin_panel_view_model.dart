@@ -9,9 +9,8 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceD
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_manager_hub_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_add_hub_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_list_new.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/city_stock_screen_new_data.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/StockDir/stock_history_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/screens/main_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/notification_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 
 class AdminViewModel extends ChangeNotifier {
@@ -62,7 +61,7 @@ class AdminViewModel extends ChangeNotifier {
 
   void onSubItemTap(SubMenuItem item) {
     openSubMenu(item.screen);
-    _selectedSubMenu = item; // ✅ store selected submenu
+    _selectedSubMenu = item;
     notifyListeners();
   }
 
@@ -73,6 +72,11 @@ class AdminViewModel extends ChangeNotifier {
       icon: Icons.dashboard,
       title: "Dashboard",
       screen: const DashboardContent(),
+    ),
+    MenuItem(
+      icon: Icons.notifications,
+      title: "Notification",
+      screen: NotificationView()
     ),
     MenuItem(
       icon: Icons.hub,
@@ -91,30 +95,15 @@ class AdminViewModel extends ChangeNotifier {
       screen: OrderListScreen(),
     ),
     MenuItem(
+      icon: Icons.add_circle,
+      title: "Inventory Add On",
+      screen: UrgentAddOnScreen(),
+    ),
+    MenuItem(
       icon: Icons.analytics,
       title: "City Stocks",
-      subItems: [
-
-        SubMenuItem(title: "City Stocks", screen: MainScreen()),
-        SubMenuItem(title: "Add On Request", screen: UrgentAddOnScreen()),
-        // SubMenuItem(title: "City Stocks", screen: HomeShell()),
-
-        // SubMenuItem(title: "City Stocks Old", screen: CityStockScreen()),
-        // SubMenuItem(title: "City Stocks Request To Admin", screen: RequestStockToAdminScreen()),
-        // SubMenuItem(title: "Stocks Transfer to Hub", screen: TransferStockScreen()),
-        // SubMenuItem(title: "Bulk Stock Transfer To Hub", screen: BulkTransferScreen()),
-        // SubMenuItem(title: "Hub Transfer Stocks History", screen: CityHubHistoryScreen()), yeh htya h recent meh
-        // SubMenuItem(title: "City Stocks Admin Request History", screen: CityRequestHistoryScreen()),
-      ],
+      screen: MainScreen(),
     ),
-    // MenuItem(
-    //   icon: Icons.attach_money,
-    //   title: "Dispute",
-    //   subItems: [
-    //     // SubMenuItem(title: "Dispute", screen: DisputeScreen()),
-    //     SubMenuItem(title: "Dispute", screen: ComplaintScreen()),
-    //   ],
-    // ),
   ];
 
   Future<void> performLogout(BuildContext context) async {

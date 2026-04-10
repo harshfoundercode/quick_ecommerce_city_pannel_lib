@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/api_url.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/responsive_sizes.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
@@ -160,7 +161,7 @@ class _AdminSidebarState extends State<AdminSidebar>
 
   Widget _buildMenuList(AdminViewModel avm) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       itemCount: avm.menuItems.length,
       itemBuilder: (context, index) {
         return _buildMenuItem(
@@ -333,7 +334,7 @@ class _AdminSidebarState extends State<AdminSidebar>
     return const Padding(
       padding: EdgeInsets.all(16),
       child: Text(
-        "Admin Panel v1.0.0",
+        "Admin Panel ${ApiUrl.adminVersion}",
         style: TextStyle(fontSize: 12, color: Colors.grey),
       ),
     );
