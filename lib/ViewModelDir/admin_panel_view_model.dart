@@ -8,6 +8,7 @@ import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/all_hub_list_sc
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/HubPerformanceDir/all_hub_performance.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_manager_hub_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubDir/create_add_hub_screen.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/HubRequestGetDir/hub_request_get_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/OrderDir/order_list_new.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/screens/main_screen.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/notification_screen.dart';
@@ -103,6 +104,11 @@ class AdminViewModel extends ChangeNotifier {
       icon: Icons.analytics,
       title: "City Stocks",
       screen: MainScreen(),
+    ),
+    MenuItem(
+      icon: Icons.hub,
+      title: "Hub Inventory Request",
+      screen: HubRequestManagementScreen(),
     ),
   ];
 

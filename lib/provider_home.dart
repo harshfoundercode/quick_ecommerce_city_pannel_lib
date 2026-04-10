@@ -20,6 +20,8 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/notification_v
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/order_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/profile_view_model.dart';
 
+import 'View/HubRequestGetDir/hub_request_get_viewmodel.dart' show HubRequestProvider;
+
 class ProvidersHome{
   List<SingleChildWidget> providers= [
     ChangeNotifierProvider(create: (context) => AdminViewModel()),
@@ -41,5 +43,6 @@ class ProvidersHome{
     ChangeNotifierProvider(create: (context) => StockProvider()),
     ChangeNotifierProvider(create: (context) => AdminIncomingStockNewViewModel()),
     ChangeNotifierProvider(create: (context) => UrgentAddOnViewModel()),
+    ChangeNotifierProvider(create: (context) => HubRequestProvider()),
   ];
 }
