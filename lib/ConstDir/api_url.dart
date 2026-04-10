@@ -34,6 +34,12 @@ class ApiUrl {
   static String hubPerformanceViewOrderDetailsUrl(String orderId) =>
       "${configUrl1}orders/$orderId";
 
+  static String cloudName = "ddsnwfgaw";
+  static String preset = "FastoDriver";
+  static String cloudinaryUrl = "https://api.cloudinary.com/v1_1/${cloudName.toString()}/image/upload";
+
+
+
   ///============================= MAP APIS ==================================
   static String mapPlaceAutoCompleteUrl(String query) =>
       "${configUrl1}place_autocomplete?query=$query";

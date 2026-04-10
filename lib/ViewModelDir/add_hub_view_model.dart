@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/api_url.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/text_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
@@ -279,18 +280,15 @@ class AddHubViewModel extends ChangeNotifier {
     }
   }
 
-  String cloudName = "ddsnwfgaw";
-  String preset = "FastoDriver";
-
   Future<String?> uploadToCloudinary(XFile file) async {
     try {
       final url = Uri.parse(
-        "https://api.cloudinary.com/v1_1/$cloudName/image/upload",
+        ApiUrl.cloudinaryUrl,
       );
 
       final request = http.MultipartRequest('POST', url);
 
-      request.fields['upload_preset'] = preset;
+      request.fields['upload_preset'] = ApiUrl.preset;
 
       request.files.add(
         http.MultipartFile.fromBytes(

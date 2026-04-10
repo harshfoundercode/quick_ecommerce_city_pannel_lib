@@ -1,15 +1,18 @@
-// screens/admin_incoming_stock_screen.dart
-
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart' show ImagePicker, ImageSource;
 import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/api_url.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
+import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/admin_incoming_models.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/providers/admin_incomming_stock_list_model.dart';
 import '../widgets/app_header.dart';
 
-// ══════════════════════════════════════════════════════════════════════════════
-// Admin Incoming Stock Screen
-// ══════════════════════════════════════════════════════════════════════════════
+
 class AdminIncomingStockScreen extends StatefulWidget {
   const AdminIncomingStockScreen({super.key});
 
@@ -25,9 +28,8 @@ class _AdminIncomingStockScreenState extends State<AdminIncomingStockScreen> {
   final List<String> _statusFilters = [
     'All',
     'Pending',
-    'Received',
-    'Disputed',
-    'In Transit'
+    'Accepted',
+    'Completed',
   ];
 
   final List<String> _sortOptions = [
@@ -251,6 +253,19 @@ class _IncomingStockContent extends StatelessWidget {
     required this.sortBy,
   });
 
+  String getStatusLabel(dynamic status) {
+    switch (status) {
+      case 0:
+        return 'Pending';
+      case 1:
+        return 'Accepted';
+      case 2:
+        return 'Completed';
+      default:
+        return 'Unknown';
+    }
+  }
+
   List<AdminIncomingStockData> _filterAndSort(List<AdminIncomingStockData> list) {
     var filtered = list.where((transfer) {
       // Search filter
@@ -264,10 +279,12 @@ class _IncomingStockContent extends StatelessWidget {
 
       // Status filter
       final matchesStatus = selectedStatus == 'All' ||
-          '${transfer.status}'.toLowerCase() == selectedStatus.toLowerCase();
+      getStatusLabel(transfer.status).toLowerCase() ==
+      selectedStatus.toLowerCase();
 
       return matchesSearch && matchesStatus;
     }).toList();
+
 
     // Sorting
     filtered.sort((a, b) {
@@ -417,11 +434,13 @@ class _TransferCardState extends State<_TransferCard> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     final status = '${widget.transfer.status}';
     final statusColor = _getStatusColor(status);
-    final isPending = status.toLowerCase() == 'pending';
+    final isPending = widget.transfer.status == 0;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -481,7 +500,7 @@ class _TransferCardState extends State<_TransferCard> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                _StatusBadge(status: status),
+                                _StatusBadge(status: getStatusLabel(widget.transfer.status)),
                                 if (isPending) ...[
                                   const SizedBox(width: 8),
                                   _AcceptButton(onPressed: _showAcceptDialog),
@@ -612,16 +631,27 @@ class _TransferCardState extends State<_TransferCard> {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return ColorConst.warning;
-      case 'received':
-        return ColorConst.success;
-      case 'disputed':
-        return ColorConst.danger;
-      case 'in_transit':
-        return ColorConst.info;
+  String getStatusLabel(dynamic status) {
+    switch (status) {
+      case 0:
+        return 'Pending';
+      case 1:
+        return 'Accepted';
+      case 2:
+        return 'Completed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Color _getStatusColor(dynamic status) {
+    switch (status) {
+      case 0:
+        return ColorConst.warning;   // Pending
+      case 1:
+        return ColorConst.success;   // Accepted
+      case 2:
+        return ColorConst.primaryGreen; // Completed
       default:
         return ColorConst.textGrey;
     }
@@ -634,7 +664,7 @@ class _TransferCardState extends State<_TransferCard> {
       if (diff.inMinutes < 1) return 'Just now';
       if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
       if (diff.inHours < 24) return '${diff.inHours}h ago';
-      if (diff.inDays < 7) return '${diff.inDays}d ago';
+      if (diff.inDays < 3) return '${diff.inDays}d ago';
       return '${dt.day}/${dt.month}/${dt.year}';
     } catch (_) {
       return raw;
@@ -695,6 +725,72 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
   void dispose() {
     _remarkController.dispose();
     super.dispose();
+  }
+
+
+
+  // ================= CLOUDINARY UPLOAD =================
+  Future<String?> uploadToCloudinaryWeb(Uint8List bytes) async {
+    try {
+      final url = Uri.parse(ApiUrl.cloudinaryUrl);
+
+      final request = http.MultipartRequest("POST", url)
+        ..fields['upload_preset'] = ApiUrl.preset
+        ..files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            bytes,
+            filename: "upload.jpg",
+          ),
+        );
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final resBody = await response.stream.bytesToString();
+        final jsonData = jsonDecode(resBody);
+        return jsonData['secure_url'];
+      }
+    } catch (e) {
+      print("UPLOAD ERROR: $e");
+    }
+
+    return null;
+  }
+
+  Future<void> _pickDisputeImage(String key) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes(); // ✅ WEB SAFE
+
+      setState(() {
+        _variantData[key]!['dispute_image'] = "loading";
+      });
+
+      final url = await uploadToCloudinaryWeb(bytes);
+
+      if (url != null) {
+        setState(() {
+          _variantData[key]!['dispute_image'] = url;
+        });
+      } else {
+        setState(() {
+          _variantData[key]!['dispute_image'] = '';
+        });
+      }
+    }
+  }
+
+
+  bool canIncrease(int received, int dispute, int maxQty) {
+    return (received + dispute) < maxQty;
+  }
+
+  void updateMissing(Map data) {
+    data['missing_qty'] =
+        data['maxQty'] - (data['received_qty'] + data['dispute_qty']);
   }
 
   @override
@@ -950,12 +1046,174 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
     );
   }
 
+  // Widget _buildVariantRow(Items item, Variants variant) {
+  //   final key = '${item.productid}_${variant.variantid}';
+  //   final data = _variantData[key]!;
+  //   final maxQty = data['maxQty'] as int;
+  //   final receivedQty = data['received_qty'] as int;
+  //   final missingQty = data['missing_qty'] as int;
+  //
+  //   return Container(
+  //     margin: const EdgeInsets.only(bottom: 8),
+  //     padding: const EdgeInsets.all(10),
+  //     decoration: BoxDecoration(
+  //       color: ColorConst.white,
+  //       borderRadius: BorderRadius.circular(8),
+  //       border: Border.all(color: ColorConst.borderColor),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Expanded(
+  //               child: Text(
+  //                 '${variant.value}',
+  //                 style: TextStyle(
+  //                   color: ColorConst.textPrimary,
+  //                   fontSize: 12,
+  //                   fontWeight: FontWeight.w600,
+  //                 ),
+  //               ),
+  //             ),
+  //             Container(
+  //               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+  //               decoration: BoxDecoration(
+  //                 color: ColorConst.info.withValues(alpha:0.1),
+  //                 borderRadius: BorderRadius.circular(6),
+  //               ),
+  //               child: Text(
+  //                 'Sent: $maxQty',
+  //                 style: TextStyle(
+  //                   color: ColorConst.info,
+  //                   fontSize: 11,
+  //                   fontWeight: FontWeight.w600,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 10),
+  //         Row(
+  //           children: [
+  //             // Received Quantity
+  //             Expanded(
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Text(
+  //                     'Received',
+  //                     style: TextStyle(
+  //                       color: ColorConst.textGrey,
+  //                       fontSize: 10,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 4),
+  //                   Container(
+  //                     height: 36,
+  //                     decoration: BoxDecoration(
+  //                       color: ColorConst.containerGrey,
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     child: Row(
+  //                       children: [
+  //                         IconButton(
+  //                           onPressed: receivedQty > 0
+  //                               ? () {
+  //                             setState(() {
+  //                               data['received_qty'] = receivedQty - 1;
+  //                               data['missing_qty'] = maxQty - (receivedQty - 1);
+  //                             });
+  //                           }
+  //                               : null,
+  //                           icon: const Icon(Icons.remove, size: 16),
+  //                           padding: EdgeInsets.zero,
+  //                           constraints: const BoxConstraints(minWidth: 32),
+  //                         ),
+  //                         Expanded(
+  //                           child: Text(
+  //                             '$receivedQty',
+  //                             textAlign: TextAlign.center,
+  //                             style: TextStyle(
+  //                               color: ColorConst.success,
+  //                               fontSize: 13,
+  //                               fontWeight: FontWeight.w700,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                         IconButton(
+  //                           onPressed: receivedQty < maxQty
+  //                               ? () {
+  //                             setState(() {
+  //                               data['received_qty'] = receivedQty + 1;
+  //                               data['missing_qty'] = maxQty - (receivedQty + 1);
+  //                             });
+  //                           }
+  //                               : null,
+  //                           icon: const Icon(Icons.add, size: 16),
+  //                           padding: EdgeInsets.zero,
+  //                           constraints: const BoxConstraints(minWidth: 32),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             const SizedBox(width: 8),
+  //             // Missing Quantity
+  //             Expanded(
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Text(
+  //                     'Missing',
+  //                     style: TextStyle(
+  //                       color: ColorConst.textGrey,
+  //                       fontSize: 10,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 4),
+  //                   Container(
+  //                     height: 36,
+  //                     decoration: BoxDecoration(
+  //                       color: ColorConst.containerGrey,
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                     alignment: Alignment.center,
+  //                     child: Text(
+  //                       '$missingQty',
+  //                       style: TextStyle(
+  //                         color: missingQty > 0 ? ColorConst.danger : ColorConst.textGrey,
+  //                         fontSize: 13,
+  //                         fontWeight: FontWeight.w700,
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget _buildVariantRow(Items item, Variants variant) {
     final key = '${item.productid}_${variant.variantid}';
     final data = _variantData[key]!;
+
     final maxQty = data['maxQty'] as int;
     final receivedQty = data['received_qty'] as int;
     final missingQty = data['missing_qty'] as int;
+    final disputeQty = data['dispute_qty'] as int;
+    final imageUrl = data['dispute_image'];
+
+    void updateMissing() {
+      data['missing_qty'] =
+          maxQty - (data['received_qty'] + data['dispute_qty']);
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -968,6 +1226,7 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // HEADER
           Row(
             children: [
               Expanded(
@@ -980,118 +1239,81 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: ColorConst.info.withValues(alpha:0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  'Sent: $maxQty',
-                  style: TextStyle(
-                    color: ColorConst.info,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+              Text('Sent: $maxQty'),
             ],
           ),
+
           const SizedBox(height: 10),
+
+          // QUANTITY ROW
           Row(
             children: [
-              // Received Quantity
+
+              /// RECEIVED
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Received',
-                      style: TextStyle(
-                        color: ColorConst.textGrey,
-                        fontSize: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: ColorConst.containerGrey,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: receivedQty > 0
-                                ? () {
-                              setState(() {
-                                data['received_qty'] = receivedQty - 1;
-                                data['missing_qty'] = maxQty - (receivedQty - 1);
-                              });
-                            }
-                                : null,
-                            icon: const Icon(Icons.remove, size: 16),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(minWidth: 32),
-                          ),
-                          Expanded(
-                            child: Text(
-                              '$receivedQty',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: ColorConst.success,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: receivedQty < maxQty
-                                ? () {
-                              setState(() {
-                                data['received_qty'] = receivedQty + 1;
-                                data['missing_qty'] = maxQty - (receivedQty + 1);
-                              });
-                            }
-                                : null,
-                            icon: const Icon(Icons.add, size: 16),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(minWidth: 32),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: _qtyBox(
+                  label: "Received",
+                  value: receivedQty,
+                  color: ColorConst.success,
+                  onMinus: receivedQty > 0
+                      ? () {
+                    setState(() {
+                      data['received_qty']--;
+                      updateMissing();
+                    });
+                  }
+                      : null,
+                  onPlus: (receivedQty + disputeQty) < maxQty
+                      ? () {
+                    setState(() {
+                      data['received_qty']++;
+                      updateMissing();
+                    });
+                  }
+                      : null,
                 ),
               ),
-              const SizedBox(width: 8),
-              // Missing Quantity
+
+              const SizedBox(width: 6),
+
+              /// DEFECTIVE
+              Expanded(
+                child: _qtyBox(
+                  label: "Defective",
+                  value: disputeQty,
+                  color: ColorConst.warning,
+                  onMinus: disputeQty > 0
+                      ? () {
+                    setState(() {
+                      data['dispute_qty']--;
+                      updateMissing();
+                    });
+                  }
+                      : null,
+                  onPlus: (receivedQty + disputeQty) < maxQty
+                      ? () {
+                    setState(() {
+                      data['dispute_qty']++;
+                      updateMissing();
+                    });
+                  }
+                      : null,
+                ),
+              ),
+
+              const SizedBox(width: 6),
+
+              /// MISSING
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text("Missing"),
                     Text(
-                      'Missing',
+                      '$missingQty',
                       style: TextStyle(
-                        color: ColorConst.textGrey,
-                        fontSize: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: ColorConst.containerGrey,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '$missingQty',
-                        style: TextStyle(
-                          color: missingQty > 0 ? ColorConst.danger : ColorConst.textGrey,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        color: missingQty > 0
+                            ? ColorConst.danger
+                            : ColorConst.textGrey,
                       ),
                     ),
                   ],
@@ -1099,12 +1321,90 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
               ),
             ],
           ),
+
+          const SizedBox(height: 8),
+
+          /// 🔥 IMAGE UPLOAD (IMPORTANT FIX)
+          if (disputeQty > 0)
+            GestureDetector(
+              onTap: () => _pickDisputeImage(key),
+              child: Container(
+                height: Sizes.screenHeight*0.3,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: ColorConst.borderColor),
+                ),
+                child: imageUrl == "loading"
+                    ? const Center(child: CircularProgressIndicator())
+                    : imageUrl != null && imageUrl != ''
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(imageUrl, fit: BoxFit.contain),
+                )
+                    : const Center(child: Text("Upload Image")),
+              ),
+            ),
         ],
       ),
     );
   }
 
+  Widget _qtyBox({
+    required String label,
+    required int value,
+    required Color color,
+    VoidCallback? onMinus,
+    VoidCallback? onPlus,
+  }) {
+    return Column(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 10)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: onMinus,
+              icon: const Icon(Icons.remove, size: 16),
+            ),
+            Text('$value',
+                style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+            IconButton(
+              onPressed: onPlus,
+              icon: const Icon(Icons.add, size: 16),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   void _submitTransfer(BuildContext context) {
+    for (var data in _variantData.values) {
+      final max = data['maxQty'];
+      final total = data['received_qty'] +
+          data['dispute_qty'] +
+          data['missing_qty'];
+
+      // ❌ quantity mismatch
+      if (total != max) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Quantity mismatch")),
+        );
+        return;
+      }
+
+      // ❌ defective but no image
+      if (data['dispute_qty'] > 0 &&
+          (data['dispute_image'] == null ||
+              data['dispute_image'] == '')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Upload defective image")),
+        );
+        return;
+      }
+    }
+
     final vm = context.read<AdminIncomingStockNewViewModel>();
 
     final items = _variantData.values.map((data) {
@@ -1345,28 +1645,28 @@ class _VariantRow extends StatelessWidget {
             ],
           ),
 
-          // Status (if any)
-          if (variant.status != null && '${variant.status}'.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.circle,
-                  size: 8,
-                  color: _getVariantStatusColor('${variant.status}'),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${variant.status}',
-                  style: TextStyle(
-                    color: ColorConst.textGrey,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ],
+          // // Status (if any)
+          // if (variant.status != null && '${variant.status}'.isNotEmpty) ...[
+          //   const SizedBox(height: 8),
+          //   Row(
+          //     children: [
+          //       Icon(
+          //         Icons.circle,
+          //         size: 8,
+          //         color: _getVariantStatusColor('${variant.status}'),
+          //       ),
+          //       const SizedBox(width: 4),
+          //       Text(
+          //         '${variant.status}',
+          //         style: TextStyle(
+          //           color: ColorConst.textGrey,
+          //           fontSize: 10,
+          //           fontWeight: FontWeight.w500,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ],
         ],
       ),
     );
