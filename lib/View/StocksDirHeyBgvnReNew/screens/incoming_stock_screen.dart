@@ -199,7 +199,7 @@ class _AdminIncomingStockScreenState extends State<AdminIncomingStockScreen> {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
               decoration: BoxDecoration(
-                color: isActive ? color.withOpacity(0.12) : ColorConst.white,
+                color: isActive ? color.withValues(alpha:0.12) : ColorConst.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isActive ? color : ColorConst.borderColor,
@@ -338,7 +338,7 @@ class _IncomingStockContent extends StatelessWidget {
           Icon(
             Icons.inbox_outlined,
             size: 64,
-            color: ColorConst.textGrey.withOpacity(0.3),
+            color: ColorConst.textGrey.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -431,7 +431,7 @@ class _TransferCardState extends State<_TransferCard> {
         border: Border.all(color: ColorConst.borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha:0.03),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -454,7 +454,7 @@ class _TransferCardState extends State<_TransferCard> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
+                          color: statusColor.withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -713,7 +713,7 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: ColorConst.primaryGreen.withOpacity(0.05),
+                color: ColorConst.primaryGreen.withValues(alpha:0.05),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
@@ -726,7 +726,7 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: ColorConst.primaryGreen.withOpacity(0.1),
+                      color: ColorConst.primaryGreen.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -904,7 +904,7 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: ColorConst.primaryGreen.withOpacity(0.1),
+                  color: ColorConst.primaryGreen.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: item.productImage != null && '${item.productImage}'.isNotEmpty
@@ -983,7 +983,7 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: ColorConst.info.withOpacity(0.1),
+                  color: ColorConst.info.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -1158,7 +1158,7 @@ class _ProductItemCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: ColorConst.primaryGreen.withOpacity(0.08),
+                  color: ColorConst.primaryGreen.withValues(alpha:0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: item.productImage != null && '${item.productImage}'.isNotEmpty
@@ -1404,9 +1404,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha:0.3)),
       ),
       child: Text(
         status.toUpperCase(),
@@ -1456,7 +1456,7 @@ class _AcceptButton extends StatelessWidget {
       ),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        backgroundColor: ColorConst.success.withOpacity(0.1),
+        backgroundColor: ColorConst.success.withValues(alpha:0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
         ),
@@ -1487,9 +1487,9 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: chipColor.withOpacity(0.08),
+        color: chipColor.withValues(alpha:0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: chipColor.withOpacity(0.2)),
+        border: Border.all(color: chipColor.withValues(alpha:0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1508,7 +1508,7 @@ class _StatChip extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: chipColor.withOpacity(0.7),
+              color: chipColor.withValues(alpha:0.7),
               fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
@@ -1533,7 +1533,7 @@ class _InfoTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha:0.08),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -1564,9 +1564,9 @@ class _QtyPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha:0.08),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha:0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1583,7 +1583,7 @@ class _QtyPill extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: color.withOpacity(0.7),
+              color: color.withValues(alpha:0.7),
               fontSize: 9,
               fontWeight: FontWeight.w500,
             ),
