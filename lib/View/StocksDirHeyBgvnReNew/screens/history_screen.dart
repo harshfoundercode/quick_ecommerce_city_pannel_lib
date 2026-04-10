@@ -20,23 +20,28 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   // Admin tab filters
   String _adminStatus = 'All';
-  final List<String> _adminStatuses = [
-    'All',
-    'Pending',
-    'Approved',
-    'Rejected',
-    'Fulfilled',
-  ];
+
 
   // Hub tab filters
   String _hubStatus = 'All';
+
+
+  // Admin
+  final List<String> _adminStatuses = [
+    'All',
+    'Pending',
+    'Accepted',
+    'Completed',
+  ];
+
+// Hub
   final List<String> _hubStatuses = [
     'All',
     'Pending',
     'Received',
-    'Disputed',
-    'In Transit',
+    'Completed', // ✅ fixed
   ];
+
 
   String _sortBy = 'Newest';
   final List<String> _sortOptions = [
@@ -334,17 +339,19 @@ class _AdminHistoryTab extends StatelessWidget {
   });
 
   List<CityRequestHistoryData> _filterAndSort(
-    List<CityRequestHistoryData> list,
-  ) {
+      List<CityRequestHistoryData> list,
+      ) {
     var result = list.where((item) {
       final q = searchQuery.toLowerCase();
+
       final matchSearch =
           q.isEmpty ||
-          '${item.id}'.toLowerCase().contains(q) ||
-          '${item.name}'.toLowerCase().contains(q);
-      final matchStatus =
-          selectedStatus == 'All' ||
-          '${item.status}'.toLowerCase() == selectedStatus.toLowerCase();
+              '${item.id}'.toLowerCase().contains(q) ||
+              '${item.name}'.toLowerCase().contains(q);
+
+      final matchStatus = selectedStatus == 'All' ||
+          _getAdminStatus(item.status) == selectedStatus;
+
       return matchSearch && matchStatus;
     }).toList();
 
@@ -352,19 +359,37 @@ class _AdminHistoryTab extends StatelessWidget {
       switch (sortBy) {
         case 'Oldest':
           return _dt('${a.createdAt}').compareTo(_dt('${b.createdAt}'));
+
         case 'Quantity: High':
-          return (int.tryParse('${b.quantity}') ?? 0).compareTo(
-            int.tryParse('${a.quantity}') ?? 0,
-          );
+          return (int.tryParse('${b.quantity}') ?? 0)
+              .compareTo(int.tryParse('${a.quantity}') ?? 0);
+
         case 'Quantity: Low':
-          return (int.tryParse('${a.quantity}') ?? 0).compareTo(
-            int.tryParse('${b.quantity}') ?? 0,
-          );
+          return (int.tryParse('${a.quantity}') ?? 0)
+              .compareTo(int.tryParse('${b.quantity}') ?? 0);
+
         default:
           return _dt('${b.createdAt}').compareTo(_dt('${a.createdAt}'));
       }
     });
+
     return result;
+  }
+
+  /// ✅ FIX: Convert int → Admin Status Text
+  String _getAdminStatus(dynamic status) {
+    final s = int.tryParse(status.toString()) ?? 0;
+
+    switch (s) {
+      case 0:
+        return "Pending";
+      case 1:
+        return "Accepted";
+      case 2:
+        return "Completed";
+      default:
+        return "Unknown";
+    }
   }
 
   DateTime _dt(String s) {
@@ -411,13 +436,15 @@ class _AdminHistoryTab extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           msg,
-          style: const TextStyle(color: ColorConst.textSecondary, fontSize: 14),
+          style: const TextStyle(
+            color: ColorConst.textSecondary,
+            fontSize: 14,
+          ),
         ),
       ],
     ),
   );
 }
-
 // ── Request Card ──────────────────────────────────────────────────────────────
 class _RequestCard extends StatelessWidget {
   final CityRequestHistoryData item;
@@ -487,7 +514,7 @@ class _RequestCard extends StatelessWidget {
                 ),
 
                 // Status badge
-                _StatusBadge(status: status),
+                _StatusBadge(status: status,isAdmin: false,),
               ],
             ),
           ),
@@ -610,41 +637,61 @@ class _HubHistoryTab extends StatelessWidget {
   List<CityHubHistoryData> _filterAndSort(List<CityHubHistoryData> list) {
     var result = list.where((p) {
       final q = searchQuery.toLowerCase();
+
       final matchSearch =
           q.isEmpty ||
-          '${p.productName}'.toLowerCase().contains(q) ||
-          '${p.sku}'.toLowerCase().contains(q) ||
-          '${p.brandName}'.toLowerCase().contains(q);
-      final matchStatus =
-          selectedStatus == 'All' ||
-          p.transfers?.any(
-                (t) =>
-                    '${t.status}'.toLowerCase() == selectedStatus.toLowerCase(),
-              ) ==
-              true;
+              '${p.productName}'.toLowerCase().contains(q) ||
+              '${p.sku}'.toLowerCase().contains(q) ||
+              '${p.brandName}'.toLowerCase().contains(q);
+
+      final matchStatus = selectedStatus == 'All' ||
+          (p.transfers?.any(
+                (t) => _getHubStatus(t.status) == selectedStatus,
+          ) ??
+              false);
+
       return matchSearch && matchStatus;
     }).toList();
 
     result.sort((a, b) {
       final aDate = _latestDate(a) ?? DateTime(2000);
       final bDate = _latestDate(b) ?? DateTime(2000);
+
       return sortBy == 'Oldest'
           ? aDate.compareTo(bDate)
           : bDate.compareTo(aDate);
     });
+
     return result;
+  }
+
+  /// ✅ FIXED: Correct mapping
+  String _getHubStatus(dynamic status) {
+    final s = int.tryParse(status.toString()) ?? 0;
+
+    switch (s) {
+      case 0:
+        return "Pending";
+      case 1:
+        return "Received";
+      case 2:
+        return "Completed"; // ✅ FIX HERE
+      default:
+        return "Unknown";
+    }
   }
 
   DateTime? _latestDate(CityHubHistoryData p) {
     if (p.transfers == null || p.transfers!.isEmpty) return null;
+
     return p.transfers!
         .map((t) {
-          try {
-            return DateTime.parse('${t.createdAt}');
-          } catch (_) {
-            return null;
-          }
-        })
+      try {
+        return DateTime.parse('${t.createdAt}');
+      } catch (_) {
+        return null;
+      }
+    })
         .whereType<DateTime>()
         .reduce((a, b) => a.isAfter(b) ? a : b);
   }
@@ -657,7 +704,6 @@ class _HubHistoryTab extends StatelessWidget {
       return const Center(
         child: CircularProgressIndicator(
           color: ColorConst.primaryGreen,
-          backgroundColor: ColorConst.white,
         ),
       );
     }
@@ -677,7 +723,10 @@ class _HubHistoryTab extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'No transfers found',
-              style: TextStyle(color: ColorConst.textSecondary, fontSize: 14),
+              style: TextStyle(
+                color: ColorConst.textSecondary,
+                fontSize: 14,
+              ),
             ),
           ],
         ),
@@ -688,7 +737,7 @@ class _HubHistoryTab extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       itemCount: list.length,
       itemBuilder: (_, i) =>
-          _HubCard(product: list[i], statusFilter: selectedStatus.toString()),
+          _HubCard(product: list[i], statusFilter: selectedStatus),
     );
   }
 }
@@ -706,32 +755,50 @@ class _HubCard extends StatefulWidget {
 class _HubCardState extends State<_HubCard> {
   bool _expanded = false;
 
+  /// ✅ FIXED FILTER
   List<Transfers> get _transfers {
-    if (widget.statusFilter == 'All') return widget.product.transfers ?? [];
+    if (widget.statusFilter == 'All') {
+      return widget.product.transfers ?? [];
+    }
+
     return widget.product.transfers
-            ?.where(
-              (t) =>
-                  '${t.status}'.toLowerCase() ==
-                  widget.statusFilter.toLowerCase(),
-            )
-            .toList() ??
+        ?.where((t) =>
+    _getHubStatus(t.status) == widget.statusFilter)
+        .toList() ??
         [];
   }
 
-  // CORRECTED: Fixed the _totalSent getter
+  /// ✅ Convert int → status text
+  String _getHubStatus(dynamic status) {
+    final s = int.tryParse(status.toString()) ?? 0;
+
+    switch (s) {
+      case 0:
+        return "Pending";
+      case 1:
+        return "Received";
+      case 2:
+        return "Completed"; // 🔥 FIXED (not Disputed)
+      default:
+        return "Unknown";
+    }
+  }
+
+  // ✅ Total Sent (your logic already correct)
   int get _totalSent {
     return _transfers.fold(0, (sum, transfer) {
       final variantsSum =
           transfer.variants?.fold<int>(0, (vSum, variant) {
-            // Safely parse sentQty to int
             final qty = variant.sentQty;
             if (qty == null) return vSum;
-            final parsedQty = qty is int
-                ? qty
-                : int.tryParse(qty.toString()) ?? 0;
+
+            final parsedQty =
+            qty is int ? qty : int.tryParse(qty.toString()) ?? 0;
+
             return vSum + parsedQty;
           }) ??
-          0;
+              0;
+
       return sum + variantsSum;
     });
   }
@@ -749,15 +816,16 @@ class _HubCardState extends State<_HubCard> {
       ),
       child: Column(
         children: [
-          // ── Header row ───────────────────────────────────────────
+          // ── Header ──
           InkWell(
             onTap: () => setState(() => _expanded = !_expanded),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  // Product image / icon
+                  // Image
                   Container(
                     width: 40,
                     height: 40,
@@ -765,30 +833,29 @@ class _HubCardState extends State<_HubCard> {
                       color: ColorConst.primaryGreen.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child:
-                        widget.product.productImg != null &&
-                            '${widget.product.productImg}'.isNotEmpty
+                    child: widget.product.productImg != null &&
+                        '${widget.product.productImg}'.isNotEmpty
                         ? ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              '${widget.product.productImg}',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.inventory_2_outlined,
-                                color: ColorConst.primaryGreen,
-                                size: 20,
-                              ),
-                            ),
-                          )
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        '${widget.product.productImg}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.inventory_2_outlined,
+                          color: ColorConst.primaryGreen,
+                          size: 20,
+                        ),
+                      ),
+                    )
                         : const Icon(
-                            Icons.inventory_2_outlined,
-                            color: ColorConst.primaryGreen,
-                            size: 20,
-                          ),
+                      Icons.inventory_2_outlined,
+                      color: ColorConst.primaryGreen,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 10),
 
-                  // Name + SKU
+                  // Name
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -804,139 +871,59 @@ class _HubCardState extends State<_HubCard> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Text(
-                              'SKU: ${widget.product.sku}',
-                              style: const TextStyle(
-                                color: ColorConst.textGrey,
-                                fontSize: 11,
-                              ),
-                            ),
-                            if (widget.product.brandName != null) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: ColorConst.info.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  '${widget.product.brandName}',
-                                  style: const TextStyle(
-                                    color: ColorConst.info,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+                        Text(
+                          'SKU: ${widget.product.sku ?? "N/n"}',
+                          style: const TextStyle(
+                            color: ColorConst.textGrey,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Hub count + chevron
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ColorConst.info.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '${transfers.length} hub${transfers.length != 1 ? 's' : ''}',
-                          style: const TextStyle(
-                            color: ColorConst.info,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                  // Count
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: ColorConst.info.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${transfers.length} hubs',
+                      style: const TextStyle(
+                        color: ColorConst.info,
+                        fontSize: 10,
                       ),
-                      const SizedBox(height: 4),
-                      AnimatedRotation(
-                        turns: _expanded ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 180),
-                        child: const Icon(
-                          Icons.keyboard_arrow_down,
-                          color: ColorConst.textGrey,
-                          size: 18,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          // ── Expanded transfer rows ───────────────────────────────
+          // ── Expanded Rows ──
           if (_expanded && transfers.isNotEmpty)
-            Container(
-              decoration: BoxDecoration(
-                color: ColorConst.containerGrey2,
-                border: Border(top: BorderSide(color: ColorConst.borderColor)),
-              ),
-              child: Column(
-                children: transfers
-                    .map((t) => _TransferRow(transfer: t))
-                    .toList(),
-              ),
+            Column(
+              children: transfers
+                  .map((t) => _TransferRow(transfer: t))
+                  .toList(),
             ),
 
-          // ── Footer ──────────────────────────────────────────────
+          // ── Footer ──
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 7, 12, 7),
-            decoration: BoxDecoration(
-              color: ColorConst.containerGrey2,
-              borderRadius: BorderRadius.vertical(
-                bottom: const Radius.circular(12),
-                top: _expanded ? Radius.zero : Radius.zero,
-              ),
-              border: Border(top: BorderSide(color: ColorConst.borderColor)),
-            ),
+            padding: const EdgeInsets.all(10),
             child: Row(
               children: [
-                const Icon(
-                  Icons.access_time_outlined,
-                  size: 12,
-                  color: ColorConst.textGrey,
-                ),
-                const SizedBox(width: 4),
                 Text(
                   '${transfers.length} transfer(s)',
-                  style: const TextStyle(
-                    color: ColorConst.textGrey,
-                    fontSize: 11,
-                  ),
+                  style: const TextStyle(fontSize: 11),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ColorConst.info.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '$_totalSent total sent',
-                    style: const TextStyle(
-                      color: ColorConst.info,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                Text(
+                  '$_totalSent total sent',
+                  style: const TextStyle(fontSize: 11),
                 ),
               ],
             ),
@@ -980,7 +967,7 @@ class _TransferRow extends StatelessWidget {
                   ),
                 ),
               ),
-              _StatusBadge(status: status),
+              _StatusBadge(status: status,isAdmin: true,),
             ],
           ),
           const SizedBox(height: 8),
@@ -994,7 +981,7 @@ class _TransferRow extends StatelessWidget {
                   const SizedBox(width: 18),
                   Expanded(
                     child: Text(
-                      '${v.value}',
+                      '${v.value ?? "N/n"}',
                       style: const TextStyle(
                         color: ColorConst.textSecondary,
                         fontSize: 11,
@@ -1034,46 +1021,63 @@ class _TransferRow extends StatelessWidget {
 // Shared widgets
 // ══════════════════════════════════════════════════════════════════════════════
 class _StatusBadge extends StatelessWidget {
-  final String status;
-  const _StatusBadge({required this.status});
+  final dynamic status; // can be int or string
+  final bool isAdmin;   // identify context
+
+  const _StatusBadge({
+    required this.status,
+    required this.isAdmin,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = _color(status);
-    final bg = color.withOpacity(0.1);
+    final intStatus = int.tryParse(status.toString()) ?? 0;
+
+    final color = _getColor(intStatus);
+    final text = _getText(intStatus);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
-        color: bg,
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.toUpperCase(),
+        text.toUpperCase(),
         style: TextStyle(
           color: color,
           fontSize: 10,
           fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
         ),
       ),
     );
   }
 
-  Color _color(String s) {
-    switch (s.toLowerCase()) {
-      case 'pending':
-        return ColorConst.warning;
-      case 'approved':
-      case 'received':
-        return ColorConst.success;
-      case 'rejected':
-      case 'disputed':
-        return ColorConst.danger;
-      case 'fulfilled':
-      case 'in_transit':
-        return ColorConst.info;
+  Color _getColor(int status) {
+    switch (status) {
+      case 0:
+        return ColorConst.warning; // Pending
+      case 1:
+        return ColorConst.success; // Approved / Accepted
+      case 2:
+        return isAdmin
+            ? ColorConst.info   // Completed (Admin)
+            : ColorConst.danger; // Rejected (City)
       default:
         return ColorConst.textGrey;
+    }
+  }
+
+  String _getText(int status) {
+    switch (status) {
+      case 0:
+        return "Pending";
+      case 1:
+        return isAdmin ? "Accepted" : "Approved";
+      case 2:
+        return isAdmin ? "Completed" : "Rejected";
+      default:
+        return "Unknown";
     }
   }
 }

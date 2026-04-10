@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/routes_name.dart';
+import 'package:quick_ecommerce_city_panel_redefined/main.dart';
 
 class ActivityTracker extends StatefulWidget {
   final Widget child;
@@ -29,10 +30,11 @@ class _ActivityTrackerState extends State<ActivityTracker> {
       bool expired = await userVM.isSessionExpired();
 
       if (expired && mounted) {
+        timer?.cancel(); // stop further calls
+
         await userVM.clearToken();
 
-        Navigator.pushNamedAndRemoveUntil(
-          context,
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
           RoutesName.adminLoginScreen,
               (route) => false,
         );
