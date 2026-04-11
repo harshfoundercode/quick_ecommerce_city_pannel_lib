@@ -52,6 +52,10 @@ class ApiUrl {
   static String mainCategoryListUrl = "${configUrl1}main-category-list";
   static String categoryListUrl = "${configUrl1}category-fulllist";
 
+  /// hub get inventory list apis
+  static String hubGetInventoryRequestListUrl = "${configUrl1}request/list";
+  static String hubGetInventoryAcceptUrl = "${configUrl1}accept-request";
+
   ///============================= MAP APIS ==================================
   static String mapPlaceAutoCompleteUrl(String query) =>
       "${configUrl1}place_autocomplete?query=$query";

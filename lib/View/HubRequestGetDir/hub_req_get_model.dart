@@ -1,148 +1,186 @@
-// ════════════════════════════════════════════════════════════════════════════
-// HUB REQUEST MODEL
-// ════════════════════════════════════════════════════════════════════════════
-
 class HubRequestListModel {
-  bool? success;
   String? message;
-  HubRequestData? data;
+  List<Data>? data;
 
-  HubRequestListModel({this.success, this.message, this.data});
+  HubRequestListModel({this.message, this.data});
 
-  factory HubRequestListModel.fromJson(Map<String, dynamic> json) {
-    return HubRequestListModel(
-      success: json['success'],
-      message: json['message'],
-      data: json['data'] != null ? HubRequestData.fromJson(json['data']) : null,
-    );
+  HubRequestListModel.fromJson(Map<String, dynamic> json) {
+    message = json['message'];
+    if (json['data'] != null) {
+      data = <Data>[];
+      json['data'].forEach((v) {
+        data!.add(Data.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['message'] = message;
+    if (this.data != null) {
+      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    }
+    return data;
   }
 }
 
-class HubRequestData {
-  List<HubRequest>? requests;
-
-  HubRequestData({this.requests});
-
-  factory HubRequestData.fromJson(Map<String, dynamic> json) {
-    return HubRequestData(
-      requests: json['requests'] != null
-          ? (json['requests'] as List)
-          .map((e) => HubRequest.fromJson(e))
-          .toList()
-          : null,
-    );
-  }
-}
-
-class HubRequest {
+class Data {
   dynamic requestId;
-  dynamic hubId;
-  String? hubName;
-  String? cityName;
-  String? status; // "pending" | "accepted" | "rejected"
-  String? note;
-  String? createdAt;
-  List<RequestProduct>? products;
+  dynamic status;
+  dynamic createdAt;
+  Hubmanager? hubmanager;
+  List<Products>? products;
 
-  HubRequest({
-    this.requestId,
-    this.hubId,
-    this.hubName,
-    this.cityName,
-    this.status,
-    this.note,
-    this.createdAt,
-    this.products,
-  });
+  Data(
+      {this.requestId,
+        this.status,
+        this.createdAt,
+        this.hubmanager,
+        this.products});
 
-  factory HubRequest.fromJson(Map<String, dynamic> json) {
-    return HubRequest(
-      requestId: json['request_id'],
-      hubId: json['hub_id'],
-      hubName: json['hub_name'],
-      cityName: json['city_name'],
-      status: json['status'],
-      note: json['note'],
-      createdAt: json['created_at'],
-      products: json['products'] != null
-          ? (json['products'] as List)
-          .map((e) => RequestProduct.fromJson(e))
-          .toList()
-          : null,
-    );
+  Data.fromJson(Map<String, dynamic> json) {
+    requestId = json['request_id'];
+    status = json['status'];
+    createdAt = json['created_at'];
+    hubmanager = json['hubmanager'] != null
+        ? Hubmanager.fromJson(json['hubmanager'])
+        : null;
+    if (json['products'] != null) {
+      products = <Products>[];
+      json['products'].forEach((v) {
+        products!.add(Products.fromJson(v));
+      });
+    }
   }
 
-  int get totalQty =>
-      products?.fold(0, (sum, p) => sum! + p.totalQty) ?? 0;
 
-  int get totalVariants =>
-      products?.fold(0, (sum, p) => sum! + (p.variants?.length ?? 0)) ?? 0;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['request_id'] = requestId;
+    data['status'] = status;
+    data['created_at'] = createdAt;
+    if (hubmanager != null) {
+      data['hubmanager'] = hubmanager!.toJson();
+    }
+    if (products != null) {
+      data['products'] = products!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
 }
 
-class RequestProduct {
+class Hubmanager {
+  dynamic id;
+  dynamic name;
+
+  Hubmanager({this.id, this.name});
+
+  Hubmanager.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    return data;
+  }
+}
+
+class Products {
   dynamic productId;
-  String? productName;
-  String? productImg;
-  String? sku;
-  String? mainCategory;
-  String? subCategory;
-  List<RequestVariant>? variants;
+  dynamic productName;
+  dynamic productImg;
+  dynamic categoryName;
+  dynamic brandName;
+  dynamic brandImg;
+  dynamic requestedQuantity;
+  List<Variants>? variants;
 
-  RequestProduct({
-    this.productId,
-    this.productName,
-    this.productImg,
-    this.sku,
-    this.mainCategory,
-    this.subCategory,
-    this.variants,
-  });
+  Products(
+      {this.productId,
+        this.productName,
+        this.productImg,
+        this.categoryName,
+        this.brandName,
+        this.brandImg,
+        this.requestedQuantity,
+        this.variants});
 
-  factory RequestProduct.fromJson(Map<String, dynamic> json) {
-    return RequestProduct(
-      productId: json['product_id'],
-      productName: json['product_name'],
-      productImg: json['product_img'],
-      sku: json['sku'],
-      mainCategory: json['main_category'],
-      subCategory: json['sub_category'],
-      variants: json['variants'] != null
-          ? (json['variants'] as List)
-          .map((e) => RequestVariant.fromJson(e))
-          .toList()
-          : null,
-    );
+  Products.fromJson(Map<String, dynamic> json) {
+    productId = json['product_id'];
+    productName = json['product_name'];
+    productImg = json['product_img'];
+    categoryName = json['category_name'];
+    brandName = json['brand_name'];
+    brandImg = json['brand_img'];
+    requestedQuantity = json['requested_quantity'];
+    if (json['variants'] != null) {
+      variants = <Variants>[];
+      json['variants'].forEach((v) {
+        variants!.add(Variants.fromJson(v));
+      });
+    }
   }
 
-  int get totalQty =>
-      variants?.fold(0, (sum, v) => sum! + (int.tryParse(v.qty.toString()) ?? 0)) ?? 0;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['product_id'] = productId;
+    data['product_name'] = productName;
+    data['product_img'] = productImg;
+    data['category_name'] = categoryName;
+    data['brand_name'] = brandName;
+    data['brand_img'] = brandImg;
+    data['requested_quantity'] = requestedQuantity;
+    if (variants != null) {
+      data['variants'] = variants!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
 }
 
-class RequestVariant {
+class Variants {
   dynamic variantId;
-  String? variantName;
-  dynamic qty;
-  dynamic availableStock;
+  dynamic variantValue;
+  dynamic sku;
+  dynamic price;
+  dynamic discountPrice;
+  dynamic discountPercent;
+  dynamic variantImg;
+  dynamic currentStock;
 
-  RequestVariant({
-    this.variantId,
-    this.variantName,
-    this.qty,
-    this.availableStock,
-  });
+  Variants(
+      {this.variantId,
+        this.variantValue,
+        this.sku,
+        this.price,
+        this.discountPrice,
+        this.discountPercent,
+        this.variantImg,
+        this.currentStock});
 
-  factory RequestVariant.fromJson(Map<String, dynamic> json) {
-    return RequestVariant(
-      variantId: json['variant_id'],
-      variantName: json['variant_name'],
-      qty: json['qty'],
-      availableStock: json['available_stock'],
-    );
+  Variants.fromJson(Map<String, dynamic> json) {
+    variantId = json['variant_id'];
+    variantValue = json['variant_value'];
+    sku = json['sku'];
+    price = json['price'];
+    discountPrice = json['discount_price'];
+    discountPercent = json['discount_percent'];
+    variantImg = json['variant_img'];
+    currentStock = json['current_stock'];
   }
 
-  bool get isLowStock {
-    final q = int.tryParse(qty.toString()) ?? 0;
-    final s = int.tryParse(availableStock.toString()) ?? 0;
-    return q > s;
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['variant_id'] = variantId;
+    data['variant_value'] = variantValue;
+    data['sku'] = sku;
+    data['price'] = price;
+    data['discount_price'] = discountPrice;
+    data['discount_percent'] = discountPercent;
+    data['variant_img'] = variantImg;
+    data['current_stock'] = currentStock;
+    return data;
   }
 }

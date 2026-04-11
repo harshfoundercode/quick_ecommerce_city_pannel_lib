@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_ecommerce_city_panel_redefined/View/HubRequestGetDir/hub_get_req_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/HubRequestGetDir/hub_req_get_model.dart';
-import 'package:quick_ecommerce_city_panel_redefined/View/HubRequestGetDir/hub_request_get_viewmodel.dart';
-
-
-// ════════════════════════════════════════════════════════════════════════════
-// THEME CONSTANTS  (matches your ColorConst palette)
-// ════════════════════════════════════════════════════════════════════════════
 
 const _kBg = Color(0xFFF4F6F9);
 const _kSurf = Colors.white;
@@ -24,9 +19,9 @@ const _kWarnSoft = Color(0xFFFFF3E0);
 const _kAccent = Color(0xFF0F6E56);
 const _kAccentSoft = Color(0xFFE1F5EE);
 
-// ════════════════════════════════════════════════════════════════════════════
-// SCREEN
-// ════════════════════════════════════════════════════════════════════════════
+
+enum _RequestFilter { all, pending, accepted, rejected }
+
 
 class HubRequestManagementScreen extends StatefulWidget {
   const HubRequestManagementScreen({super.key});
@@ -36,56 +31,85 @@ class HubRequestManagementScreen extends StatefulWidget {
       _HubRequestManagementScreenState();
 }
 
-class _HubRequestManagementScreenState
-    extends State<HubRequestManagementScreen> {
+class _HubRequestManagementScreenState extends State<HubRequestManagementScreen> {
+
+
+  _RequestFilter _filter = _RequestFilter.all;
+  Data? _selectedRequest;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HubRequestProvider>().fetchHubRequests(context);
+      context.read<HubReqGetViewModel>().getHubReqGetDataApi(context);
     });
   }
+
+  // ── Status helper — 0: pending | 1: accepted | 2: rejected ──────────────────
+
+  String _statusStr(dynamic status) {
+    switch (status?.toString()) {
+      case '1':
+        return 'accepted';
+      case '2':
+        return 'rejected';
+      default:
+        return 'pending'; // 0 or anything else
+    }
+  }
+
+  List<Data> _allRequests(HubReqGetViewModel vm) =>
+      vm.hubRequestListModel?.data ?? [];
+
+  List<Data> _filtered(HubReqGetViewModel vm) {
+    final all = _allRequests(vm);
+    if (_filter == _RequestFilter.all) return all;
+    return all
+        .where((r) => _statusStr(r.status) == _filter.name)
+        .toList();
+  }
+
+  int _pendingCount(HubReqGetViewModel vm) =>
+      _allRequests(vm).where((r) => _statusStr(r.status) == 'pending').length;
+
+  int _totalQty(Data req) =>
+      (req.products ?? []).fold(
+        0,
+            (sum, p) =>
+        sum +
+            (int.tryParse(p.requestedQuantity?.toString() ?? '0') ?? 0),
+      );
+
+  int _totalVariants(Data req) =>
+      (req.products ?? [])
+          .fold(0, (sum, p) => sum + (p.variants?.length ?? 0));
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _AppHeader(),
+        _buildAppHeader(),
         Expanded(
-          child: Consumer<HubRequestProvider>(
-            builder: (context, provider, _) {
-              if (provider.isLoading) {
+          child: Consumer<HubReqGetViewModel>(
+            builder: (context, vm, _) {
+              if (vm.hubRequestListModel == null) {
                 return const Center(
                   child: CircularProgressIndicator(color: _kAccent),
                 );
               }
-              if (provider.error != null) {
-                return _ErrorState(
-                  message: provider.error!,
-                  onRetry: () => provider.fetchHubRequests(context),
-                );
-              }
-              return _SplitLayout();
+              return _buildSplitLayout(vm);
             },
           ),
         ),
       ],
     );
   }
-}
 
-// ════════════════════════════════════════════════════════════════════════════
-// APP HEADER
-// ════════════════════════════════════════════════════════════════════════════
-
-class _AppHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildAppHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: const BoxDecoration(
         color: _kSurf,
-
         border: Border(bottom: BorderSide(color: _kBorder)),
       ),
       child: Row(
@@ -112,7 +136,7 @@ class _AppHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                'Incoming requests review karein — accept ya reject karein',
+                'Review incoming requests — accept or reject them.',
                 style: TextStyle(fontSize: 11, color: _kT2),
               ),
             ],
@@ -121,40 +145,28 @@ class _AppHeader extends StatelessWidget {
       ),
     );
   }
-}
 
-// ════════════════════════════════════════════════════════════════════════════
-// SPLIT LAYOUT
-// ════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════════
+  // SPLIT LAYOUT
+  // ══════════════════════════════════════════════════════════════════════════
 
-class _SplitLayout extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSplitLayout(HubReqGetViewModel vm) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // LEFT 55%
-        const Expanded(flex: 55, child: _LeftPanel()),
-        // Divider
+        Expanded(flex: 55, child: _buildLeftPanel(vm)),
         Container(width: 1, color: _kBorder),
-        // RIGHT 45%
-        const Expanded(flex: 45, child: _RightPanel()),
+        Expanded(flex: 45, child: _buildRightPanel(vm)),
       ],
     );
   }
-}
 
-// ════════════════════════════════════════════════════════════════════════════
-// LEFT PANEL
-// ════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════════
+  // LEFT PANEL
+  // ══════════════════════════════════════════════════════════════════════════
 
-class _LeftPanel extends StatelessWidget {
-  const _LeftPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<HubRequestProvider>();
-    final filtered = provider.filteredRequests;
+  Widget _buildLeftPanel(HubReqGetViewModel vm) {
+    final filtered = _filtered(vm);
 
     return Column(
       children: [
@@ -165,8 +177,8 @@ class _LeftPanel extends StatelessWidget {
           bgColor: _kGreenSoft,
           trailing: '${filtered.length} requests',
         ),
-        // Filter tabs
-        _FilterBar(),
+        // Filter bar
+        _buildFilterBar(vm),
         // List
         Expanded(
           child: filtered.isEmpty
@@ -174,21 +186,16 @@ class _LeftPanel extends StatelessWidget {
               : ListView.builder(
             padding: const EdgeInsets.all(12),
             itemCount: filtered.length,
-            itemBuilder: (_, i) => _RequestCard(request: filtered[i]),
+            itemBuilder: (_, i) => _buildRequestCard(filtered[i]),
           ),
         ),
       ],
     );
   }
-}
 
-// ── Filter Bar ──────────────────────────────────────────────────────────────
+  // ── Filter Bar ─────────────────────────────────────────────────────────────
 
-class _FilterBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<HubRequestProvider>();
-
+  Widget _buildFilterBar(HubReqGetViewModel vm) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: const BoxDecoration(
@@ -197,58 +204,45 @@ class _FilterBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _FilterChip(
+          _buildFilterChip(
             label: 'All',
-            filter: RequestFilter.all,
-            count: provider.allRequests.length,
+            filter: _RequestFilter.all,
+            count: _allRequests(vm).length,
             countColor: _kAccent,
           ),
           const SizedBox(width: 6),
-          _FilterChip(
+          _buildFilterChip(
             label: 'Pending',
-            filter: RequestFilter.pending,
-            count: provider.pendingCount,
+            filter: _RequestFilter.pending,
+            count: _pendingCount(vm),
             countColor: _kWarn,
           ),
           const SizedBox(width: 6),
-          _FilterChip(label: 'Accepted', filter: RequestFilter.accepted),
+          _buildFilterChip(label: 'Accepted', filter: _RequestFilter.accepted),
           const SizedBox(width: 6),
-          _FilterChip(label: 'Rejected', filter: RequestFilter.rejected),
+          _buildFilterChip(label: 'Rejected', filter: _RequestFilter.rejected),
         ],
       ),
     );
   }
-}
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final RequestFilter filter;
-  final int? count;
-  final Color? countColor;
-
-  const _FilterChip({
-    required this.label,
-    required this.filter,
-    this.count,
-    this.countColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<HubRequestProvider>();
-    final isActive = provider.filter == filter;
+  Widget _buildFilterChip({
+    required String label,
+    required _RequestFilter filter,
+    int? count,
+    Color? countColor,
+  }) {
+    final isActive = _filter == filter;
 
     return GestureDetector(
-      onTap: () => provider.setFilter(filter),
+      onTap: () => setState(() => _filter = filter),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
         decoration: BoxDecoration(
           color: isActive ? _kAccent : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? _kAccent : _kBorder,
-          ),
+          border: Border.all(color: isActive ? _kAccent : _kBorder),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -261,7 +255,7 @@ class _FilterChip extends StatelessWidget {
                 color: isActive ? Colors.white : _kT2,
               ),
             ),
-            if (count != null && count! > 0) ...[
+            if (count != null && count > 0) ...[
               const SizedBox(width: 5),
               Container(
                 width: 16,
@@ -275,10 +269,10 @@ class _FilterChip extends StatelessWidget {
                 child: Center(
                   child: Text(
                     '$count',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
-                      color: isActive ? Colors.white : Colors.white,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -289,53 +283,41 @@ class _FilterChip extends StatelessWidget {
       ),
     );
   }
-}
 
-// ── Request Card ────────────────────────────────────────────────────────────
+  // ── Request Card ────────────────────────────────────────────────────────────
 
-class _RequestCard extends StatelessWidget {
-  final HubRequest request;
-
-  const _RequestCard({required this.request});
-
-  Color get _statusColor {
-    switch (request.status) {
-      case 'accepted':
-        return _kGreen;
-      case 'rejected':
-        return _kError;
-      default:
-        return _kWarn;
-    }
-  }
-
-  Color get _statusBg {
-    switch (request.status) {
-      case 'accepted':
-        return _kGreenSoft;
-      case 'rejected':
-        return _kErrorSoft;
-      default:
-        return _kWarnSoft;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<HubRequestProvider>();
+  Widget _buildRequestCard(Data req) {
     final isSelected =
-        provider.selectedRequest?.requestId?.toString() ==
-            request.requestId?.toString();
+        _selectedRequest?.requestId?.toString() == req.requestId?.toString();
+    final statusStr = _statusStr(req.status);
 
-    final categories = request.products
-        ?.map((p) => p.subCategory ?? p.mainCategory ?? '')
+    Color statusColor;
+    Color statusBg;
+    switch (statusStr) {
+      case 'accepted':
+        statusColor = _kGreen;
+        statusBg = _kGreenSoft;
+        break;
+      case 'rejected':
+        statusColor = _kError;
+        statusBg = _kErrorSoft;
+        break;
+      default:
+        statusColor = _kWarn;
+        statusBg = _kWarnSoft;
+    }
+
+    // Category tags from products
+    final categories = (req.products ?? [])
+        .map((p) => p.categoryName?.toString() ?? '')
         .where((s) => s.isNotEmpty)
         .toSet()
-        .toList() ??
-        [];
+        .toList();
+
+    final hubName = req.hubmanager?.name?.toString() ?? 'Unknown Hub';
 
     return GestureDetector(
-      onTap: () => provider.selectRequest(request),
+      onTap: () => setState(() => _selectedRequest = req),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: 10),
@@ -375,16 +357,16 @@ class _RequestCard extends StatelessWidget {
                     width: 34,
                     height: 34,
                     decoration: BoxDecoration(
-                      color: _statusBg,
+                      color: statusBg,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
                       child: Text(
-                        _initials(request.hubName ?? 'HB'),
+                        _initials(hubName),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: _statusColor,
+                          color: statusColor,
                         ),
                       ),
                     ),
@@ -396,7 +378,7 @@ class _RequestCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          request.hubName ?? 'Unknown Hub',
+                          hubName,
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -405,7 +387,7 @@ class _RequestCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          '${request.cityName ?? ''} · ${request.createdAt ?? ''}',
+                          req.createdAt?.toString() ?? '',
                           style: const TextStyle(fontSize: 10, color: _kT2),
                         ),
                       ],
@@ -414,19 +396,17 @@ class _RequestCard extends StatelessWidget {
                   // Status badge
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 3,
-                    ),
+                        horizontal: 9, vertical: 3),
                     decoration: BoxDecoration(
-                      color: _statusBg,
+                      color: statusBg,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      _capitalize(request.status ?? 'pending'),
+                      _capitalize(statusStr),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: _statusColor,
+                        color: statusColor,
                       ),
                     ),
                   ),
@@ -445,7 +425,7 @@ class _RequestCard extends StatelessWidget {
                   ),
                   _MiniTag(
                     label:
-                    '${request.totalVariants} variants · qty ${request.totalQty}',
+                    '${_totalVariants(req)} variants · qty ${_totalQty(req)}',
                     bgColor: _kInfoSoft,
                     textColor: _kInfo,
                   ),
@@ -458,80 +438,11 @@ class _RequestCard extends StatelessWidget {
     );
   }
 
-  String _initials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
-  }
+  // ══════════════════════════════════════════════════════════════════════════
+  // RIGHT PANEL
+  // ══════════════════════════════════════════════════════════════════════════
 
-  String _capitalize(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
-}
-
-class _MiniTag extends StatelessWidget {
-  final String label;
-  final Color bgColor;
-  final Color textColor;
-
-  const _MiniTag({
-    required this.label,
-    this.bgColor = _kAccentSoft,
-    this.textColor = _kAccent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: textColor,
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.inbox_outlined, color: _kT2, size: 40),
-          SizedBox(height: 10),
-          Text(
-            'Koi request nahi mili',
-            style: TextStyle(fontSize: 13, color: _kT2),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-// RIGHT PANEL
-// ════════════════════════════════════════════════════════════════════════════
-
-class _RightPanel extends StatelessWidget {
-  const _RightPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<HubRequestProvider>();
-    final req = provider.selectedRequest;
-
+  Widget _buildRightPanel(HubReqGetViewModel vm) {
     return Column(
       children: [
         _PanelHeader(
@@ -539,72 +450,32 @@ class _RightPanel extends StatelessWidget {
           color: _kInfo,
           bgColor: _kInfoSoft,
         ),
-        if (req == null)
+        if (_selectedRequest == null)
           const Expanded(child: _EmptyDetail())
         else
-          Expanded(child: _DetailView(request: req)),
+          Expanded(child: _buildDetailView(vm, _selectedRequest!)),
       ],
     );
   }
-}
 
-// ── Empty detail ────────────────────────────────────────────────────────────
+  // ── Detail View ─────────────────────────────────────────────────────────────
 
-class _EmptyDetail extends StatelessWidget {
-  const _EmptyDetail();
+  Widget _buildDetailView(HubReqGetViewModel vm, Data req) {
+    final statusStr = _statusStr(req.status);
+    final hubName = req.hubmanager?.name?.toString() ?? '-';
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: _kInfoSoft,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(
-                Icons.mark_email_unread_outlined,
-                color: _kInfo,
-                size: 30,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Koi request select karein',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: _kT1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Left panel se kisi request par\nclick karein to details dekhein',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: _kT2, height: 1.6),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+    Color statusColor;
+    switch (statusStr) {
+      case 'accepted':
+        statusColor = _kGreen;
+        break;
+      case 'rejected':
+        statusColor = _kError;
+        break;
+      default:
+        statusColor = _kWarn;
+    }
 
-// ── Detail View ─────────────────────────────────────────────────────────────
-
-class _DetailView extends StatelessWidget {
-  final HubRequest request;
-
-  const _DetailView({required this.request});
-
-  @override
-  Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
@@ -614,22 +485,19 @@ class _DetailView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Info chips
-                _SectionLabel('Request info'),
+                const _SectionLabel('Request info'),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(
                       child: _InfoChip(
                         label: 'Request ID',
-                        value: request.requestId?.toString() ?? '-',
+                        value: req.requestId?.toString() ?? '-',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: _InfoChip(
-                        label: 'Hub',
-                        value: request.hubName ?? '-',
-                      ),
+                      child: _InfoChip(label: 'Hub', value: hubName),
                     ),
                   ],
                 ),
@@ -639,105 +507,45 @@ class _DetailView extends StatelessWidget {
                     Expanded(
                       child: _InfoChip(
                         label: 'Total variants',
-                        value: '${request.totalVariants}',
+                        value: '${_totalVariants(req)}',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _InfoChip(
                         label: 'Total qty',
-                        value: '${request.totalQty} units',
+                        value: '${_totalQty(req)} units',
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: _InfoChip(
                         label: 'Status',
-                        value: _capitalize(request.status ?? 'pending'),
-                        valueColor: _statusColor(request.status),
+                        value: _capitalize(statusStr),
+                        valueColor: statusColor,
                       ),
                     ),
                   ],
                 ),
 
-                // Note
-                if (request.note != null && request.note!.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  _SectionLabel('Note'),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: _kBg,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _kBorder),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.note_alt_outlined,
-                          size: 14,
-                          color: _kT2,
-                        ),
-                        const SizedBox(width: 7),
-                        Expanded(
-                          child: Text(
-                            request.note!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: _kT1,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
                 // Products
                 const SizedBox(height: 14),
-                _SectionLabel('Requested products'),
+                const _SectionLabel('Requested products'),
                 const SizedBox(height: 8),
-                ...(request.products ?? []).map(
-                      (p) => _ProductCard(product: p),
-                ),
+                ...(req.products ?? []).map((p) => _buildProductCard(p)),
               ],
             ),
           ),
         ),
         // Action footer
-        _ActionFooter(request: request),
+        _buildActionFooter(vm, req),
       ],
     );
   }
 
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'accepted':
-        return _kGreen;
-      case 'rejected':
-        return _kError;
-      default:
-        return _kWarn;
-    }
-  }
+  // ── Product Card ────────────────────────────────────────────────────────────
 
-  String _capitalize(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
-}
-
-// ── Product Card ────────────────────────────────────────────────────────────
-
-class _ProductCard extends StatelessWidget {
-  final RequestProduct product;
-
-  const _ProductCard({required this.product});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildProductCard(Products product) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -757,9 +565,9 @@ class _ProductCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(7),
                   child: (product.productImg != null &&
-                      product.productImg!.isNotEmpty)
+                      product.productImg.toString().isNotEmpty)
                       ? Image.network(
-                    product.productImg!,
+                    product.productImg.toString(),
                     width: 30,
                     height: 30,
                     fit: BoxFit.cover,
@@ -773,7 +581,7 @@ class _ProductCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product.productName ?? 'Unknown',
+                        product.productName?.toString() ?? 'Unknown',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -781,19 +589,51 @@ class _ProductCard extends StatelessWidget {
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
-                        '${product.mainCategory ?? ''} › ${product.subCategory ?? ''}',
-                        style: const TextStyle(fontSize: 10, color: _kT2),
+                      Row(
+                        children: [
+                          Text(
+                            product.categoryName?.toString() ?? '',
+                            style:
+                            const TextStyle(fontSize: 10, color: _kT2),
+                          ),
+                          if (product.brandName != null) ...[
+                            const Text(
+                              ' · ',
+                              style: TextStyle(fontSize: 10, color: _kT2),
+                            ),
+                            Text(
+                              product.brandName.toString(),
+                              style:
+                              const TextStyle(fontSize: 10, color: _kT2),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),
                 ),
+                // Requested qty badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: _kInfoSoft,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Req: ${product.requestedQuantity ?? 0}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: _kInfo,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
                 // Variant count badge
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
+                      horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: _kGreenSoft,
                     borderRadius: BorderRadius.circular(12),
@@ -812,7 +652,7 @@ class _ProductCard extends StatelessWidget {
           ),
           // Variant rows
           if (product.variants != null)
-            ...product.variants!.map((v) => _VariantRow(variant: v)),
+            ...product.variants!.map((v) => _buildVariantRow(v)),
         ],
       ),
     );
@@ -827,94 +667,77 @@ class _ProductCard extends StatelessWidget {
     ),
     child: const Icon(Icons.inventory_2, color: _kAccent, size: 16),
   );
-}
 
-class _VariantRow extends StatelessWidget {
-  final RequestVariant variant;
-
-  const _VariantRow({required this.variant});
-
-  @override
-  Widget build(BuildContext context) {
-    final isLow = variant.isLowStock;
+  Widget _buildVariantRow(Variants variant) {
+    final stock =
+        int.tryParse(variant.currentStock?.toString() ?? '0') ?? 0;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(
-        border: const Border(top: BorderSide(color: _kBorder)),
-        color: isLow ? _kErrorSoft.withValues(alpha: 0.4) : Colors.transparent,
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: _kBorder)),
       ),
       child: Row(
         children: [
           // Variant name
           Expanded(
-            child: Text(
-              variant.variantName ?? 'Default',
-              style: const TextStyle(fontSize: 11, color: _kT1),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  variant.variantValue?.toString() ?? 'Default',
+                  style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: _kT1),
+                ),
+                if (variant.sku != null)
+                  Text(
+                    'SKU: ${variant.sku}',
+                    style: const TextStyle(fontSize: 9, color: _kT2),
+                  ),
+              ],
             ),
           ),
-          // Stock chip
+          // Price
+          if (variant.discountPrice != null) ...[
+            Text(
+              '₹${variant.discountPrice}',
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: _kAccent),
+            ),
+            const SizedBox(width: 7),
+          ],
+          // Current stock chip
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: isLow ? _kWarnSoft : _kGreenSoft,
+              color: stock > 0 ? _kGreenSoft : _kErrorSoft,
               borderRadius: BorderRadius.circular(5),
             ),
             child: Text(
-              'Stock: ${variant.availableStock ?? 0}',
+              'Stock: $stock',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: isLow ? _kWarn : _kGreen,
+                color: stock > 0 ? _kGreen : _kError,
               ),
             ),
           ),
-          const SizedBox(width: 7),
-          // Qty badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(
-              color: isLow
-                  ? _kError.withValues(alpha: 0.1)
-                  : _kAccentSoft,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              '×${variant.qty ?? 0}',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: isLow ? _kError : _kAccent,
-              ),
-            ),
-          ),
-          if (isLow) ...[
-            const SizedBox(width: 5),
-            const Icon(
-              Icons.warning_amber_rounded,
-              size: 13,
-              color: _kWarn,
-            ),
-          ],
         ],
       ),
     );
   }
-}
 
-// ════════════════════════════════════════════════════════════════════════════
-// ACTION FOOTER — Accept / Reject
-// ════════════════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════════════
+  // ACTION FOOTER
+  // ══════════════════════════════════════════════════════════════════════════
 
-class _ActionFooter extends StatelessWidget {
-  final HubRequest request;
-
-  const _ActionFooter({required this.request});
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<HubRequestProvider>();
-    final isPending = request.status == 'pending';
+  Widget _buildActionFooter(HubReqGetViewModel vm, Data req) {
+    final statusStr = _statusStr(req.status);
+    final isPending = statusStr == 'pending';
 
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
@@ -930,77 +753,18 @@ class _ActionFooter extends StatelessWidget {
         ],
       ),
       child: isPending
-          ? _PendingActions(request: request, provider: provider)
-          : _DoneState(status: request.status ?? 'pending'),
+          ? _buildPendingActions(vm, req)
+          : _buildDoneState(statusStr),
     );
   }
-}
 
-class _PendingActions extends StatelessWidget {
-  final HubRequest request;
-  final HubRequestProvider provider;
-
-  const _PendingActions({
-    required this.request,
-    required this.provider,
-  });
-
-  Future<void> _onAccept(BuildContext context) async {
-    final success = await provider.acceptRequest(
-      context,
-      request.requestId,
-    );
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success ? 'Request accept kar li gayi ✓' : 'Kuch galat hua, retry karein',
-          ),
-          backgroundColor: success ? _kGreen : _kError,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _onReject(BuildContext context) async {
-    // Optional: show a reject reason bottom sheet
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => const _RejectConfirmDialog(),
-    );
-    if (confirmed != true) return;
-
-    // final success = await provider.rejectRequest(
-    //   context,
-    //   request.requestId,
-    // );
-    // if (context.mounted) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(
-    //       content: Text(
-    //         success ? 'Request reject kar di gayi' : 'Kuch galat hua, retry karein',
-    //       ),
-    //       backgroundColor: success ? _kError : _kWarn,
-    //       behavior: SnackBarBehavior.floating,
-    //       shape: RoundedRectangleBorder(
-    //         borderRadius: BorderRadius.circular(10),
-    //       ),
-    //     ),
-    //   );
-    // }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return provider.isActionLoading
+  Widget _buildPendingActions(HubReqGetViewModel vm, Data req) {
+    return vm.addLoading
         ? const Center(
       child: Padding(
         padding: EdgeInsets.all(8),
-        child: CircularProgressIndicator(color: _kAccent, strokeWidth: 2),
+        child: CircularProgressIndicator(
+            color: _kAccent, strokeWidth: 2),
       ),
     )
         : Row(
@@ -1008,11 +772,15 @@ class _PendingActions extends StatelessWidget {
         // Accept
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: () => _onAccept(context),
+            onPressed: () => vm.acceptHubRequestApi(
+              context,
+              req.requestId.toString(),
+            ),
             icon: const Icon(Icons.check_circle_outline, size: 18),
             label: const Text(
               'Accept Request',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w700),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: _kGreen,
@@ -1026,41 +794,35 @@ class _PendingActions extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        // Reject
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () => _onReject(context),
-            icon: const Icon(Icons.cancel_outlined, size: 18),
-            label: const Text(
-              'Reject',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kErrorSoft,
-              foregroundColor: _kError,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(11),
-                side: BorderSide(
-                  color: _kError.withValues(alpha: 0.3),
-                ),
-              ),
-              elevation: 0,
-            ),
-          ),
-        ),
+        // // Reject
+        // Expanded(
+        //   child: ElevatedButton.icon(
+        //     onPressed: () => _onReject(context, req),
+        //     icon: const Icon(Icons.cancel_outlined, size: 18),
+        //     label: const Text(
+        //       'Reject',
+        //       style: TextStyle(
+        //           fontSize: 13, fontWeight: FontWeight.w700),
+        //     ),
+        //     style: ElevatedButton.styleFrom(
+        //       backgroundColor: _kErrorSoft,
+        //       foregroundColor: _kError,
+        //       padding: const EdgeInsets.symmetric(vertical: 13),
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(11),
+        //         side: BorderSide(
+        //             color: _kError.withValues(alpha: 0.3)),
+        //       ),
+        //       elevation: 0,
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
-}
 
-class _DoneState extends StatelessWidget {
-  final String status;
 
-  const _DoneState({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDoneState(String status) {
     final isAccepted = status == 'accepted';
     return Container(
       width: double.infinity,
@@ -1084,8 +846,8 @@ class _DoneState extends StatelessWidget {
           const SizedBox(width: 9),
           Text(
             isAccepted
-                ? 'Yeh request accept ki ja chuki hai'
-                : 'Yeh request reject ki ja chuki hai',
+                ? 'This request has already been accepted.'
+                : 'This request has already been rejected.',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -1096,54 +858,70 @@ class _DoneState extends StatelessWidget {
       ),
     );
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // HELPERS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  String _initials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
 // REJECT CONFIRM DIALOG
 // ════════════════════════════════════════════════════════════════════════════
 
-class _RejectConfirmDialog extends StatelessWidget {
-  const _RejectConfirmDialog();
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
-        children: [
-          Icon(Icons.warning_amber_rounded, color: _kError, size: 22),
-          SizedBox(width: 8),
-          Text(
-            'Request Reject karein?',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
-      content: const Text(
-        'Kya aap sure hain? Reject karne ke baad hub ko dobara request karni padegi.',
-        style: TextStyle(fontSize: 13, color: _kT2, height: 1.5),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel', style: TextStyle(color: _kT2)),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, true),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _kError,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            elevation: 0,
-          ),
-          child: const Text('Haan, Reject Karein'),
-        ),
-      ],
-    );
-  }
-}
+// class _RejectConfirmDialog extends StatelessWidget {
+//   const _RejectConfirmDialog();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return AlertDialog(
+//       shape:
+//       RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//       title: const Row(
+//         children: [
+//           Icon(Icons.warning_amber_rounded, color: _kError, size: 22),
+//           SizedBox(width: 8),
+//           Text(
+//             'Request Reject karein?',
+//             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+//           ),
+//         ],
+//       ),
+//       content: const Text(
+//         'Kya aap sure hain? Reject karne ke baad hub ko dobara request karni padegi.',
+//         style: TextStyle(fontSize: 13, color: _kT2, height: 1.5),
+//       ),
+//       actions: [
+//         TextButton(
+//           onPressed: () => Navigator.pop(context, false),
+//           child: const Text('Cancel', style: TextStyle(color: _kT2)),
+//         ),
+//         ElevatedButton(
+//           onPressed: () => Navigator.pop(context, true),
+//           style: ElevatedButton.styleFrom(
+//             backgroundColor: _kError,
+//             foregroundColor: Colors.white,
+//             shape: RoundedRectangleBorder(
+//               borderRadius: BorderRadius.circular(10),
+//             ),
+//             elevation: 0,
+//           ),
+//           child: const Text('Haan, Reject Karein'),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 // ════════════════════════════════════════════════════════════════════════════
 // SHARED WIDGETS
@@ -1234,10 +1012,7 @@ class _InfoChip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 10, color: _kT2),
-          ),
+          Text(label, style: const TextStyle(fontSize: 10, color: _kT2)),
           const SizedBox(height: 3),
           Text(
             value,
@@ -1254,44 +1029,97 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-// ERROR STATE
-// ════════════════════════════════════════════════════════════════════════════
+class _MiniTag extends StatelessWidget {
+  final String label;
+  final Color bgColor;
+  final Color textColor;
 
-class _ErrorState extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
+  const _MiniTag({
+    required this.label,
+    this.bgColor = _kAccentSoft,
+    this.textColor = _kAccent,
+  });
 
-  const _ErrorState({required this.message, required this.onRetry});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyList extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.inbox_outlined, color: _kT2, size: 40),
+          SizedBox(height: 10),
+          Text(
+            'No requests found.',
+            style: TextStyle(fontSize: 13, color: _kT2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyDetail extends StatelessWidget {
+  const _EmptyDetail();
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.error_outline, color: _kError, size: 40),
-          const SizedBox(height: 10),
-          Text(
-            message,
-            style: const TextStyle(fontSize: 13, color: _kT2),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 14),
-          ElevatedButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh, size: 16),
-            label: const Text('Retry'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _kAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: _kInfoSoft,
+                borderRadius: BorderRadius.circular(18),
               ),
-              elevation: 0,
+              child: const Icon(
+                Icons.mark_email_unread_outlined,
+                color: _kInfo,
+                size: 30,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            const Text(
+              'Please select a request.',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: _kT1,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Click on a request from the left panel to view details.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: _kT2, height: 1.6),
+            ),
+          ],
+        ),
       ),
     );
   }
