@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_hub_history_model.dart'
-    show CityHubHistoryData, Transfers, Variants;
+    show CityHubHistoryData, Transfers;
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_request_history_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/city_stock_view_model.dart';
 import '../widgets/app_header.dart';
@@ -274,16 +274,17 @@ class _HistoryScreenState extends State<HistoryScreen>
 
           return GestureDetector(
             onTap: () => setState(() {
-              if (isAdmin)
+              if (isAdmin) {
                 _adminStatus = s;
-              else
+              } else {
                 _hubStatus = s;
+              }
             }),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: active ? color.withOpacity(0.12) : ColorConst.white,
+                color: active ? color.withValues(alpha:0.12) : ColorConst.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: active ? color : ColorConst.borderColor,
@@ -441,7 +442,7 @@ class _AdminHistoryTab extends StatelessWidget {
         Icon(
           Icons.inbox_outlined,
           size: 52,
-          color: ColorConst.textGrey.withOpacity(0.3),
+          color: ColorConst.textGrey.withValues(alpha: 0.3),
         ),
         const SizedBox(height: 12),
         Text(
@@ -771,7 +772,7 @@ class _HubHistoryTab extends StatelessWidget {
             Icon(
               Icons.inbox_outlined,
               size: 52,
-              color: ColorConst.textGrey.withOpacity(0.3),
+              color: ColorConst.textGrey.withValues(alpha:0.3),
             ),
             const SizedBox(height: 12),
             const Text(
@@ -883,7 +884,7 @@ class _HubCardState extends State<_HubCard> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: ColorConst.primaryGreen.withOpacity(0.08),
+                      color: ColorConst.primaryGreen.withValues(alpha:0.08),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: widget.product.productImg != null &&
@@ -940,7 +941,7 @@ class _HubCardState extends State<_HubCard> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: ColorConst.info.withOpacity(0.1),
+                      color: ColorConst.info.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -1092,7 +1093,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -1153,7 +1154,7 @@ class _QtyChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(5),
       ),
       child: Row(
@@ -1170,7 +1171,7 @@ class _QtyChip extends StatelessWidget {
           const SizedBox(width: 2),
           Text(
             label,
-            style: TextStyle(color: color.withOpacity(0.7), fontSize: 9),
+            style: TextStyle(color: color.withValues(alpha:0.7), fontSize: 9),
           ),
         ],
       ),
