@@ -191,6 +191,38 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 
   // ── Geo helpers ──────────────────────────────────────────────────────────
 
+  Set<Marker> _buildExistingHubMarkers() {
+    final hubVM = Provider.of<HubZoneViewModel>(context, listen: false);
+    final Set<Marker> markers = {};
+
+    for (final z in hubVM.hubZones) {
+      markers.add(
+        Marker(
+          markerId: MarkerId('existing_label_${z.id}'),
+          position: LatLng(
+            double.parse(z.latitude.toString()),
+            double.parse(z.longitude.toString()),
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueOrange,
+          ),
+          alpha: 0.8,
+          infoWindow: InfoWindow(
+            title: z.name?.toString() ?? 'Hub Zone',
+            snippet: 'Radius: ${z.radiuskm} km | ${z.address ?? ""}',
+          ),
+          // Optional: Always show info window
+          consumeTapEvents: true,
+          onTap: () {
+
+          },
+        ),
+      );
+    }
+
+    return markers;
+  }
+
   double _distanceKm(LatLng a, LatLng b) {
     const r = 6371.0;
     final dLat = _deg2rad(b.latitude - a.latitude);
@@ -277,17 +309,75 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     return LatLng(lat, lng);
   }
 
+  // Set<Marker> get _markers => {
+  //   Marker(
+  //     markerId: const MarkerId('city_center'),
+  //     position: _cityCenter,
+  //     icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+  //     infoWindow: InfoWindow(
+  //       title: widget.cityZone?.name?.toString() ?? 'City Zone',
+  //       snippet: 'City boundary center',
+  //     ),
+  //     alpha: 0.7,
+  //   ),
+  //   Marker(
+  //     markerId: const MarkerId('hub'),
+  //     position: _selectedLocation,
+  //     draggable: true,
+  //     icon: BitmapDescriptor.defaultMarkerWithHue(
+  //       _isOutsideBoundary
+  //           ? BitmapDescriptor.hueRed
+  //           : BitmapDescriptor.hueGreen,
+  //     ),
+  //     onDragStart: (_) => debugPrint("Dragging started"),
+  //     onDrag: (pos) {
+  //       if (_isInsideCity(pos)) {
+  //         setState(() => _selectedLocation = pos);
+  //       }
+  //     },
+  //     onDragEnd: (pos) async {
+  //       if (!_isInsideCity(pos)) {
+  //         CustomSnackBar.show(
+  //           context,
+  //           message: '❌ You can only drag inside blue zone',
+  //           type: SnackBarType.error,
+  //         );
+  //         pos = _clampToCity(pos);
+  //       }
+  //       if (_checkOverlapWith(pos, _hubRadius)) {
+  //         CustomSnackBar.show(
+  //           context,
+  //           message: '❌ Overlapping another hub zone',
+  //           type: SnackBarType.error,
+  //         );
+  //         return;
+  //       }
+  //       setState(() {
+  //         _selectedLocation = pos;
+  //         _isOutsideBoundary = !_isInsideCity(pos);
+  //       });
+  //       await _fetchAddress(pos);
+  //       _mapController?.animateCamera(CameraUpdate.newLatLng(pos));
+  //     },
+  //   ),
+  // };
+
+  // Replace the existing _markers getter with this enhanced version
+
   Set<Marker> get _markers => {
+    // City center marker
     Marker(
       markerId: const MarkerId('city_center'),
       position: _cityCenter,
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       infoWindow: InfoWindow(
         title: widget.cityZone?.name?.toString() ?? 'City Zone',
-        snippet: 'City boundary center',
+        snippet: 'City boundary center - Radius: ${_cityRadiusKm.toStringAsFixed(1)} km',
       ),
       alpha: 0.7,
     ),
+
+    // Selected hub marker
     Marker(
       markerId: const MarkerId('hub'),
       position: _selectedLocation,
@@ -296,6 +386,12 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         _isOutsideBoundary
             ? BitmapDescriptor.hueRed
             : BitmapDescriptor.hueGreen,
+      ),
+      infoWindow: InfoWindow(
+        title: 'New Hub Location',
+        snippet: _isOutsideBoundary
+            ? '⚠️ Outside city boundary'
+            : '✓ Valid location\nRadius: ${_hubRadius.toStringAsFixed(1)} km',
       ),
       onDragStart: (_) => debugPrint("Dragging started"),
       onDrag: (pos) {
@@ -328,6 +424,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         _mapController?.animateCamera(CameraUpdate.newLatLng(pos));
       },
     ),
+    ..._buildExistingHubMarkers(),
   };
 
   // ── Map tap ───────────────────────────────────────────────────────────────

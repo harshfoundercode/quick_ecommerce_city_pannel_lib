@@ -17,8 +17,7 @@ class AdminSidebar extends StatefulWidget {
   State<AdminSidebar> createState() => _AdminSidebarState();
 }
 
-class _AdminSidebarState extends State<AdminSidebar>
-    with SingleTickerProviderStateMixin {
+class _AdminSidebarState extends State<AdminSidebar> with SingleTickerProviderStateMixin {
   late AnimationController _hoverController;
 
   @override
@@ -138,10 +137,13 @@ class _AdminSidebarState extends State<AdminSidebar>
           CustomText.bold(
             pvm.profileData?.data?.name ?? "",
             color: Colors.black,
+            fontSize: 14,
           ),
           CustomText.medium(
             pvm.profileData?.data?.phone ?? "",
             color: Colors.black,
+            fontSize: 13,
+
           ),
           InkWell(
             onTap: () {
@@ -149,7 +151,7 @@ class _AdminSidebarState extends State<AdminSidebar>
             },
             child: Text(
               "View Profile",
-              style: TextStyle(color: ColorConst.primaryGreen),
+              style: TextStyle(color: ColorConst.primaryGreen,fontSize: 12),
             ),
           ),
         ],
@@ -206,7 +208,7 @@ class _AdminSidebarState extends State<AdminSidebar>
                 children: [
                   Icon(
                     menuItem.icon,
-                    size: 20,
+                    size: 18,
                     color: isSelected
                         ? ColorConst.primaryGreen
                         : Colors.grey.shade600,
@@ -216,7 +218,7 @@ class _AdminSidebarState extends State<AdminSidebar>
                     child: Text(
                       menuItem.title,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: isSelected
                             ? ColorConst.primaryGreen
@@ -474,3 +476,4 @@ class _AdminSidebarState extends State<AdminSidebar>
     );
   }
 }
+

@@ -95,7 +95,7 @@ class _RevenueCardState extends State<RevenueCard>
                 ],
               ),
               child: const Icon(Icons.bar_chart_rounded,
-                  size: 18, color: Colors.white),
+                  size: 16, color: Colors.white),
             ),
             const SizedBox(width: 10),
             const Expanded(
@@ -104,7 +104,7 @@ class _RevenueCardState extends State<RevenueCard>
                   children: [
                     Text('Revenue Analytics',
                         style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 13,
                             fontWeight: FontWeight.w800,
                             color: ColorConst.textBlack,
                             letterSpacing: 0.2)),
@@ -132,7 +132,7 @@ class _RevenueCardState extends State<RevenueCard>
                       children: [
                         Text('View All',
                             style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 9,
                                 fontWeight: FontWeight.w600,
                                 color: ColorConst.black)),
                       ]),
@@ -182,12 +182,12 @@ class _RevenueCardState extends State<RevenueCard>
               children: [
                 Text('Hub Performance',
                     style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: ColorConst.textSecondary)),
                 Text('This week',
                     style: TextStyle(
-                        fontSize: 11, color: ColorConst.textBlack)),
+                        fontSize: 8, color: ColorConst.textBlack)),
               ]),
 
           const SizedBox(height: 10),
@@ -460,7 +460,7 @@ class _TopHubBanner extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(Icons.workspace_premium_rounded,
-              size: 18, color: ColorConst.white),
+              size: 16, color: ColorConst.white),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -478,7 +478,7 @@ class _TopHubBanner extends StatelessWidget {
                   hub.hubName ?? '—',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 13,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -489,7 +489,7 @@ class _TopHubBanner extends StatelessWidget {
           formatRevenue(revenue),
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w800,
           ),
         ),

@@ -30,7 +30,7 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
           CustomWidgets.hubHeader(
             title: "Today's Overview",
             subtitle: "Orders performance for this city",
-            titleSize: mobileSize?20:18,
+            titleSize: mobileSize?20:16,
             subtitleSize: mobileSize?15:10
           ),
           CustomWidgets.verticalSpace(0.03),
@@ -47,7 +47,7 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
       crossAxisSpacing: 16,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: mobileSize?1.42:1.8,
+      childAspectRatio: mobileSize?1.42:2.3,
       children: [
         overViewItem(
           title: "Total Orders",
@@ -89,7 +89,7 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
     required final Color iconColor,}
   ) {
     return Container(
-      padding:  EdgeInsets.symmetric(horizontal: 16,vertical:Sizes.screenHeight*0.02 ),
+      padding:  EdgeInsets.symmetric(horizontal: 16,vertical:Sizes.screenHeight*0.017),
       decoration: BoxDecoration(
         color: ColorConst.containerGrey2,
         borderRadius: BorderRadius.circular(20),
@@ -98,13 +98,8 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              CustomText.bold(
-                title,
-                fontSize: 13,
-                color: ColorConst.textPrimary
-              ),
               Container(
                 height: 33,
                 width: 33,
@@ -114,6 +109,13 @@ class _TodayOverviewCardState extends State<TodayOverviewCard> {
                 ),
                 child: Icon(icon, color: iconColor,size: 20,),
               ),
+              SizedBox(width: Sizes.screenWidth*0.012,),
+              CustomText.bold(
+                title,
+                fontSize: 13,
+                color: ColorConst.textPrimary
+              ),
+
             ],
           ),
           CustomWidgets.verticalSpace(0.012),

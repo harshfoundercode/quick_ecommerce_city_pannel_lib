@@ -22,7 +22,7 @@ class _CityCardState extends State<CityCard> {
       width: mobileSize ? Sizes.screenWidth * 0.93 : Sizes.screenWidth * 0.44,
       height: mobileSize
           ? Sizes.screenHeight * 0.35
-          : Sizes.screenHeight * 0.53,
+          : Sizes.screenHeight * 0.45,
       padding: EdgeInsets.symmetric(
         horizontal: mobileSize
             ? Sizes.screenWidth * 0.038
@@ -59,35 +59,11 @@ class _CityCardState extends State<CityCard> {
   }
 
   Widget _buildCityInfo(bool mobileSize) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomText.bold(
-          widget.dashboardSummaryData?.cityName ?? "N/n",
-          color: Colors.white,
-          fontSize: mobileSize ? 25 : 38,
-          letterSpacing: 1,
-        ),
-        CustomWidgets.verticalSpace(0.01),
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.location_on, color: Colors.white, size: 14),
-            ),
-            CustomWidgets.horizontalSpace(0.01),
-            CustomText.regular(
-              "Uttar Pradesh, India",
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: 15,
-            ),
-          ],
-        ),
-      ],
+    return CustomText.bold(
+      widget.dashboardSummaryData?.cityName ?? "N/n",
+      color: Colors.white,
+      fontSize: mobileSize ? 25 : 34,
+      letterSpacing: 1,
     );
   }
 
@@ -114,21 +90,21 @@ class _CityCardState extends State<CityCard> {
           _buildStatItem(
             widget.dashboardSummaryData!.totalHubs.toString(),
             "Total Hubs",
-            Icons.account_tree_outlined,
+            Icons.hub_rounded,
             Colors.white,
           ),
           verticalDivider,
           _buildStatItem(
             widget.dashboardSummaryData!.deliveryBoys.toString(),
             "Delivery Boys",
-            Icons.pedal_bike_outlined,
+            Icons.delivery_dining_rounded,
             Colors.white,
           ),
           verticalDivider,
           _buildStatItem(
             widget.dashboardSummaryData!.activeOrders.toString(),
             "Active Orders",
-            Icons.receipt_long_outlined,
+            Icons.local_shipping_rounded,
             Colors.white,
           ),
         ],
@@ -145,8 +121,8 @@ class _CityCardState extends State<CityCard> {
     return Column(
       children: [
         Container(
-          height: 45,
-          width: 45,
+          height: 40,
+          width: 40,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -162,15 +138,15 @@ class _CityCardState extends State<CityCard> {
               width: 1,
             ),
           ),
-          child: Icon(icon, color: iconColor, size: 24),
+          child: Icon(icon, color: iconColor, size: 20),
         ),
         CustomWidgets.verticalSpace(0.01),
-        CustomText.bold(value, color: Colors.white, fontSize: 28),
+        CustomText.bold(value, color: Colors.white, fontSize: 25),
         CustomWidgets.verticalSpace(0.01),
         CustomText.medium(
           label,
           color: Colors.white.withValues(alpha: 0.7),
-          fontSize: 12,
+          fontSize: 10,
         ),
       ],
     );

@@ -70,20 +70,20 @@ class AdminViewModel extends ChangeNotifier {
 
 
     MenuItem(
-      icon: Icons.dashboard,
+      icon: Icons.dashboard_rounded,
       title: "Dashboard",
       screen: const DashboardContent(),
     ),
     MenuItem(
-      icon: Icons.notifications,
+      icon: Icons.notifications_active_rounded,
       title: "Notification",
       screen: NotificationView()
     ),
     MenuItem(
-      icon: Icons.hub,
+      icon: Icons.hub_rounded,
       title: "Hubs",
       subItems: [
-        SubMenuItem(title: "All Hubs", screen: AllHubScreen()),
+        SubMenuItem(title: "All Hubs", screen: AllHubScreen(),),
         SubMenuItem(title: "Add Hub", screen:  AddHubScreen()),
         SubMenuItem(title: "Add Hub Manager", screen:  AddManagerScreen()),
         SubMenuItem(title: "Hub Performance", screen:  AllHubsPerformanceScreen()),
@@ -91,22 +91,22 @@ class AdminViewModel extends ChangeNotifier {
       ],
     ),
     MenuItem(
-      icon: Icons.shopping_bag,
+      icon: Icons.receipt_long_rounded,
       title: "Orders",
       screen: OrderListScreen(),
     ),
     MenuItem(
-      icon: Icons.add_circle,
+      icon: Icons.library_add_rounded,
       title: "Inventory Add On",
       screen: UrgentAddOnScreen(),
     ),
     MenuItem(
-      icon: Icons.analytics,
+      icon: Icons.store_rounded,
       title: "City Stocks",
       screen: MainScreen(),
     ),
     MenuItem(
-      icon: Icons.hub,
+      icon: Icons.sync_alt_rounded,
       title: "Hub Inventory Request",
       screen: HubRequestManagementScreen(),
     ),

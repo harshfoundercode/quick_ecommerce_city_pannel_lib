@@ -41,7 +41,7 @@ class _DisputeCardState extends State<DisputeCard> {
             subtitle: hubsDispute.isEmpty
                 ? "No disputes available"
                 : "Action required on ${displayList.length} orders",
-            titleSize: mobileSize ? 20 : 18,
+            titleSize: mobileSize ? 20 : 15,
             subtitleSize: mobileSize ? 15 : 10,
           ),
 
