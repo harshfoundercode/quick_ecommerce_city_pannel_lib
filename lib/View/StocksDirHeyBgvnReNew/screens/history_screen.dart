@@ -327,6 +327,7 @@ class _HistoryScreenState extends State<HistoryScreen>
 // ══════════════════════════════════════════════════════════════════════════════
 // Admin History Tab
 // ══════════════════════════════════════════════════════════════════════════════
+
 class _AdminHistoryTab extends StatelessWidget {
   final String searchQuery;
   final String selectedStatus;
@@ -344,10 +345,14 @@ class _AdminHistoryTab extends StatelessWidget {
     var result = list.where((item) {
       final q = searchQuery.toLowerCase();
 
+      final productNames = item.products
+          ?.map((e) => e.productName.toString().toLowerCase())
+          .join(' ') ?? '';
+
       final matchSearch =
           q.isEmpty ||
-              '${item.id}'.toLowerCase().contains(q) ||
-              '${item.name}'.toLowerCase().contains(q);
+              '${item.requestId}'.toLowerCase().contains(q) ||
+              productNames.contains(q);
 
       final matchStatus = selectedStatus == 'All' ||
           _getAdminStatus(item.status) == selectedStatus;
@@ -356,17 +361,22 @@ class _AdminHistoryTab extends StatelessWidget {
     }).toList();
 
     result.sort((a, b) {
+      int getTotalQty(CityRequestHistoryData item) {
+        return (item.products ?? []).fold<int>(
+          0,
+              (sum, p) => sum + (int.tryParse('${p.requestedQuantity}') ?? 0),
+        );
+      }
+
       switch (sortBy) {
         case 'Oldest':
           return _dt('${a.createdAt}').compareTo(_dt('${b.createdAt}'));
 
         case 'Quantity: High':
-          return (int.tryParse('${b.quantity}') ?? 0)
-              .compareTo(int.tryParse('${a.quantity}') ?? 0);
+          return getTotalQty(b).compareTo(getTotalQty(a));
 
         case 'Quantity: Low':
-          return (int.tryParse('${a.quantity}') ?? 0)
-              .compareTo(int.tryParse('${b.quantity}') ?? 0);
+          return getTotalQty(a).compareTo(getTotalQty(b));
 
         default:
           return _dt('${b.createdAt}').compareTo(_dt('${a.createdAt}'));
@@ -446,18 +456,30 @@ class _AdminHistoryTab extends StatelessWidget {
   );
 }
 // ── Request Card ──────────────────────────────────────────────────────────────
-class _RequestCard extends StatelessWidget {
+class _RequestCard extends StatefulWidget {
   final CityRequestHistoryData item;
   const _RequestCard({required this.item});
 
   @override
+  State<_RequestCard> createState() => _RequestCardState();
+}
+
+class _RequestCardState extends State<_RequestCard> {
+  bool isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final item = widget.item;
     final status = '${item.status}';
     final color = _statusColor(status);
-    final iconBg = color.withOpacity(0.1);
+
+    int totalQty = (item.products ?? []).fold<int>(
+      0,
+          (sum, p) => sum + (int.tryParse('${p.requestedQuantity}') ?? 0),
+    );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: ColorConst.white,
         borderRadius: BorderRadius.circular(12),
@@ -465,123 +487,157 @@ class _RequestCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Main row ────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                // Icon
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: iconBg,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.description_outlined,
-                    color: color,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 10),
 
-                // Meta
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${item.name}',
-                        style: const TextStyle(
-                          color: ColorConst.textPrimary,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'ID: #${item.id}',
-                        style: const TextStyle(
-                          color: ColorConst.textGrey,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          // 🔹 HEADER (clickable)
+          InkWell(
+            onTap: () {
+              setState(() => isExpanded = !isExpanded);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Icon(Icons.description, color: color),
+                  const SizedBox(width: 10),
 
-                // Status badge
-                _StatusBadge(status: status,isAdmin: false,),
-              ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Request #${item.requestId}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '${item.products?.length ?? 0} products',
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Text('Qty: $totalQty'),
+
+                  const SizedBox(width: 10),
+
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // ── Footer ──────────────────────────────────────────────
+          // 🔥 EXPANDABLE CONTENT
+          if (isExpanded) ...[
+            const Divider(height: 1),
+
+            ...?item.products?.map((product) {
+              return Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    // 🟢 PRODUCT
+                    Row(
+                      children: [
+                        Image.network(
+                          '${product.productImg}',
+                          width: 40,
+                          height: 40,
+                        ),
+                        const SizedBox(width: 8),
+
+                        Expanded(
+                          child: Text(
+                            '${product.productName}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+
+                        Text('x${product.requestedQuantity}'),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // 🔵 VARIANTS
+                    ...?product.variants?.map((v) {
+                      return Container(
+                        margin: const EdgeInsets.only(top: 6),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: ColorConst.containerGrey2,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Image.network(
+                              '${v.variantImg}',
+                              width: 30,
+                              height: 30,
+                            ),
+                            const SizedBox(width: 8),
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text('${v.variantValue}'),
+                                  Text(
+                                    'SKU: ${v.sku}',
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.end,
+                              children: [
+                                Text('₹${v.discountPrice}'),
+                                Text(
+                                  '₹${v.price}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    decoration:
+                                    TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              );
+            }),
+          ],
+
+          // 🔹 FOOTER
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 7, 12, 7),
-            decoration: BoxDecoration(
-              color: ColorConst.containerGrey2,
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(12),
-              ),
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
               border: Border(top: BorderSide(color: ColorConst.borderColor)),
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.access_time_outlined,
-                  size: 12,
-                  color: ColorConst.textGrey,
-                ),
+                const Icon(Icons.access_time, size: 12),
                 const SizedBox(width: 4),
-                Text(
-                  _formatDate('${item.createdAt}'),
-                  style: const TextStyle(
-                    color: ColorConst.textGrey,
-                    fontSize: 11,
-                  ),
-                ),
-                if (item.remarks != null && '${item.remarks}'.isNotEmpty) ...[
-                  const SizedBox(width: 10),
-                  const Text(
-                    '·',
-                    style: TextStyle(color: ColorConst.textGrey, fontSize: 11),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      '${item.remarks}',
-                      style: const TextStyle(
-                        color: ColorConst.textGrey,
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ] else
-                  const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: ColorConst.info.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'Qty: ${item.quantity}',
-                    style: const TextStyle(
-                      color: ColorConst.info,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                Text(_formatDate('${item.createdAt}')),
+                const Spacer(),
+                _StatusBadge(status: status, isAdmin: false),
               ],
             ),
           ),
@@ -591,14 +647,12 @@ class _RequestCard extends StatelessWidget {
   }
 
   Color _statusColor(String s) {
-    switch (s.toLowerCase()) {
-      case 'pending':
+    switch (s) {
+      case '0':
         return ColorConst.warning;
-      case 'approved':
+      case '1':
         return ColorConst.success;
-      case 'rejected':
-        return ColorConst.danger;
-      case 'fulfilled':
+      case '2':
         return ColorConst.info;
       default:
         return ColorConst.textGrey;
@@ -612,7 +666,6 @@ class _RequestCard extends StatelessWidget {
       if (diff.inMinutes < 1) return 'Just now';
       if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
       if (diff.inHours < 24) return '${diff.inHours}h ago';
-      if (diff.inDays < 7) return '${diff.inDays}d ago';
       return '${dt.day}/${dt.month}/${dt.year}';
     } catch (_) {
       return raw;
