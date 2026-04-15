@@ -115,7 +115,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   @override
   void dispose() {
     _removeDropdownOverlay();
-    _mapController?.dispose();
+    // _mapController?.dispose();
     _searchCtrl.dispose();
     _searchFocus.dispose();
     _radiusCtrl.dispose();
@@ -123,6 +123,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     _debounce?.cancel();
     super.dispose();
   }
+
+
 
   // ── Dropdown open / close ─────────────────────────────────────────────────
 
@@ -181,17 +183,70 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 
   // ── Camera ────────────────────────────────────────────────────────────────
 
+  // void _fitCityBoundary() {
+  //   _mapController?.animateCamera(
+  //     CameraUpdate.newCameraPosition(
+  //       CameraPosition(
+  //           target: _cityCenter, zoom: _radiusToZoom(_cityRadiusKm)),
+  //     ),
+  //   );
+  // }
+  //
+  // void _fitHubCoverage() {
+  //   _mapController?.animateCamera(
+  //     CameraUpdate.newCameraPosition(
+  //       CameraPosition(
+  //         target: _selectedLocation,
+  //         zoom: _radiusToZoom(_hubRadius),
+  //       ),
+  //     ),
+  //   );
+  // }
   void _fitCityBoundary() {
-    _mapController?.animateCamera(
+    if (_mapController == null) {
+      _ensureMapControllerReady().then((_) {
+        if (mounted && _mapController != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: _cityCenter,
+                zoom: _radiusToZoom(_cityRadiusKm),
+              ),
+            ),
+          );
+        }
+      });
+      return;
+    }
+
+    _mapController!.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-            target: _cityCenter, zoom: _radiusToZoom(_cityRadiusKm)),
+          target: _cityCenter,
+          zoom: _radiusToZoom(_cityRadiusKm),
+        ),
       ),
     );
   }
 
   void _fitHubCoverage() {
-    _mapController?.animateCamera(
+    if (_mapController == null) {
+      _ensureMapControllerReady().then((_) {
+        if (mounted && _mapController != null) {
+          _mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: _selectedLocation,
+                zoom: _radiusToZoom(_hubRadius),
+              ),
+            ),
+          );
+        }
+      });
+      return;
+    }
+
+    _mapController!.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: _selectedLocation,
@@ -725,11 +780,161 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 //  6. Null-checks _mapController before animating
 //  7. Resets _isSelectingFromSearch in finally after a short delay
 // ─────────────────────────────────────────────────────────────────────────
+//   Future<void> _selectPlace(String placeId, {String description = ''}) async {
+//     // Step 1: Lock map taps immediately
+//     _isSelectingFromSearch = true;
+//
+//     // Step 2: Update search bar text and close dropdown synchronously
+//     _closeDropdown();
+//     if (description.isNotEmpty) {
+//       _searchCtrl.text = description;
+//       _searchCtrl.selection = TextSelection.fromPosition(
+//         TextPosition(offset: description.length),
+//       );
+//     }
+//     _searchFocus.unfocus();
+//
+//     try {
+//       // Step 3: Fetch place details
+//       final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
+//       debugPrint('Fetching place details: $uri');
+//
+//       final res = await http.get(uri).timeout(const Duration(seconds: 10));
+//
+//       if (!mounted) return;
+//
+//       debugPrint('Place details status: ${res.statusCode}');
+//       debugPrint('Place details body: ${res.body}');
+//
+//       if (res.statusCode != 200) {
+//         CustomSnackBar.show(
+//           context,
+//           message: 'Failed to load place details (HTTP ${res.statusCode}).',
+//           type: SnackBarType.error,
+//         );
+//         return;
+//       }
+//
+//       final data = jsonDecode(res.body);
+//
+//       // Support both { data: { lat, lng } } and { lat, lng } response shapes
+//       final loc = data['data'] ?? data;
+//       if (loc == null ||
+//           loc['lat'] == null ||
+//           loc['lng'] == null) {
+//         if (mounted) {
+//           CustomSnackBar.show(
+//             context,
+//             message: 'Could not fetch location coordinates.',
+//             type: SnackBarType.error,
+//           );
+//         }
+//         return;
+//       }
+//
+//       final double? parsedLat = double.tryParse(loc['lat'].toString());
+//       final double? parsedLng = double.tryParse(loc['lng'].toString());
+//
+//       if (parsedLat == null || parsedLng == null) {
+//         if (mounted) {
+//           CustomSnackBar.show(
+//             context,
+//             message: 'Invalid coordinates in response.',
+//             type: SnackBarType.error,
+//           );
+//         }
+//         return;
+//       }
+//
+//       final latLng = LatLng(parsedLat, parsedLng);
+//       final bool outside = !_isInsideCity(latLng);
+//
+//       if (outside) {
+//         // Place is outside city boundary
+//         if (mounted) {
+//           setState(() {
+//             _selectedLocation = latLng;
+//             _isOutsideBoundary = true;
+//             _searchResultOutside = true;
+//             _searchOutsideMsg =
+//             'This place is outside the city zone '
+//                 '"${widget.cityZone?.name ?? 'boundary'}". '
+//                 'Only locations inside the blue circle are allowed.';
+//           });
+//         }
+//         // Still animate camera to show user where the place is
+//         await Future.delayed(const Duration(milliseconds: 50));
+//         if (!mounted) return;
+//         _mapController?.animateCamera(
+//           CameraUpdate.newCameraPosition(
+//             CameraPosition(target: latLng, zoom: 12.0),
+//           ),
+//         );
+//         return;
+//       }
+//
+//       // Check overlap with existing hub zones
+//       if (_checkOverlapWith(latLng, _hubRadius)) {
+//         if (mounted) {
+//           CustomSnackBar.show(
+//             context,
+//             message: 'This location overlaps an existing hub zone!',
+//             type: SnackBarType.error,
+//           );
+//         }
+//         return;
+//       }
+//
+//       // Step 4: Update state — this rebuilds marker + circle on the map
+//       if (mounted) {
+//         setState(() {
+//           _selectedLocation = latLng;
+//           _isOutsideBoundary = false;
+//           _searchResultOutside = false;
+//           _searchOutsideMsg = '';
+//         });
+//       }
+//
+//       // Step 5: Let the setState frame flush before animating camera
+//       await Future.delayed(const Duration(milliseconds: 80));
+//       if (!mounted) return;
+//
+//       // Step 6: Null-safe camera animation
+//       final controller = _mapController;
+//       if (controller == null) {
+//         debugPrint('⚠️ _mapController is null — cannot animate camera');
+//       } else {
+//         await controller.animateCamera(
+//           CameraUpdate.newCameraPosition(
+//             CameraPosition(target: latLng, zoom: 14.0),
+//           ),
+//         );
+//       }
+//
+//       // Step 7: Fetch reverse-geocoded address for selected location
+//       await _fetchAddress(latLng);
+//     } catch (e, stack) {
+//       debugPrint('_selectPlace error: $e\n$stack');
+//       if (mounted) {
+//         CustomSnackBar.show(
+//           context,
+//           message: 'Failed to load place details. Please try again.',
+//           type: SnackBarType.error,
+//         );
+//       }
+//     } finally {
+//       // Step 8: Release the lock after a small buffer so spurious map taps
+//       //         fired during the animation don't sneak through
+//       Future.delayed(const Duration(milliseconds: 600), () {
+//         if (mounted) {
+//           _isSelectingFromSearch = false;
+//         }
+//       });
+//     }
+//   }
   Future<void> _selectPlace(String placeId, {String description = ''}) async {
-    // Step 1: Lock map taps immediately
     _isSelectingFromSearch = true;
 
-    // Step 2: Update search bar text and close dropdown synchronously
     _closeDropdown();
     if (description.isNotEmpty) {
       _searchCtrl.text = description;
@@ -740,7 +945,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     _searchFocus.unfocus();
 
     try {
-      // Step 3: Fetch place details
       final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
       debugPrint('Fetching place details: $uri');
 
@@ -761,12 +965,9 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       }
 
       final data = jsonDecode(res.body);
-
-      // Support both { data: { lat, lng } } and { lat, lng } response shapes
       final loc = data['data'] ?? data;
-      if (loc == null ||
-          loc['lat'] == null ||
-          loc['lng'] == null) {
+
+      if (loc == null || loc['lat'] == null || loc['lng'] == null) {
         if (mounted) {
           CustomSnackBar.show(
             context,
@@ -795,21 +996,22 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       final bool outside = !_isInsideCity(latLng);
 
       if (outside) {
-        // Place is outside city boundary
         if (mounted) {
           setState(() {
             _selectedLocation = latLng;
             _isOutsideBoundary = true;
             _searchResultOutside = true;
-            _searchOutsideMsg =
-            'This place is outside the city zone '
+            _searchOutsideMsg = 'This place is outside the city zone '
                 '"${widget.cityZone?.name ?? 'boundary'}". '
                 'Only locations inside the blue circle are allowed.';
           });
         }
-        // Still animate camera to show user where the place is
-        await Future.delayed(const Duration(milliseconds: 50));
+
+        // Wait for map controller to be ready
+        await _ensureMapControllerReady();
+
         if (!mounted) return;
+
         _mapController?.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(target: latLng, zoom: 12.0),
@@ -818,7 +1020,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         return;
       }
 
-      // Check overlap with existing hub zones
       if (_checkOverlapWith(latLng, _hubRadius)) {
         if (mounted) {
           CustomSnackBar.show(
@@ -830,7 +1031,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         return;
       }
 
-      // Step 4: Update state — this rebuilds marker + circle on the map
       if (mounted) {
         setState(() {
           _selectedLocation = latLng;
@@ -840,11 +1040,11 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         });
       }
 
-      // Step 5: Let the setState frame flush before animating camera
-      await Future.delayed(const Duration(milliseconds: 80));
+      // Wait for map controller to be ready
+      await _ensureMapControllerReady();
+
       if (!mounted) return;
 
-      // Step 6: Null-safe camera animation
       final controller = _mapController;
       if (controller == null) {
         debugPrint('⚠️ _mapController is null — cannot animate camera');
@@ -856,7 +1056,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         );
       }
 
-      // Step 7: Fetch reverse-geocoded address for selected location
       await _fetchAddress(latLng);
     } catch (e, stack) {
       debugPrint('_selectPlace error: $e\n$stack');
@@ -868,13 +1067,28 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         );
       }
     } finally {
-      // Step 8: Release the lock after a small buffer so spurious map taps
-      //         fired during the animation don't sneak through
       Future.delayed(const Duration(milliseconds: 600), () {
         if (mounted) {
           _isSelectingFromSearch = false;
         }
       });
+    }
+  }
+
+// Add this helper method
+  Future<void> _ensureMapControllerReady() async {
+    if (_mapController != null) return;
+
+    try {
+      await _mapControllerCompleter.future.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('⚠️ Map controller initialization timeout');
+          throw TimeoutException('Map controller not ready');
+        },
+      );
+    } catch (e) {
+      debugPrint('Error waiting for map controller: $e');
     }
   }
   // ── Radius ────────────────────────────────────────────────────────────────
@@ -1246,11 +1460,12 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         if (!_mapControllerCompleter.isCompleted) {
           _mapControllerCompleter.complete(c);
         }
-        // Trigger city zoom as soon as map controller is ready
-        Future.delayed(
-          const Duration(milliseconds: 300),
-          _fitCityBoundary,
-        );
+        // Ensure map is fully initialized before animating
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _fitCityBoundary();
+          }
+        });
       },
       // Always wire up onTap; the guard inside _onMapTap handles the lock
       onTap: _onMapTap,
