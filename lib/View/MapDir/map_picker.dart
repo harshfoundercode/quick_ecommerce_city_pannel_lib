@@ -560,6 +560,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     }
   }
 
+
+
   String get _fullAddress => [
     if (_street.isNotEmpty) _street,
     if (_city.isNotEmpty) _city,
