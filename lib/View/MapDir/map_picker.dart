@@ -15,7 +15,6 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_sn
 import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_zone_list_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 
-
 class MapPickerPopup extends StatefulWidget {
   final Data? cityZone;
   const MapPickerPopup({super.key, this.cityZone});
@@ -30,6 +29,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   final Completer<GoogleMapController> _mapControllerCompleter = Completer();
   GoogleMapController? _mapController;
 
+  // Guard: prevents map tap while a search-selection is in progress
   bool _isSelectingFromSearch = false;
 
   // ── City boundary ─────────────────────────────────────────────────────────
@@ -64,7 +64,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   OverlayEntry? _dropdownOverlay;
   final GlobalKey _searchBarKey = GlobalKey();
 
-  // ── Controls the transparent map blocker ─────────────────────────────────
+  // Controls the transparent map blocker
   bool _isDropdownOpen = false;
 
   // ── Animation ─────────────────────────────────────────────────────────────
@@ -90,7 +90,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchAddress(_selectedLocation);
-      // FIX 3: Bumped delay to 800ms so map platform view is ready on most devices
       Future.delayed(const Duration(milliseconds: 800), _fitCityBoundary);
     });
 
@@ -107,9 +106,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     _searchFocus.addListener(() {
       if (!_searchFocus.hasFocus) {
         Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) {
-            _closeDropdown();
-          }
+          if (mounted) _closeDropdown();
         });
       }
     });
@@ -131,7 +128,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 
   void _openDropdown() {
     if (_searchResults.isEmpty) return;
-    setState(() => _isDropdownOpen = true);
+    if (mounted) setState(() => _isDropdownOpen = true);
     if (kIsWeb) _showDropdownOverlay();
   }
 
@@ -166,9 +163,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
           color: Colors.transparent,
           child: _WebSearchDropdownList(
             results: List.from(_searchResults),
-            // FIX 1 + FIX 2: Pass description to caller; no hand cursor inside widget
             onSelect: (placeId, description) {
-              _isSelectingFromSearch = true;
               _closeDropdown();
               _selectPlace(placeId, description: description);
             },
@@ -328,8 +323,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     Marker(
       markerId: const MarkerId('city_center'),
       position: _cityCenter,
-      icon:
-      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueBlue),
       infoWindow: InfoWindow(
         title: widget.cityZone?.name?.toString() ?? 'City Zone',
         snippet:
@@ -352,7 +347,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             ? '⚠️ Outside city boundary'
             : '✓ Valid location\nRadius: ${_hubRadius.toStringAsFixed(1)} km',
       ),
-      onDragStart: (_) => debugPrint("Dragging started"),
+      onDragStart: (_) => debugPrint('Dragging started'),
       onDrag: (pos) {
         if (_isInsideCity(pos)) setState(() => _selectedLocation = pos);
       },
@@ -387,7 +382,9 @@ class _MapPickerPopupState extends State<MapPickerPopup>
   // ── Map tap ───────────────────────────────────────────────────────────────
 
   Future<void> _onMapTap(LatLng latLng) async {
+    // Ignore map taps while a search selection is being processed
     if (_isSelectingFromSearch) return;
+
     if (_checkOverlapWith(latLng, _hubRadius)) {
       CustomSnackBar.show(
         context,
@@ -460,7 +457,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         for (final r in results) {
           for (final c in (r['address_components'] ?? [])) {
             if ((c['types'] as List).contains('postal_code')) {
-              setState(() => _pincode = c['long_name'] ?? '');
+              if (mounted) setState(() => _pincode = c['long_name'] ?? '');
               break;
             }
           }
@@ -468,11 +465,13 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         }
 
         if (_street.isEmpty && _city.isEmpty) {
-          setState(() => _street = best!['formatted_address'] ?? '');
+          if (mounted) {
+            setState(() => _street = best!['formatted_address'] ?? '');
+          }
         }
       }
     } catch (e) {
-      debugPrint('_fetchAddress: $e');
+      debugPrint('_fetchAddress error: $e');
     } finally {
       if (mounted) setState(() => _addressLoading = false);
     }
@@ -496,12 +495,14 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       if (types.contains('administrative_area_level_1')) adminArea = long;
       if (types.contains('postal_code')) pincode = long;
     }
-    setState(() {
-      _street = [streetNumber, route].where((e) => e.isNotEmpty).join(' ');
-      _city = [sublocality, locality].where((e) => e.isNotEmpty).join(', ');
-      _state = adminArea;
-      if (pincode.isNotEmpty) _pincode = pincode;
-    });
+    if (mounted) {
+      setState(() {
+        _street = [streetNumber, route].where((e) => e.isNotEmpty).join(' ');
+        _city = [sublocality, locality].where((e) => e.isNotEmpty).join(', ');
+        _state = adminArea;
+        if (pincode.isNotEmpty) _pincode = pincode;
+      });
+    }
   }
 
   String get _fullAddress => [
@@ -515,15 +516,17 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 
   void _onSearchChanged(String q) {
     _debounce?.cancel();
-    setState(() {
-      _searchResultOutside = false;
-      _searchOutsideMsg = '';
-    });
+    if (mounted) {
+      setState(() {
+        _searchResultOutside = false;
+        _searchOutsideMsg = '';
+      });
+    }
     if (q.trim().isEmpty) {
       _closeDropdown();
       return;
     }
-    setState(() => _searchLoading = true);
+    if (mounted) setState(() => _searchLoading = true);
     _debounce = Timer(
       const Duration(milliseconds: 450),
           () => _searchPlaces(q),
@@ -545,97 +548,335 @@ class _MapPickerPopupState extends State<MapPickerPopup>
           _openDropdown();
         }
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('_searchPlaces error: $e');
     } finally {
       if (mounted) setState(() => _searchLoading = false);
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // FIX 1: _selectPlace now accepts an optional [description] parameter.
-  //        Instead of clearing the search field, it shows the selected place
-  //        name so the user can see what they picked.
+  // FIXED _selectPlace:
+  //  1. Sets _isSelectingFromSearch = true at the very start
+  //  2. Closes dropdown and updates search bar text BEFORE the async call
+  //  3. Uses mounted guard after every await
+  //  4. Calls setState to update _selectedLocation so map rebuilds marker/circle
+  //  5. Awaits a microtask so setState flushes before animateCamera
+  //  6. Null-checks _mapController before animating
+  //  7. Resets _isSelectingFromSearch in finally after a short delay
   // ─────────────────────────────────────────────────────────────────────────
+  // Future<void> _selectPlace(String placeId, {String description = ''}) async {
+  //   // Step 1: Lock map taps immediately
+  //   _isSelectingFromSearch = true;
+  //
+  //   // Step 2: Update search bar text and close dropdown synchronously
+  //   _closeDropdown();
+  //   if (description.isNotEmpty) {
+  //     _searchCtrl.text = description;
+  //     _searchCtrl.selection = TextSelection.fromPosition(
+  //       TextPosition(offset: description.length),
+  //     );
+  //   }
+  //   _searchFocus.unfocus();
+  //
+  //   try {
+  //     // Step 3: Fetch place details
+  //     final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
+  //     debugPrint('Fetching place details: $uri');
+  //
+  //     final res = await http.get(uri).timeout(const Duration(seconds: 10));
+  //
+  //     if (!mounted) return;
+  //
+  //     debugPrint('Place details status: ${res.statusCode}');
+  //     debugPrint('Place details body: ${res.body}');
+  //
+  //     if (res.statusCode != 200) {
+  //       CustomSnackBar.show(
+  //         context,
+  //         message: 'Failed to load place details (HTTP ${res.statusCode}).',
+  //         type: SnackBarType.error,
+  //       );
+  //       return;
+  //     }
+  //
+  //     final data = jsonDecode(res.body);
+  //
+  //     // Support both { data: { lat, lng } } and { lat, lng } response shapes
+  //     final loc = data['data'] ?? data;
+  //     if (loc == null ||
+  //         loc['lat'] == null ||
+  //         loc['lng'] == null) {
+  //       if (mounted) {
+  //         CustomSnackBar.show(
+  //           context,
+  //           message: 'Could not fetch location coordinates.',
+  //           type: SnackBarType.error,
+  //         );
+  //       }
+  //       return;
+  //     }
+  //
+  //     final double? parsedLat = double.tryParse(loc['lat'].toString());
+  //     final double? parsedLng = double.tryParse(loc['lng'].toString());
+  //
+  //     if (parsedLat == null || parsedLng == null) {
+  //       if (mounted) {
+  //         CustomSnackBar.show(
+  //           context,
+  //           message: 'Invalid coordinates in response.',
+  //           type: SnackBarType.error,
+  //         );
+  //       }
+  //       return;
+  //     }
+  //
+  //     final latLng = LatLng(parsedLat, parsedLng);
+  //     final bool outside = !_isInsideCity(latLng);
+  //
+  //     if (outside) {
+  //       // Place is outside city boundary
+  //       if (mounted) {
+  //         setState(() {
+  //           _selectedLocation = latLng;
+  //           _isOutsideBoundary = true;
+  //           _searchResultOutside = true;
+  //           _searchOutsideMsg =
+  //           'This place is outside the city zone '
+  //               '"${widget.cityZone?.name ?? 'boundary'}". '
+  //               'Only locations inside the blue circle are allowed.';
+  //         });
+  //       }
+  //       // Still animate camera to show user where the place is
+  //       await Future.delayed(const Duration(milliseconds: 50));
+  //       if (!mounted) return;
+  //       _mapController?.animateCamera(
+  //         CameraUpdate.newCameraPosition(
+  //           CameraPosition(target: latLng, zoom: 12.0),
+  //         ),
+  //       );
+  //       return;
+  //     }
+  //
+  //     // Check overlap with existing hub zones
+  //     if (_checkOverlapWith(latLng, _hubRadius)) {
+  //       if (mounted) {
+  //         CustomSnackBar.show(
+  //           context,
+  //           message: 'This location overlaps an existing hub zone!',
+  //           type: SnackBarType.error,
+  //         );
+  //       }
+  //       return;
+  //     }
+  //
+  //     // Step 4: Update state — this rebuilds marker + circle on the map
+  //     if (mounted) {
+  //       setState(() {
+  //         _selectedLocation = latLng;
+  //         _isOutsideBoundary = false;
+  //         _searchResultOutside = false;
+  //         _searchOutsideMsg = '';
+  //       });
+  //     }
+  //
+  //     // Step 5: Let the setState frame flush before animating camera
+  //     await Future.delayed(const Duration(milliseconds: 80));
+  //     if (!mounted) return;
+  //
+  //     // Step 6: Null-safe camera animation
+  //     final controller = _mapController;
+  //     if (controller == null) {
+  //       debugPrint('⚠️ _mapController is null — cannot animate camera');
+  //     } else {
+  //       await controller.animateCamera(
+  //         CameraUpdate.newCameraPosition(
+  //           CameraPosition(target: latLng, zoom: 14.0),
+  //         ),
+  //       );
+  //     }
+  //
+  //     // Step 7: Fetch reverse-geocoded address for selected location
+  //     await _fetchAddress(latLng);
+  //   } catch (e, stack) {
+  //     debugPrint('_selectPlace error: $e\n$stack');
+  //     if (mounted) {
+  //       CustomSnackBar.show(
+  //         context,
+  //         message: 'Failed to load place details. Please try again.',
+  //         type: SnackBarType.error,
+  //       );
+  //     }
+  //   } finally {
+  //     // Step 8: Release the lock after a small buffer so spurious map taps
+  //     //         fired during the animation don't sneak through
+  //     Future.delayed(const Duration(milliseconds: 600), () {
+  //       _isSelectingFromSearch = false;
+  //     });
+  //   }
+  // }
+// ─────────────────────────────────────────────────────────────────────────
+// FIXED _selectPlace:
+//  1. Sets _isSelectingFromSearch = true at the very start
+//  2. Closes dropdown and updates search bar text BEFORE the async call
+//  3. Uses mounted guard after every await
+//  4. Calls setState to update _selectedLocation so map rebuilds marker/circle
+//  5. Awaits a microtask so setState flushes before animateCamera
+//  6. Null-checks _mapController before animating
+//  7. Resets _isSelectingFromSearch in finally after a short delay
+// ─────────────────────────────────────────────────────────────────────────
   Future<void> _selectPlace(String placeId, {String description = ''}) async {
-    // _isSelectingFromSearch is already true (set by caller before this runs)
-    _closeDropdown();
+    // Step 1: Lock map taps immediately
+    _isSelectingFromSearch = true;
 
-    // FIX 1: Show the selected place full name in the search bar
+    // Step 2: Update search bar text and close dropdown synchronously
+    _closeDropdown();
     if (description.isNotEmpty) {
       _searchCtrl.text = description;
       _searchCtrl.selection = TextSelection.fromPosition(
         TextPosition(offset: description.length),
       );
-    } else {
-      _searchCtrl.clear();
     }
-
     _searchFocus.unfocus();
 
     try {
-      final res =
-      await http.get(Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId)));
+      // Step 3: Fetch place details
+      final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
+      debugPrint('Fetching place details: $uri');
+
+      final res = await http.get(uri).timeout(const Duration(seconds: 10));
+
       if (!mounted) return;
-      final data = jsonDecode(res.body);
-      final loc = data['data'];
-      if (loc == null) {
+
+      debugPrint('Place details status: ${res.statusCode}');
+      debugPrint('Place details body: ${res.body}');
+
+      if (res.statusCode != 200) {
         CustomSnackBar.show(
           context,
-          message: 'Could not fetch location details.',
+          message: 'Failed to load place details (HTTP ${res.statusCode}).',
           type: SnackBarType.error,
         );
         return;
       }
-      final latLng = LatLng(
-        double.parse(loc['lat'].toString()),
-        double.parse(loc['lng'].toString()),
-      );
 
-      final outside = !_isInsideCity(latLng);
+      final data = jsonDecode(res.body);
+
+      // Support both { data: { lat, lng } } and { lat, lng } response shapes
+      final loc = data['data'] ?? data;
+      if (loc == null ||
+          loc['lat'] == null ||
+          loc['lng'] == null) {
+        if (mounted) {
+          CustomSnackBar.show(
+            context,
+            message: 'Could not fetch location coordinates.',
+            type: SnackBarType.error,
+          );
+        }
+        return;
+      }
+
+      final double? parsedLat = double.tryParse(loc['lat'].toString());
+      final double? parsedLng = double.tryParse(loc['lng'].toString());
+
+      if (parsedLat == null || parsedLng == null) {
+        if (mounted) {
+          CustomSnackBar.show(
+            context,
+            message: 'Invalid coordinates in response.',
+            type: SnackBarType.error,
+          );
+        }
+        return;
+      }
+
+      final latLng = LatLng(parsedLat, parsedLng);
+      final bool outside = !_isInsideCity(latLng);
+
       if (outside) {
-        setState(() {
-          _searchResultOutside = true;
-          _searchOutsideMsg = 'This place is outside the city zone '
-              '"${widget.cityZone?.name ?? 'boundary'}". '
-              'Only locations inside the blue circle are allowed.';
-          _selectedLocation = latLng;
-          _isOutsideBoundary = true;
-        });
-      } else {
-        if (_checkOverlapWith(latLng, _hubRadius)) {
+        // Place is outside city boundary
+        if (mounted) {
+          setState(() {
+            _selectedLocation = latLng;
+            _isOutsideBoundary = true;
+            _searchResultOutside = true;
+            _searchOutsideMsg =
+            'This place is outside the city zone '
+                '"${widget.cityZone?.name ?? 'boundary'}". '
+                'Only locations inside the blue circle are allowed.';
+          });
+        }
+        // Still animate camera to show user where the place is
+        await Future.delayed(const Duration(milliseconds: 50));
+        if (!mounted) return;
+        _mapController?.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: latLng, zoom: 12.0),
+          ),
+        );
+        return;
+      }
+
+      // Check overlap with existing hub zones
+      if (_checkOverlapWith(latLng, _hubRadius)) {
+        if (mounted) {
           CustomSnackBar.show(
             context,
             message: 'This location overlaps an existing hub zone!',
             type: SnackBarType.error,
           );
-          return;
         }
+        return;
+      }
+
+      // Step 4: Update state — this rebuilds marker + circle on the map
+      if (mounted) {
         setState(() {
           _selectedLocation = latLng;
           _isOutsideBoundary = false;
+          _searchResultOutside = false;
+          _searchOutsideMsg = '';
         });
       }
+
+      // Step 5: Let the setState frame flush before animating camera
+      await Future.delayed(const Duration(milliseconds: 80));
+      if (!mounted) return;
+
+      // Step 6: Null-safe camera animation
+      final controller = _mapController;
+      if (controller == null) {
+        debugPrint('⚠️ _mapController is null — cannot animate camera');
+      } else {
+        await controller.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: latLng, zoom: 14.0),
+          ),
+        );
+      }
+
+      // Step 7: Fetch reverse-geocoded address for selected location
       await _fetchAddress(latLng);
-      await _mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-            CameraPosition(target: latLng, zoom: 14.0)),
-      );
-    } catch (e) {
-      debugPrint('_selectPlace: $e');
+    } catch (e, stack) {
+      debugPrint('_selectPlace error: $e\n$stack');
       if (mounted) {
         CustomSnackBar.show(
           context,
-          message: 'Failed to load place details.',
+          message: 'Failed to load place details. Please try again.',
           type: SnackBarType.error,
         );
       }
     } finally {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _isSelectingFromSearch = false;
+      // Step 8: Release the lock after a small buffer so spurious map taps
+      //         fired during the animation don't sneak through
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (mounted) {
+          _isSelectingFromSearch = false;
+        }
       });
     }
   }
-
   // ── Radius ────────────────────────────────────────────────────────────────
 
   void _onRadiusSlider(double val) {
@@ -733,7 +974,8 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                 children: [
                   _buildHeader(isWeb),
                   Expanded(
-                    child: isWeb ? _buildWebLayout() : _buildMobileLayout(),
+                    child:
+                    isWeb ? _buildWebLayout() : _buildMobileLayout(),
                   ),
                 ],
               ),
@@ -821,34 +1063,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             children: [
               _buildMapWithBlocker(),
               Positioned(
-                top: 16,
-                left: 16,
-                right: 16,
-                child: Column(
-                  children: [
-                    _buildSearchBar(key: _searchBarKey),
-                    // Web dropdown is rendered via OverlayEntry (_showDropdownOverlay)
-                    // Mobile dropdown is shown inline below
-                    if (!kIsWeb && _searchResults.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      // FIX 1: Pass description when selecting from mobile inline dropdown
-                      _buildSearchDropdown(onSelect: (placeId, description) {
-                        _isSelectingFromSearch = true;
-                        _selectPlace(placeId, description: description);
-                      }),
-                    ],
-                    if (_searchResultOutside) ...[
-                      const SizedBox(height: 4),
-                      _buildSearchOutsideWarning(),
-                    ],
-                    if (_isOutsideBoundary && !_searchResultOutside) ...[
-                      const SizedBox(height: 4),
-                      _buildOutsideWarning(),
-                    ],
-                  ],
-                ),
-              ),
-              Positioned(
                 bottom: 16,
                 left: 16,
                 child: Column(
@@ -914,11 +1128,12 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                   _buildSearchBar(),
                   if (_searchResults.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    // FIX 1: Pass description when selecting from mobile dropdown
-                    _buildSearchDropdown(onSelect: (placeId, description) {
-                      _isSelectingFromSearch = true;
-                      _selectPlace(placeId, description: description);
-                    }),
+                    _buildSearchDropdown(
+                      onSelect: (placeId, description) {
+                        _closeDropdown();
+                        _selectPlace(placeId, description: description);
+                      },
+                    ),
                   ],
                   if (_searchResultOutside) ...[
                     const SizedBox(height: 4),
@@ -992,14 +1207,10 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     );
   }
 
-  // ── Map + transparent blocker overlay ────────────────────────────────────
-  // GoogleMap is a platform view. Platform views receive pointer events at OS
-  // level, bypassing Flutter's hit-test tree. AbsorbPointer / IgnorePointer
-  // have NO effect on platform views.
-  //
-  // Solution: place a transparent Flutter GestureDetector ON TOP of the
-  // platform view. When _isDropdownOpen is true this widget intercepts every
-  // pointer before it reaches the native view.
+  // ── Map + transparent blocker overlay ─────────────────────────────────────
+  // GoogleMap is a platform view. AbsorbPointer/IgnorePointer have NO effect
+  // on platform views. Solution: a transparent Flutter GestureDetector on top.
+  // When _isDropdownOpen is true it intercepts every pointer before the native view.
 
   Widget _buildMapWithBlocker() {
     return Stack(
@@ -1035,29 +1246,35 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         if (!_mapControllerCompleter.isCompleted) {
           _mapControllerCompleter.complete(c);
         }
-        // FIX 3: Also trigger city zoom as soon as the map controller is
-        //        ready. This is the most reliable trigger point because
-        //        onMapCreated fires after the platform view is fully
-        //        initialised, so animateCamera will always succeed here.
+        // Trigger city zoom as soon as map controller is ready
         Future.delayed(
           const Duration(milliseconds: 300),
           _fitCityBoundary,
         );
       },
-      onTap: _isSelectingFromSearch ? null : _onMapTap,
-      onLongPress: _isSelectingFromSearch ? null : _onMapTap,
+      // Always wire up onTap; the guard inside _onMapTap handles the lock
+      onTap: _onMapTap,
+      onLongPress: _onMapTap,
       circles: _circles,
       markers: _markers,
       zoomControlsEnabled: false,
       myLocationButtonEnabled: false,
       mapToolbarEnabled: false,
       gestureRecognizers: kIsWeb
-          ? (_isDropdownOpen
-          ? <Factory<OneSequenceGestureRecognizer>>{}
-          : <Factory<OneSequenceGestureRecognizer>>{
-        Factory<EagerGestureRecognizer>(
-                () => EagerGestureRecognizer()),
-      })
+          ? <Factory<OneSequenceGestureRecognizer>>{
+        Factory<PanGestureRecognizer>(
+              () => PanGestureRecognizer(),
+        ),
+        Factory<ScaleGestureRecognizer>(
+              () => ScaleGestureRecognizer(),
+        ),
+        Factory<TapGestureRecognizer>(
+              () => TapGestureRecognizer(),
+        ),
+        Factory<LongPressGestureRecognizer>(
+              () => LongPressGestureRecognizer(),
+        ),
+      }
           : <Factory<OneSequenceGestureRecognizer>>{},
     );
   }
@@ -1072,6 +1289,30 @@ class _MapPickerPopupState extends State<MapPickerPopup>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Column(
+              children: [
+                _buildSearchBar(key: _searchBarKey),
+                // Web dropdown is rendered via OverlayEntry (_showDropdownOverlay)
+                // For non-web within the panel show inline dropdown
+                if (!kIsWeb && _searchResults.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  _buildSearchDropdown(
+                    onSelect: (placeId, description) {
+                      _closeDropdown();
+                      _selectPlace(placeId, description: description);
+                    },
+                  ),
+                ],
+                if (_searchResultOutside) ...[
+                  const SizedBox(height: 4),
+                  _buildSearchOutsideWarning(),
+                ],
+                if (_isOutsideBoundary && !_searchResultOutside) ...[
+                  const SizedBox(height: 4),
+                  _buildOutsideWarning(),
+                ],
+              ],
+            ),
             _buildCoordinatesCard(),
             const SizedBox(height: 20),
             _buildPanelSection('Detected Address', Icons.location_on_rounded),
@@ -1465,6 +1706,10 @@ class _MapPickerPopupState extends State<MapPickerPopup>
               onTap: () {
                 _searchCtrl.clear();
                 _closeDropdown();
+                setState(() {
+                  _searchResultOutside = false;
+                  _searchOutsideMsg = '';
+                });
               },
               child: Container(
                 width: 26,
@@ -1483,8 +1728,47 @@ class _MapPickerPopupState extends State<MapPickerPopup>
     );
   }
 
-  // ── Inline dropdown (mobile only) ─────────────────────────────────────────
-  // FIX 1: onSelect now provides both placeId and description
+  // ── Inline dropdown (mobile / non-overlay) ────────────────────────────────
+
+  // Widget _buildSearchDropdown(
+  //     {required Function(String placeId, String description) onSelect}) {
+  //   return Container(
+  //     constraints: const BoxConstraints(maxHeight: 200),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white,
+  //       borderRadius: BorderRadius.circular(14),
+  //       border: Border.all(color: const Color(0xFFE5E7EB)),
+  //       boxShadow: [
+  //         BoxShadow(
+  //             color: Colors.black.withValues(alpha: 0.08),
+  //             blurRadius: 16,
+  //             offset: const Offset(0, 4)),
+  //       ],
+  //     ),
+  //     child: ClipRRect(
+  //       borderRadius: BorderRadius.circular(14),
+  //       child: ListView.separated(
+  //         padding: const EdgeInsets.symmetric(vertical: 6),
+  //         shrinkWrap: true,
+  //         itemCount: _searchResults.length,
+  //         separatorBuilder: (_, __) =>
+  //         const Divider(height: 1, color: Color(0xFFE5E7EB)),
+  //         itemBuilder: (_, i) {
+  //           final place = _searchResults[i];
+  //           final desc = place['description'] as String? ?? '';
+  //           final parts = desc.split(',');
+  //           final main = parts.first.trim();
+  //           final sub =
+  //           parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
+  //           return _SearchResultTile(main: main, sub: sub,
+  //             onTap: () => onSelect(place['place_id'], desc),);
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Replace the _SearchResultTile with ListTile in dropdown
   Widget _buildSearchDropdown(
       {required Function(String placeId, String description) onSelect}) {
     return Container(
@@ -1503,7 +1787,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           itemCount: _searchResults.length,
           separatorBuilder: (_, __) =>
@@ -1515,11 +1799,34 @@ class _MapPickerPopupState extends State<MapPickerPopup>
             final main = parts.first.trim();
             final sub =
             parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              // FIX 1: Pass full description so search bar shows place name
+
+            return ListTile(
+              dense: true,
+              leading: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: ColorConst.primaryGreen.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.location_on_rounded,
+                    size: 16, color: ColorConst.primaryGreen),
+              ),
+              title: Text(main,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF111827))),
+              subtitle: sub.isNotEmpty ? Text(sub,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 11, color: Color(0xFF9CA3AF))) : null,
+              trailing: const Icon(Icons.north_west_rounded,
+                  size: 13, color: Color(0xFF9CA3AF)),
               onTap: () => onSelect(place['place_id'], desc),
-              child: _SearchResultTile(main: main, sub: sub),
             );
           },
         ),
@@ -1620,7 +1927,6 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                 _isOutsideBoundary = false;
                 _searchResultOutside = false;
                 _searchOutsideMsg = '';
-                // Also clear search bar on reset
                 _searchCtrl.clear();
               });
               _mapController
@@ -1648,12 +1954,9 @@ class _MapPickerPopupState extends State<MapPickerPopup>
 }
 
 // ── Web overlay dropdown ──────────────────────────────────────────────────────
-// FIX 1: onSelect now passes (placeId, description) instead of just placeId
-// FIX 2: MouseRegion with SystemMouseCursors.click removed — no more hand cursor
 
 class _WebSearchDropdownList extends StatelessWidget {
   final List<dynamic> results;
-  // FIX 1 + FIX 2: Signature updated; MouseRegion removed inside
   final Function(String placeId, String description) onSelect;
 
   const _WebSearchDropdownList({
@@ -1691,14 +1994,8 @@ class _WebSearchDropdownList extends StatelessWidget {
             final main = parts.first.trim();
             final sub =
             parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
-            // FIX 2: Removed MouseRegion(cursor: SystemMouseCursors.click)
-            //        GestureDetector handles taps without showing hand cursor
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              // FIX 1: Pass full description to show in search bar after selection
-              onTap: () => onSelect(place['place_id'], desc),
-              child: _SearchResultTile(main: main, sub: sub),
-            );
+            return _SearchResultTile(main: main, sub: sub,
+              onTap: () => onSelect(place['place_id'], desc),);
           },
         ),
       ),
@@ -1711,48 +2008,60 @@ class _WebSearchDropdownList extends StatelessWidget {
 class _SearchResultTile extends StatelessWidget {
   final String main;
   final String sub;
-  const _SearchResultTile({required this.main, required this.sub});
+  final VoidCallback? onTap; // Add onTap callback
+
+  const _SearchResultTile({
+    required this.main,
+    required this.sub,
+    this.onTap, // Make it optional for backward compatibility
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: ColorConst.primaryGreen.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.location_on_rounded,
-                size: 16, color: ColorConst.primaryGreen),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: ColorConst.primaryGreen.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.location_on_rounded,
+                    size: 16, color: ColorConst.primaryGreen),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(main,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF111827))),
+                    if (sub.isNotEmpty)
+                      Text(sub,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 11, color: Color(0xFF9CA3AF))),
+                  ],
+                ),
+              ),
+              const Icon(Icons.north_west_rounded,
+                  size: 13, color: Color(0xFF9CA3AF)),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(main,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF111827))),
-                if (sub.isNotEmpty)
-                  Text(sub,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 11, color: Color(0xFF9CA3AF))),
-              ],
-            ),
-          ),
-          const Icon(Icons.north_west_rounded,
-              size: 13, color: Color(0xFF9CA3AF)),
-        ],
+        ),
       ),
     );
   }
