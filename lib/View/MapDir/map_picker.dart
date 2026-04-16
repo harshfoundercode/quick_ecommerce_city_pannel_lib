@@ -1530,6 +1530,7 @@ class _MapPickerPopupState extends State<MapPickerPopup>
                 ],
               ],
             ),
+            const SizedBox(height: 20),
             _buildCoordinatesCard(),
             const SizedBox(height: 20),
             _buildPanelSection('Detected Address', Icons.location_on_rounded),
