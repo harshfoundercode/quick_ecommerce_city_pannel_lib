@@ -769,6 +769,7 @@ class _VariantRow extends StatelessWidget {
 
           // Stock Info
           Row(
+            crossAxisAlignment:CrossAxisAlignment.end,
             children: [
               _StockPill(
                 label: 'Stock',

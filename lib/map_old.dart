@@ -15,7 +15,6 @@
 // import 'package:quick_ecommerce_city_panel_redefined/ModelDir/city_zone_list_model.dart';
 // import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/hub_zone_list_view_model_new.dart';
 //
-//
 // class MapPickerPopup extends StatefulWidget {
 //   final Data? cityZone;
 //   const MapPickerPopup({super.key, this.cityZone});
@@ -30,28 +29,29 @@
 //   final Completer<GoogleMapController> _mapControllerCompleter = Completer();
 //   GoogleMapController? _mapController;
 //
+//   // Guard: prevents map tap while a search-selection is in progress
 //   bool _isSelectingFromSearch = false;
 //
-//   // ── City boundary ────────────────────────────────────────────────────────
+//   // ── City boundary ─────────────────────────────────────────────────────────
 //   late LatLng _cityCenter;
 //   late double _cityRadiusKm;
 //
-//   // ── Selected pin ─────────────────────────────────────────────────────────
+//   // ── Selected pin ──────────────────────────────────────────────────────────
 //   late LatLng _selectedLocation;
 //   bool _isOutsideBoundary = false;
 //
-//   // ── Hub radius ───────────────────────────────────────────────────────────
+//   // ── Hub radius ────────────────────────────────────────────────────────────
 //   double _hubRadius = 1.0;
 //   late TextEditingController _radiusCtrl;
 //
-//   // ── Address ──────────────────────────────────────────────────────────────
+//   // ── Address ───────────────────────────────────────────────────────────────
 //   String _street = '';
 //   String _city = '';
 //   String _state = '';
 //   String _pincode = '';
 //   bool _addressLoading = false;
 //
-//   // ── Search ───────────────────────────────────────────────────────────────
+//   // ── Search ────────────────────────────────────────────────────────────────
 //   final TextEditingController _searchCtrl = TextEditingController();
 //   final FocusNode _searchFocus = FocusNode();
 //   List<dynamic> _searchResults = [];
@@ -60,17 +60,18 @@
 //   bool _searchResultOutside = false;
 //   String _searchOutsideMsg = '';
 //
-//   // ── FIX: OverlayEntry for web-safe dropdown ───────────────────────────────
+//   // ── Overlay dropdown (web) ────────────────────────────────────────────────
 //   OverlayEntry? _dropdownOverlay;
 //   final GlobalKey _searchBarKey = GlobalKey();
 //
-//   // ── Animation ────────────────────────────────────────────────────────────
+//   // Controls the transparent map blocker
+//   bool _isDropdownOpen = false;
+//
+//   // ── Animation ─────────────────────────────────────────────────────────────
 //   late AnimationController _slideCtrl;
 //   late Animation<double> _slideAnim;
 //
-//   bool _isDropdownOpen = false;
-//
-//
+//   // ─────────────────────────────────────────────────────────────────────────
 //   @override
 //   void initState() {
 //     super.initState();
@@ -89,7 +90,7 @@
 //
 //     WidgetsBinding.instance.addPostFrameCallback((_) {
 //       _fetchAddress(_selectedLocation);
-//       Future.delayed(const Duration(milliseconds: 500), _fitCityBoundary);
+//       Future.delayed(const Duration(milliseconds: 800), _fitCityBoundary);
 //     });
 //
 //     _slideCtrl = AnimationController(
@@ -105,10 +106,7 @@
 //     _searchFocus.addListener(() {
 //       if (!_searchFocus.hasFocus) {
 //         Future.delayed(const Duration(milliseconds: 200), () {
-//           if (mounted) {
-//             _removeDropdownOverlay();
-//             setState(() => _searchResults = []);
-//           }
+//           if (mounted) _closeDropdown();
 //         });
 //       }
 //     });
@@ -117,7 +115,7 @@
 //   @override
 //   void dispose() {
 //     _removeDropdownOverlay();
-//     _mapController?.dispose();
+//     // _mapController?.dispose();
 //     _searchCtrl.dispose();
 //     _searchFocus.dispose();
 //     _radiusCtrl.dispose();
@@ -126,16 +124,34 @@
 //     super.dispose();
 //   }
 //
-//   // ── Overlay dropdown helpers ──────────────────────────────────────────────
 //
-//   /// Web pe OverlayEntry use karo taaki map ke HtmlElementView se
-//   /// pointer-event conflict na ho. Mobile pe normal Column dropdown kaafi hai.
+//
+//   // ── Dropdown open / close ─────────────────────────────────────────────────
+//
+//   void _openDropdown() {
+//     if (_searchResults.isEmpty) return;
+//     if (mounted) setState(() => _isDropdownOpen = true);
+//     if (kIsWeb) _showDropdownOverlay();
+//   }
+//
+//   void _closeDropdown() {
+//     _removeDropdownOverlay();
+//     if (mounted) {
+//       setState(() {
+//         _searchResults = [];
+//         _isDropdownOpen = false;
+//       });
+//     }
+//   }
+//
+//   // ── OverlayEntry helpers (web only) ──────────────────────────────────────
+//
 //   void _showDropdownOverlay() {
 //     if (!kIsWeb) return;
 //     _removeDropdownOverlay();
 //
-//     // Search bar ki RenderBox se exact screen position nikalo
-//     final renderBox = _searchBarKey.currentContext?.findRenderObject() as RenderBox?;
+//     final renderBox =
+//     _searchBarKey.currentContext?.findRenderObject() as RenderBox?;
 //     if (renderBox == null) return;
 //     final offset = renderBox.localToGlobal(Offset.zero);
 //     final size = renderBox.size;
@@ -143,43 +159,94 @@
 //     _dropdownOverlay = OverlayEntry(
 //       builder: (_) => Positioned(
 //         left: offset.dx,
-//         top: offset.dy + size.height + 4, // search bar ke neeche 4px gap
+//         top: offset.dy + size.height + 4,
 //         width: size.width,
 //         child: Material(
 //           color: Colors.transparent,
 //           child: _WebSearchDropdownList(
 //             results: List.from(_searchResults),
-//             onSelect: (placeId) {
-//               _isSelectingFromSearch = true;   // ← SET FLAG BEFORE removeOverlay
-//               _removeDropdownOverlay();
-//               _selectPlace(placeId);
+//             onSelect: (placeId, description) {
+//               _closeDropdown();
+//               _selectPlace(placeId, description: description);
 //             },
 //           ),
 //         ),
 //       ),
 //     );
 //     Overlay.of(context).insert(_dropdownOverlay!);
-//     setState(() {});
 //   }
 //
 //   void _removeDropdownOverlay() {
 //     _dropdownOverlay?.remove();
 //     _dropdownOverlay = null;
-//     if (mounted) setState(() {});   // ← restores EagerGestureRecognizer
 //   }
 //
-//   // ── Camera ───────────────────────────────────────────────────────────────
+//   // ── Camera ────────────────────────────────────────────────────────────────
 //
+//   // void _fitCityBoundary() {
+//   //   _mapController?.animateCamera(
+//   //     CameraUpdate.newCameraPosition(
+//   //       CameraPosition(
+//   //           target: _cityCenter, zoom: _radiusToZoom(_cityRadiusKm)),
+//   //     ),
+//   //   );
+//   // }
+//   //
+//   // void _fitHubCoverage() {
+//   //   _mapController?.animateCamera(
+//   //     CameraUpdate.newCameraPosition(
+//   //       CameraPosition(
+//   //         target: _selectedLocation,
+//   //         zoom: _radiusToZoom(_hubRadius),
+//   //       ),
+//   //     ),
+//   //   );
+//   // }
 //   void _fitCityBoundary() {
-//     _mapController?.animateCamera(
+//     if (_mapController == null) {
+//       _ensureMapControllerReady().then((_) {
+//         if (mounted && _mapController != null) {
+//           _mapController!.animateCamera(
+//             CameraUpdate.newCameraPosition(
+//               CameraPosition(
+//                 target: _cityCenter,
+//                 zoom: _radiusToZoom(_cityRadiusKm),
+//               ),
+//             ),
+//           );
+//         }
+//       });
+//       return;
+//     }
+//
+//     _mapController!.animateCamera(
 //       CameraUpdate.newCameraPosition(
-//         CameraPosition(target: _cityCenter, zoom: _radiusToZoom(_cityRadiusKm)),
+//         CameraPosition(
+//           target: _cityCenter,
+//           zoom: _radiusToZoom(_cityRadiusKm),
+//         ),
 //       ),
 //     );
 //   }
 //
 //   void _fitHubCoverage() {
-//     _mapController?.animateCamera(
+//     if (_mapController == null) {
+//       _ensureMapControllerReady().then((_) {
+//         if (mounted && _mapController != null) {
+//           _mapController!.animateCamera(
+//             CameraUpdate.newCameraPosition(
+//               CameraPosition(
+//                 target: _selectedLocation,
+//                 zoom: _radiusToZoom(_hubRadius),
+//               ),
+//             ),
+//           );
+//         }
+//       });
+//       return;
+//     }
+//
+//     _mapController!.animateCamera(
 //       CameraUpdate.newCameraPosition(
 //         CameraPosition(
 //           target: _selectedLocation,
@@ -195,12 +262,11 @@
 //     return (base - delta).clamp(3.0, 18.0);
 //   }
 //
-//   // ── Geo helpers ──────────────────────────────────────────────────────────
+//   // ── Geo helpers ───────────────────────────────────────────────────────────
 //
 //   Set<Marker> _buildExistingHubMarkers() {
 //     final hubVM = Provider.of<HubZoneViewModel>(context, listen: false);
 //     final Set<Marker> markers = {};
-//
 //     for (final z in hubVM.hubZones) {
 //       markers.add(
 //         Marker(
@@ -210,22 +276,17 @@
 //             double.parse(z.longitude.toString()),
 //           ),
 //           icon: BitmapDescriptor.defaultMarkerWithHue(
-//             BitmapDescriptor.hueOrange,
-//           ),
+//               BitmapDescriptor.hueOrange),
 //           alpha: 0.8,
 //           infoWindow: InfoWindow(
 //             title: z.name?.toString() ?? 'Hub Zone',
 //             snippet: 'Radius: ${z.radiuskm} km | ${z.address ?? ""}',
 //           ),
-//           // Optional: Always show info window
 //           consumeTapEvents: true,
-//           onTap: () {
-//
-//           },
+//           onTap: () {},
 //         ),
 //       );
 //     }
-//
 //     return markers;
 //   }
 //
@@ -233,19 +294,16 @@
 //     const r = 6371.0;
 //     final dLat = _deg2rad(b.latitude - a.latitude);
 //     final dLon = _deg2rad(b.longitude - a.longitude);
-//     final s =
-//         sin(dLat / 2) * sin(dLat / 2) +
-//             cos(_deg2rad(a.latitude)) *
-//                 cos(_deg2rad(b.latitude)) *
-//                 sin(dLon / 2) *
-//                 sin(dLon / 2);
+//     final s = sin(dLat / 2) * sin(dLat / 2) +
+//         cos(_deg2rad(a.latitude)) *
+//             cos(_deg2rad(b.latitude)) *
+//             sin(dLon / 2) *
+//             sin(dLon / 2);
 //     return r * 2 * atan2(sqrt(s), sqrt(1 - s));
 //   }
 //
 //   double _deg2rad(double d) => d * pi / 180;
-//
 //   bool _isInsideCity(LatLng p) => _distanceKm(p, _cityCenter) <= _cityRadiusKm;
-//
 //   bool _isOverlapping() => _checkOverlapWith(_selectedLocation, _hubRadius);
 //
 //   bool _checkOverlapWith(LatLng loc, double rad) {
@@ -261,7 +319,7 @@
 //     return false;
 //   }
 //
-//   // ── Overlays ─────────────────────────────────────────────────────────────
+//   // ── Map circles ───────────────────────────────────────────────────────────
 //
 //   Set<Circle> get _circles {
 //     final hubVM = Provider.of<HubZoneViewModel>(context, listen: false);
@@ -309,81 +367,26 @@
 //     final ratio = _cityRadiusKm / dist;
 //     final lat =
 //         _cityCenter.latitude + (point.latitude - _cityCenter.latitude) * ratio;
-//     final lng =
-//         _cityCenter.longitude +
-//             (point.longitude - _cityCenter.longitude) * ratio;
+//     final lng = _cityCenter.longitude +
+//         (point.longitude - _cityCenter.longitude) * ratio;
 //     return LatLng(lat, lng);
 //   }
 //
-//   // Set<Marker> get _markers => {
-//   //   Marker(
-//   //     markerId: const MarkerId('city_center'),
-//   //     position: _cityCenter,
-//   //     icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-//   //     infoWindow: InfoWindow(
-//   //       title: widget.cityZone?.name?.toString() ?? 'City Zone',
-//   //       snippet: 'City boundary center',
-//   //     ),
-//   //     alpha: 0.7,
-//   //   ),
-//   //   Marker(
-//   //     markerId: const MarkerId('hub'),
-//   //     position: _selectedLocation,
-//   //     draggable: true,
-//   //     icon: BitmapDescriptor.defaultMarkerWithHue(
-//   //       _isOutsideBoundary
-//   //           ? BitmapDescriptor.hueRed
-//   //           : BitmapDescriptor.hueGreen,
-//   //     ),
-//   //     onDragStart: (_) => debugPrint("Dragging started"),
-//   //     onDrag: (pos) {
-//   //       if (_isInsideCity(pos)) {
-//   //         setState(() => _selectedLocation = pos);
-//   //       }
-//   //     },
-//   //     onDragEnd: (pos) async {
-//   //       if (!_isInsideCity(pos)) {
-//   //         CustomSnackBar.show(
-//   //           context,
-//   //           message: '❌ You can only drag inside blue zone',
-//   //           type: SnackBarType.error,
-//   //         );
-//   //         pos = _clampToCity(pos);
-//   //       }
-//   //       if (_checkOverlapWith(pos, _hubRadius)) {
-//   //         CustomSnackBar.show(
-//   //           context,
-//   //           message: '❌ Overlapping another hub zone',
-//   //           type: SnackBarType.error,
-//   //         );
-//   //         return;
-//   //       }
-//   //       setState(() {
-//   //         _selectedLocation = pos;
-//   //         _isOutsideBoundary = !_isInsideCity(pos);
-//   //       });
-//   //       await _fetchAddress(pos);
-//   //       _mapController?.animateCamera(CameraUpdate.newLatLng(pos));
-//   //     },
-//   //   ),
-//   // };
-//
-//   // Replace the existing _markers getter with this enhanced version
+//   // ── Markers ───────────────────────────────────────────────────────────────
 //
 //   Set<Marker> get _markers => {
-//     // City center marker
 //     Marker(
 //       markerId: const MarkerId('city_center'),
 //       position: _cityCenter,
-//       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+//       icon: BitmapDescriptor.defaultMarkerWithHue(
+//           BitmapDescriptor.hueBlue),
 //       infoWindow: InfoWindow(
 //         title: widget.cityZone?.name?.toString() ?? 'City Zone',
-//         snippet: 'City boundary center - Radius: ${_cityRadiusKm.toStringAsFixed(1)} km',
+//         snippet:
+//         'City boundary center - Radius: ${_cityRadiusKm.toStringAsFixed(1)} km',
 //       ),
 //       alpha: 0.7,
 //     ),
-//
-//     // Selected hub marker
 //     Marker(
 //       markerId: const MarkerId('hub'),
 //       position: _selectedLocation,
@@ -399,11 +402,9 @@
 //             ? '⚠️ Outside city boundary'
 //             : '✓ Valid location\nRadius: ${_hubRadius.toStringAsFixed(1)} km',
 //       ),
-//       onDragStart: (_) => debugPrint("Dragging started"),
+//       onDragStart: (_) => debugPrint('Dragging started'),
 //       onDrag: (pos) {
-//         if (_isInsideCity(pos)) {
-//           setState(() => _selectedLocation = pos);
-//         }
+//         if (_isInsideCity(pos)) setState(() => _selectedLocation = pos);
 //       },
 //       onDragEnd: (pos) async {
 //         if (!_isInsideCity(pos)) {
@@ -436,7 +437,9 @@
 //   // ── Map tap ───────────────────────────────────────────────────────────────
 //
 //   Future<void> _onMapTap(LatLng latLng) async {
+//     // Ignore map taps while a search selection is being processed
 //     if (_isSelectingFromSearch) return;
+//
 //     if (_checkOverlapWith(latLng, _hubRadius)) {
 //       CustomSnackBar.show(
 //         context,
@@ -496,7 +499,8 @@
 //         best ??= results.firstWhere(
 //               (r) => (r['types'] as List).contains('locality'),
 //           orElse: () => results.firstWhere(
-//                 (r) => (r['types'] as List).contains('administrative_area_level_2'),
+//                 (r) => (r['types'] as List)
+//                 .contains('administrative_area_level_2'),
 //             orElse: () => results.first,
 //           ),
 //         );
@@ -508,7 +512,7 @@
 //         for (final r in results) {
 //           for (final c in (r['address_components'] ?? [])) {
 //             if ((c['types'] as List).contains('postal_code')) {
-//               setState(() => _pincode = c['long_name'] ?? '');
+//               if (mounted) setState(() => _pincode = c['long_name'] ?? '');
 //               break;
 //             }
 //           }
@@ -516,13 +520,13 @@
 //         }
 //
 //         if (_street.isEmpty && _city.isEmpty) {
-//           setState(() {
-//             _street = best!['formatted_address'] ?? '';
-//           });
+//           if (mounted) {
+//             setState(() => _street = best!['formatted_address'] ?? '');
+//           }
 //         }
 //       }
 //     } catch (e) {
-//       debugPrint('_fetchAddress: $e');
+//       debugPrint('_fetchAddress error: $e');
 //     } finally {
 //       if (mounted) setState(() => _addressLoading = false);
 //     }
@@ -541,20 +545,22 @@
 //       if (types.contains('street_number')) streetNumber = long;
 //       if (types.contains('route')) route = long;
 //       if (types.contains('sublocality') ||
-//           types.contains('sublocality_level_1')) {
-//         sublocality = long;
-//       }
+//           types.contains('sublocality_level_1')) sublocality = long;
 //       if (types.contains('locality')) locality = long;
 //       if (types.contains('administrative_area_level_1')) adminArea = long;
 //       if (types.contains('postal_code')) pincode = long;
 //     }
-//     setState(() {
-//       _street = [streetNumber, route].where((e) => e.isNotEmpty).join(' ');
-//       _city = [sublocality, locality].where((e) => e.isNotEmpty).join(', ');
-//       _state = adminArea;
-//       if (pincode.isNotEmpty) _pincode = pincode;
-//     });
+//     if (mounted) {
+//       setState(() {
+//         _street = [streetNumber, route].where((e) => e.isNotEmpty).join(' ');
+//         _city = [sublocality, locality].where((e) => e.isNotEmpty).join(', ');
+//         _state = adminArea;
+//         if (pincode.isNotEmpty) _pincode = pincode;
+//       });
+//     }
 //   }
+//
+//
 //
 //   String get _fullAddress => [
 //     if (_street.isNotEmpty) _street,
@@ -567,16 +573,17 @@
 //
 //   void _onSearchChanged(String q) {
 //     _debounce?.cancel();
-//     setState(() {
-//       _searchResultOutside = false;
-//       _searchOutsideMsg = '';
-//     });
+//     if (mounted) {
+//       setState(() {
+//         _searchResultOutside = false;
+//         _searchOutsideMsg = '';
+//       });
+//     }
 //     if (q.trim().isEmpty) {
-//       _removeDropdownOverlay();
-//       setState(() => _searchResults = []);
+//       _closeDropdown();
 //       return;
 //     }
-//     setState(() => _searchLoading = true);
+//     if (mounted) setState(() => _searchLoading = true);
 //     _debounce = Timer(
 //       const Duration(milliseconds: 450),
 //           () => _searchPlaces(q),
@@ -592,94 +599,500 @@
 //         final results = data['data'] ?? [];
 //         setState(() {
 //           _searchResults = results;
-//           _isDropdownOpen = results.isNotEmpty; // ← ADD THIS
+//           _isDropdownOpen = results.isNotEmpty;
 //         });
-//         if (kIsWeb && results.isNotEmpty) {
-//           _showDropdownOverlay();
+//         if (results.isNotEmpty) {
+//           _openDropdown();
 //         }
 //       }
-//     } catch (_) {
+//     } catch (e) {
+//       debugPrint('_searchPlaces error: $e');
 //     } finally {
 //       if (mounted) setState(() => _searchLoading = false);
 //     }
 //   }
 //
-//   Future<void> _selectPlace(String placeId) async {
+//   // ─────────────────────────────────────────────────────────────────────────
+//   // FIXED _selectPlace:
+//   //  1. Sets _isSelectingFromSearch = true at the very start
+//   //  2. Closes dropdown and updates search bar text BEFORE the async call
+//   //  3. Uses mounted guard after every await
+//   //  4. Calls setState to update _selectedLocation so map rebuilds marker/circle
+//   //  5. Awaits a microtask so setState flushes before animateCamera
+//   //  6. Null-checks _mapController before animating
+//   //  7. Resets _isSelectingFromSearch in finally after a short delay
+//   // ─────────────────────────────────────────────────────────────────────────
+//   // Future<void> _selectPlace(String placeId, {String description = ''}) async {
+//   //   // Step 1: Lock map taps immediately
+//   //   _isSelectingFromSearch = true;
+//   //
+//   //   // Step 2: Update search bar text and close dropdown synchronously
+//   //   _closeDropdown();
+//   //   if (description.isNotEmpty) {
+//   //     _searchCtrl.text = description;
+//   //     _searchCtrl.selection = TextSelection.fromPosition(
+//   //       TextPosition(offset: description.length),
+//   //     );
+//   //   }
+//   //   _searchFocus.unfocus();
+//   //
+//   //   try {
+//   //     // Step 3: Fetch place details
+//   //     final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
+//   //     debugPrint('Fetching place details: $uri');
+//   //
+//   //     final res = await http.get(uri).timeout(const Duration(seconds: 10));
+//   //
+//   //     if (!mounted) return;
+//   //
+//   //     debugPrint('Place details status: ${res.statusCode}');
+//   //     debugPrint('Place details body: ${res.body}');
+//   //
+//   //     if (res.statusCode != 200) {
+//   //       CustomSnackBar.show(
+//   //         context,
+//   //         message: 'Failed to load place details (HTTP ${res.statusCode}).',
+//   //         type: SnackBarType.error,
+//   //       );
+//   //       return;
+//   //     }
+//   //
+//   //     final data = jsonDecode(res.body);
+//   //
+//   //     // Support both { data: { lat, lng } } and { lat, lng } response shapes
+//   //     final loc = data['data'] ?? data;
+//   //     if (loc == null ||
+//   //         loc['lat'] == null ||
+//   //         loc['lng'] == null) {
+//   //       if (mounted) {
+//   //         CustomSnackBar.show(
+//   //           context,
+//   //           message: 'Could not fetch location coordinates.',
+//   //           type: SnackBarType.error,
+//   //         );
+//   //       }
+//   //       return;
+//   //     }
+//   //
+//   //     final double? parsedLat = double.tryParse(loc['lat'].toString());
+//   //     final double? parsedLng = double.tryParse(loc['lng'].toString());
+//   //
+//   //     if (parsedLat == null || parsedLng == null) {
+//   //       if (mounted) {
+//   //         CustomSnackBar.show(
+//   //           context,
+//   //           message: 'Invalid coordinates in response.',
+//   //           type: SnackBarType.error,
+//   //         );
+//   //       }
+//   //       return;
+//   //     }
+//   //
+//   //     final latLng = LatLng(parsedLat, parsedLng);
+//   //     final bool outside = !_isInsideCity(latLng);
+//   //
+//   //     if (outside) {
+//   //       // Place is outside city boundary
+//   //       if (mounted) {
+//   //         setState(() {
+//   //           _selectedLocation = latLng;
+//   //           _isOutsideBoundary = true;
+//   //           _searchResultOutside = true;
+//   //           _searchOutsideMsg =
+//   //           'This place is outside the city zone '
+//   //               '"${widget.cityZone?.name ?? 'boundary'}". '
+//   //               'Only locations inside the blue circle are allowed.';
+//   //         });
+//   //       }
+//   //       // Still animate camera to show user where the place is
+//   //       await Future.delayed(const Duration(milliseconds: 50));
+//   //       if (!mounted) return;
+//   //       _mapController?.animateCamera(
+//   //         CameraUpdate.newCameraPosition(
+//   //           CameraPosition(target: latLng, zoom: 12.0),
+//   //         ),
+//   //       );
+//   //       return;
+//   //     }
+//   //
+//   //     // Check overlap with existing hub zones
+//   //     if (_checkOverlapWith(latLng, _hubRadius)) {
+//   //       if (mounted) {
+//   //         CustomSnackBar.show(
+//   //           context,
+//   //           message: 'This location overlaps an existing hub zone!',
+//   //           type: SnackBarType.error,
+//   //         );
+//   //       }
+//   //       return;
+//   //     }
+//   //
+//   //     // Step 4: Update state — this rebuilds marker + circle on the map
+//   //     if (mounted) {
+//   //       setState(() {
+//   //         _selectedLocation = latLng;
+//   //         _isOutsideBoundary = false;
+//   //         _searchResultOutside = false;
+//   //         _searchOutsideMsg = '';
+//   //       });
+//   //     }
+//   //
+//   //     // Step 5: Let the setState frame flush before animating camera
+//   //     await Future.delayed(const Duration(milliseconds: 80));
+//   //     if (!mounted) return;
+//   //
+//   //     // Step 6: Null-safe camera animation
+//   //     final controller = _mapController;
+//   //     if (controller == null) {
+//   //       debugPrint('⚠️ _mapController is null — cannot animate camera');
+//   //     } else {
+//   //       await controller.animateCamera(
+//   //         CameraUpdate.newCameraPosition(
+//   //           CameraPosition(target: latLng, zoom: 14.0),
+//   //         ),
+//   //       );
+//   //     }
+//   //
+//   //     // Step 7: Fetch reverse-geocoded address for selected location
+//   //     await _fetchAddress(latLng);
+//   //   } catch (e, stack) {
+//   //     debugPrint('_selectPlace error: $e\n$stack');
+//   //     if (mounted) {
+//   //       CustomSnackBar.show(
+//   //         context,
+//   //         message: 'Failed to load place details. Please try again.',
+//   //         type: SnackBarType.error,
+//   //       );
+//   //     }
+//   //   } finally {
+//   //     // Step 8: Release the lock after a small buffer so spurious map taps
+//   //     //         fired during the animation don't sneak through
+//   //     Future.delayed(const Duration(milliseconds: 600), () {
+//   //       _isSelectingFromSearch = false;
+//   //     });
+//   //   }
+//   // }
+// // ─────────────────────────────────────────────────────────────────────────
+// // FIXED _selectPlace:
+// //  1. Sets _isSelectingFromSearch = true at the very start
+// //  2. Closes dropdown and updates search bar text BEFORE the async call
+// //  3. Uses mounted guard after every await
+// //  4. Calls setState to update _selectedLocation so map rebuilds marker/circle
+// //  5. Awaits a microtask so setState flushes before animateCamera
+// //  6. Null-checks _mapController before animating
+// //  7. Resets _isSelectingFromSearch in finally after a short delay
+// // ─────────────────────────────────────────────────────────────────────────
+// //   Future<void> _selectPlace(String placeId, {String description = ''}) async {
+// //     // Step 1: Lock map taps immediately
+// //     _isSelectingFromSearch = true;
+// //
+// //     // Step 2: Update search bar text and close dropdown synchronously
+// //     _closeDropdown();
+// //     if (description.isNotEmpty) {
+// //       _searchCtrl.text = description;
+// //       _searchCtrl.selection = TextSelection.fromPosition(
+// //         TextPosition(offset: description.length),
+// //       );
+// //     }
+// //     _searchFocus.unfocus();
+// //
+// //     try {
+// //       // Step 3: Fetch place details
+// //       final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
+// //       debugPrint('Fetching place details: $uri');
+// //
+// //       final res = await http.get(uri).timeout(const Duration(seconds: 10));
+// //
+// //       if (!mounted) return;
+// //
+// //       debugPrint('Place details status: ${res.statusCode}');
+// //       debugPrint('Place details body: ${res.body}');
+// //
+// //       if (res.statusCode != 200) {
+// //         CustomSnackBar.show(
+// //           context,
+// //           message: 'Failed to load place details (HTTP ${res.statusCode}).',
+// //           type: SnackBarType.error,
+// //         );
+// //         return;
+// //       }
+// //
+// //       final data = jsonDecode(res.body);
+// //
+// //       // Support both { data: { lat, lng } } and { lat, lng } response shapes
+// //       final loc = data['data'] ?? data;
+// //       if (loc == null ||
+// //           loc['lat'] == null ||
+// //           loc['lng'] == null) {
+// //         if (mounted) {
+// //           CustomSnackBar.show(
+// //             context,
+// //             message: 'Could not fetch location coordinates.',
+// //             type: SnackBarType.error,
+// //           );
+// //         }
+// //         return;
+// //       }
+// //
+// //       final double? parsedLat = double.tryParse(loc['lat'].toString());
+// //       final double? parsedLng = double.tryParse(loc['lng'].toString());
+// //
+// //       if (parsedLat == null || parsedLng == null) {
+// //         if (mounted) {
+// //           CustomSnackBar.show(
+// //             context,
+// //             message: 'Invalid coordinates in response.',
+// //             type: SnackBarType.error,
+// //           );
+// //         }
+// //         return;
+// //       }
+// //
+// //       final latLng = LatLng(parsedLat, parsedLng);
+// //       final bool outside = !_isInsideCity(latLng);
+// //
+// //       if (outside) {
+// //         // Place is outside city boundary
+// //         if (mounted) {
+// //           setState(() {
+// //             _selectedLocation = latLng;
+// //             _isOutsideBoundary = true;
+// //             _searchResultOutside = true;
+// //             _searchOutsideMsg =
+// //             'This place is outside the city zone '
+// //                 '"${widget.cityZone?.name ?? 'boundary'}". '
+// //                 'Only locations inside the blue circle are allowed.';
+// //           });
+// //         }
+// //         // Still animate camera to show user where the place is
+// //         await Future.delayed(const Duration(milliseconds: 50));
+// //         if (!mounted) return;
+// //         _mapController?.animateCamera(
+// //           CameraUpdate.newCameraPosition(
+// //             CameraPosition(target: latLng, zoom: 12.0),
+// //           ),
+// //         );
+// //         return;
+// //       }
+// //
+// //       // Check overlap with existing hub zones
+// //       if (_checkOverlapWith(latLng, _hubRadius)) {
+// //         if (mounted) {
+// //           CustomSnackBar.show(
+// //             context,
+// //             message: 'This location overlaps an existing hub zone!',
+// //             type: SnackBarType.error,
+// //           );
+// //         }
+// //         return;
+// //       }
+// //
+// //       // Step 4: Update state — this rebuilds marker + circle on the map
+// //       if (mounted) {
+// //         setState(() {
+// //           _selectedLocation = latLng;
+// //           _isOutsideBoundary = false;
+// //           _searchResultOutside = false;
+// //           _searchOutsideMsg = '';
+// //         });
+// //       }
+// //
+// //       // Step 5: Let the setState frame flush before animating camera
+// //       await Future.delayed(const Duration(milliseconds: 80));
+// //       if (!mounted) return;
+// //
+// //       // Step 6: Null-safe camera animation
+// //       final controller = _mapController;
+// //       if (controller == null) {
+// //         debugPrint('⚠️ _mapController is null — cannot animate camera');
+// //       } else {
+// //         await controller.animateCamera(
+// //           CameraUpdate.newCameraPosition(
+// //             CameraPosition(target: latLng, zoom: 14.0),
+// //           ),
+// //         );
+// //       }
+// //
+// //       // Step 7: Fetch reverse-geocoded address for selected location
+// //       await _fetchAddress(latLng);
+// //     } catch (e, stack) {
+// //       debugPrint('_selectPlace error: $e\n$stack');
+// //       if (mounted) {
+// //         CustomSnackBar.show(
+// //           context,
+// //           message: 'Failed to load place details. Please try again.',
+// //           type: SnackBarType.error,
+// //         );
+// //       }
+// //     } finally {
+// //       // Step 8: Release the lock after a small buffer so spurious map taps
+// //       //         fired during the animation don't sneak through
+// //       Future.delayed(const Duration(milliseconds: 600), () {
+// //         if (mounted) {
+// //           _isSelectingFromSearch = false;
+// //         }
+// //       });
+// //     }
+// //   }
+//   Future<void> _selectPlace(String placeId, {String description = ''}) async {
 //     _isSelectingFromSearch = true;
-//     _removeDropdownOverlay();
-//     setState(() {
-//       _searchResults = [];
-//       _searchResultOutside = false;
-//       _searchOutsideMsg = '';
-//     });
-//     _searchCtrl.clear();
+//
+//     _closeDropdown();
+//     if (description.isNotEmpty) {
+//       _searchCtrl.text = description;
+//       _searchCtrl.selection = TextSelection.fromPosition(
+//         TextPosition(offset: description.length),
+//       );
+//     }
 //     _searchFocus.unfocus();
 //
 //     try {
-//       final res = await http.get(Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId)));
+//       final uri = Uri.parse(ApiUrl.mapPlaceDetailsUrl(placeId));
+//       debugPrint('Fetching place details: $uri');
+//
+//       final res = await http.get(uri).timeout(const Duration(seconds: 10));
+//
 //       if (!mounted) return;
-//       final data = jsonDecode(res.body);
-//       final loc = data['data'];
-//       if (loc == null) {
+//
+//       debugPrint('Place details status: ${res.statusCode}');
+//       debugPrint('Place details body: ${res.body}');
+//
+//       if (res.statusCode != 200) {
 //         CustomSnackBar.show(
 //           context,
-//           message: 'Could not fetch location details.',
+//           message: 'Failed to load place details (HTTP ${res.statusCode}).',
 //           type: SnackBarType.error,
 //         );
 //         return;
 //       }
-//       final latLng = LatLng(
-//         double.parse(loc['lat'].toString()),
-//         double.parse(loc['lng'].toString()),
-//       );
 //
-//       final outside = !_isInsideCity(latLng);
+//       final data = jsonDecode(res.body);
+//       final loc = data['data'] ?? data;
+//
+//       if (loc == null || loc['lat'] == null || loc['lng'] == null) {
+//         if (mounted) {
+//           CustomSnackBar.show(
+//             context,
+//             message: 'Could not fetch location coordinates.',
+//             type: SnackBarType.error,
+//           );
+//         }
+//         return;
+//       }
+//
+//       final double? parsedLat = double.tryParse(loc['lat'].toString());
+//       final double? parsedLng = double.tryParse(loc['lng'].toString());
+//
+//       if (parsedLat == null || parsedLng == null) {
+//         if (mounted) {
+//           CustomSnackBar.show(
+//             context,
+//             message: 'Invalid coordinates in response.',
+//             type: SnackBarType.error,
+//           );
+//         }
+//         return;
+//       }
+//
+//       final latLng = LatLng(parsedLat, parsedLng);
+//       final bool outside = !_isInsideCity(latLng);
+//
 //       if (outside) {
-//         setState(() {
-//           _searchResultOutside = true;
-//           _searchOutsideMsg =
-//           'This place is outside the city zone '
-//               '"${widget.cityZone?.name ?? 'boundary'}". '
-//               'Only locations inside the blue circle are allowed.';
-//           _selectedLocation = latLng;
-//           _isOutsideBoundary = true;
-//         });
-//       } else {
-//         if (_checkOverlapWith(latLng, _hubRadius)) {
+//         if (mounted) {
+//           setState(() {
+//             _selectedLocation = latLng;
+//             _isOutsideBoundary = true;
+//             _searchResultOutside = true;
+//             _searchOutsideMsg = 'This place is outside the city zone '
+//                 '"${widget.cityZone?.name ?? 'boundary'}". '
+//                 'Only locations inside the blue circle are allowed.';
+//           });
+//         }
+//
+//         // Wait for map controller to be ready
+//         await _ensureMapControllerReady();
+//
+//         if (!mounted) return;
+//
+//         _mapController?.animateCamera(
+//           CameraUpdate.newCameraPosition(
+//             CameraPosition(target: latLng, zoom: 12.0),
+//           ),
+//         );
+//         return;
+//       }
+//
+//       if (_checkOverlapWith(latLng, _hubRadius)) {
+//         if (mounted) {
 //           CustomSnackBar.show(
 //             context,
 //             message: 'This location overlaps an existing hub zone!',
 //             type: SnackBarType.error,
 //           );
-//           return;
 //         }
+//         return;
+//       }
+//
+//       if (mounted) {
 //         setState(() {
 //           _selectedLocation = latLng;
 //           _isOutsideBoundary = false;
+//           _searchResultOutside = false;
+//           _searchOutsideMsg = '';
 //         });
 //       }
+//
+//       // Wait for map controller to be ready
+//       await _ensureMapControllerReady();
+//
+//       if (!mounted) return;
+//
+//       final controller = _mapController;
+//       if (controller == null) {
+//         debugPrint('⚠️ _mapController is null — cannot animate camera');
+//       } else {
+//         await controller.animateCamera(
+//           CameraUpdate.newCameraPosition(
+//             CameraPosition(target: latLng, zoom: 14.0),
+//           ),
+//         );
+//       }
+//
 //       await _fetchAddress(latLng);
-//       await _mapController?.animateCamera(
-//         CameraUpdate.newCameraPosition(
-//           CameraPosition(target: latLng, zoom: 14.0),
-//         ),
-//       );
-//     } catch (e) {
-//       debugPrint('_selectPlace: $e');
+//     } catch (e, stack) {
+//       debugPrint('_selectPlace error: $e\n$stack');
 //       if (mounted) {
 //         CustomSnackBar.show(
 //           context,
-//           message: 'Failed to load place details.',
+//           message: 'Failed to load place details. Please try again.',
 //           type: SnackBarType.error,
 //         );
 //       }
 //     } finally {
-//       Future.delayed(const Duration(milliseconds: 500), () {
-//         _isSelectingFromSearch = false;
+//       Future.delayed(const Duration(milliseconds: 600), () {
+//         if (mounted) {
+//           _isSelectingFromSearch = false;
+//         }
 //       });
 //     }
 //   }
 //
+// // Add this helper method
+//   Future<void> _ensureMapControllerReady() async {
+//     if (_mapController != null) return;
+//
+//     try {
+//       await _mapControllerCompleter.future.timeout(
+//         const Duration(seconds: 5),
+//         onTimeout: () {
+//           debugPrint('⚠️ Map controller initialization timeout');
+//           throw TimeoutException('Map controller not ready');
+//         },
+//       );
+//     } catch (e) {
+//       debugPrint('Error waiting for map controller: $e');
+//     }
+//   }
 //   // ── Radius ────────────────────────────────────────────────────────────────
 //
 //   void _onRadiusSlider(double val) {
@@ -735,7 +1148,7 @@
 //     });
 //   }
 //
-//   // ── Build ─────────────────────────────────────────────────────────────────
+//   // ── Build ──────────────────────────────────────────────────────────────────
 //
 //   @override
 //   Widget build(BuildContext context) {
@@ -777,7 +1190,8 @@
 //                 children: [
 //                   _buildHeader(isWeb),
 //                   Expanded(
-//                     child: isWeb ? _buildWebLayout() : _buildMobileLayout(),
+//                     child:
+//                     isWeb ? _buildWebLayout() : _buildMobileLayout(),
 //                   ),
 //                 ],
 //               ),
@@ -805,11 +1219,8 @@
 //               color: ColorConst.primaryGreen.withValues(alpha: 0.1),
 //               borderRadius: BorderRadius.circular(10),
 //             ),
-//             child: const Icon(
-//               Icons.map_rounded,
-//               size: 18,
-//               color: ColorConst.primaryGreen,
-//             ),
+//             child: const Icon(Icons.map_rounded,
+//                 size: 18, color: ColorConst.primaryGreen),
 //           ),
 //           const SizedBox(width: 12),
 //           Expanded(
@@ -819,18 +1230,15 @@
 //                 const Text(
 //                   'Select Hub Location',
 //                   style: TextStyle(
-//                     fontSize: 16,
-//                     fontWeight: FontWeight.w700,
-//                     color: Color(0xFF111827),
-//                   ),
+//                       fontSize: 16,
+//                       fontWeight: FontWeight.w700,
+//                       color: Color(0xFF111827)),
 //                 ),
 //                 Text(
 //                   'City Zone: ${widget.cityZone?.name ?? "—"}  •  '
 //                       'Radius: ${_cityRadiusKm.toStringAsFixed(1)} km',
 //                   style: const TextStyle(
-//                     fontSize: 11,
-//                     color: Color(0xFF6B7280),
-//                   ),
+//                       fontSize: 11, color: Color(0xFF6B7280)),
 //                 ),
 //               ],
 //             ),
@@ -851,11 +1259,8 @@
 //                 color: const Color(0xFFF1F5F9),
 //                 borderRadius: BorderRadius.circular(10),
 //               ),
-//               child: const Icon(
-//                 Icons.close_rounded,
-//                 size: 18,
-//                 color: Color(0xFF374151),
-//               ),
+//               child: const Icon(Icons.close_rounded,
+//                   size: 18, color: Color(0xFF374151)),
 //             ),
 //           ),
 //         ],
@@ -872,36 +1277,7 @@
 //           flex: 6,
 //           child: Stack(
 //             children: [
-//               _buildGoogleMap(),
-//               // ✅ FIX: Search bar + warnings in a non-intercepting layer.
-//               // IgnorePointer wraps nothing here — we DO want pointer events
-//               // on the search bar. The key fix is using OverlayEntry for the
-//               // dropdown so it lives ABOVE the map's HtmlElementView entirely.
-//               Positioned(
-//                 top: 16,
-//                 left: 16,
-//                 right: 16,
-//                 child: Column(
-//                   children: [
-//                     // GlobalKey se position track karo overlay ke liye
-//                     _buildSearchBar(key: _searchBarKey),
-//                     // Mobile-only: show dropdown inline (no overlay needed)
-//                     if (!kIsWeb && _searchResults.isNotEmpty) ...[
-//                       const SizedBox(height: 4),
-//                       _buildSearchDropdown(onSelect: _selectPlace),
-//                     ],
-//                     if (_searchResultOutside) ...[
-//                       const SizedBox(height: 4),
-//                       _buildSearchOutsideWarning(),
-//                     ],
-//                     if (_isOutsideBoundary && !_searchResultOutside) ...[
-//                       const SizedBox(height: 4),
-//                       _buildOutsideWarning(),
-//                     ],
-//                   ],
-//                 ),
-//               ),
-//               // Legend
+//               _buildMapWithBlocker(),
 //               Positioned(
 //                 bottom: 16,
 //                 left: 16,
@@ -922,28 +1298,24 @@
 //                   ],
 //                 ),
 //               ),
-//               // Zoom controls
 //               Positioned(
 //                 bottom: 16,
 //                 right: 16,
 //                 child: Column(
 //                   children: [
 //                     _MapBtn(
-//                       icon: Icons.add_rounded,
-//                       onTap: () =>
-//                           _mapController?.animateCamera(CameraUpdate.zoomIn()),
-//                     ),
+//                         icon: Icons.add_rounded,
+//                         onTap: () => _mapController
+//                             ?.animateCamera(CameraUpdate.zoomIn())),
 //                     const SizedBox(height: 6),
 //                     _MapBtn(
-//                       icon: Icons.remove_rounded,
-//                       onTap: () =>
-//                           _mapController?.animateCamera(CameraUpdate.zoomOut()),
-//                     ),
+//                         icon: Icons.remove_rounded,
+//                         onTap: () => _mapController
+//                             ?.animateCamera(CameraUpdate.zoomOut())),
 //                     const SizedBox(height: 6),
 //                     _MapBtn(
-//                       icon: Icons.my_location_rounded,
-//                       onTap: _fitCityBoundary,
-//                     ),
+//                         icon: Icons.my_location_rounded,
+//                         onTap: _fitCityBoundary),
 //                   ],
 //                 ),
 //               ),
@@ -960,7 +1332,7 @@
 //
 //   Widget _buildMobileLayout() {
 //     return SingleChildScrollView(
-//       child: Container(
+//       child: SizedBox(
 //         height: Sizes.screenHeight,
 //         width: Sizes.screenWidth,
 //         child: Column(
@@ -972,7 +1344,12 @@
 //                   _buildSearchBar(),
 //                   if (_searchResults.isNotEmpty) ...[
 //                     const SizedBox(height: 4),
-//                     _buildSearchDropdown(onSelect: _selectPlace),
+//                     _buildSearchDropdown(
+//                       onSelect: (placeId, description) {
+//                         _closeDropdown();
+//                         _selectPlace(placeId, description: description);
+//                       },
+//                     ),
 //                   ],
 //                   if (_searchResultOutside) ...[
 //                     const SizedBox(height: 4),
@@ -992,7 +1369,7 @@
 //                     padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
 //                     child: ClipRRect(
 //                       borderRadius: BorderRadius.circular(14),
-//                       child: _buildGoogleMap(),
+//                       child: _buildMapWithBlocker(),
 //                     ),
 //                   ),
 //                   Positioned(
@@ -1021,21 +1398,18 @@
 //                     child: Column(
 //                       children: [
 //                         _MapBtn(
-//                           icon: Icons.add_rounded,
-//                           onTap: () => _mapController
-//                               ?.animateCamera(CameraUpdate.zoomIn()),
-//                         ),
+//                             icon: Icons.add_rounded,
+//                             onTap: () => _mapController
+//                                 ?.animateCamera(CameraUpdate.zoomIn())),
 //                         const SizedBox(height: 6),
 //                         _MapBtn(
-//                           icon: Icons.remove_rounded,
-//                           onTap: () => _mapController
-//                               ?.animateCamera(CameraUpdate.zoomOut()),
-//                         ),
+//                             icon: Icons.remove_rounded,
+//                             onTap: () => _mapController
+//                                 ?.animateCamera(CameraUpdate.zoomOut())),
 //                         const SizedBox(height: 6),
 //                         _MapBtn(
-//                           icon: Icons.my_location_rounded,
-//                           onTap: _fitCityBoundary,
-//                         ),
+//                             icon: Icons.my_location_rounded,
+//                             onTap: _fitCityBoundary),
 //                       ],
 //                     ),
 //                   ),
@@ -1046,6 +1420,32 @@
 //           ],
 //         ),
 //       ),
+//     );
+//   }
+//
+//   // ── Map + transparent blocker overlay ─────────────────────────────────────
+//   // GoogleMap is a platform view. AbsorbPointer/IgnorePointer have NO effect
+//   // on platform views. Solution: a transparent Flutter GestureDetector on top.
+//   // When _isDropdownOpen is true it intercepts every pointer before the native view.
+//
+//   Widget _buildMapWithBlocker() {
+//     return Stack(
+//       children: [
+//         _buildGoogleMap(),
+//         if (_isDropdownOpen)
+//           Positioned.fill(
+//             child: GestureDetector(
+//               behavior: HitTestBehavior.opaque,
+//               onTap: () {
+//                 _closeDropdown();
+//                 _searchFocus.unfocus();
+//               },
+//               onPanDown: (_) {},
+//               onScaleStart: (_) {},
+//               child: const ColoredBox(color: Colors.transparent),
+//             ),
+//           ),
+//       ],
 //     );
 //   }
 //
@@ -1062,27 +1462,36 @@
 //         if (!_mapControllerCompleter.isCompleted) {
 //           _mapControllerCompleter.complete(c);
 //         }
+//         // Ensure map is fully initialized before animating
+//         WidgetsBinding.instance.addPostFrameCallback((_) {
+//           if (mounted) {
+//             _fitCityBoundary();
+//           }
+//         });
 //       },
-//       // ✅ onTap: sirf tab disable karo jab selecting ho.
-//       // Dropdown open hone se onTap band NAHI karna — dropdown ab Overlay mein
-//       // hai aur map ke upar nahi, isliye conflict nahi hoga.
-//       onTap: _isSelectingFromSearch ? null : _onMapTap,
-//       onLongPress: _isSelectingFromSearch ? null : _onMapTap,
+//       // Always wire up onTap; the guard inside _onMapTap handles the lock
+//       onTap: _onMapTap,
+//       onLongPress: _onMapTap,
 //       circles: _circles,
 //       markers: _markers,
 //       zoomControlsEnabled: false,
 //       myLocationButtonEnabled: false,
 //       mapToolbarEnabled: false,
-//       // ✅ gestureRecognizers: hamesha zoom/pan allow karo.
-//       // Web pe EagerGestureRecognizer chahiye pointer capture ke liye.
-//       // Dropdown ab Overlay mein hai to gestureRecognizers band karne ki
-//       // zaroorat NAHI hai.
 //       gestureRecognizers: kIsWeb
-//           ? (_dropdownOverlay != null  // ← only eager when dropdown is CLOSED
-//           ? <Factory<OneSequenceGestureRecognizer>>{}
-//           : <Factory<OneSequenceGestureRecognizer>>{
-//         Factory<EagerGestureRecognizer>(() => EagerGestureRecognizer()),
-//       })
+//           ? <Factory<OneSequenceGestureRecognizer>>{
+//         Factory<PanGestureRecognizer>(
+//               () => PanGestureRecognizer(),
+//         ),
+//         Factory<ScaleGestureRecognizer>(
+//               () => ScaleGestureRecognizer(),
+//         ),
+//         Factory<TapGestureRecognizer>(
+//               () => TapGestureRecognizer(),
+//         ),
+//         Factory<LongPressGestureRecognizer>(
+//               () => LongPressGestureRecognizer(),
+//         ),
+//       }
 //           : <Factory<OneSequenceGestureRecognizer>>{},
 //     );
 //   }
@@ -1097,6 +1506,31 @@
 //         child: Column(
 //           crossAxisAlignment: CrossAxisAlignment.start,
 //           children: [
+//             Column(
+//               children: [
+//                 _buildSearchBar(key: _searchBarKey),
+//                 // Web dropdown is rendered via OverlayEntry (_showDropdownOverlay)
+//                 // For non-web within the panel show inline dropdown
+//                 if (!kIsWeb && _searchResults.isNotEmpty) ...[
+//                   const SizedBox(height: 4),
+//                   _buildSearchDropdown(
+//                     onSelect: (placeId, description) {
+//                       _closeDropdown();
+//                       _selectPlace(placeId, description: description);
+//                     },
+//                   ),
+//                 ],
+//                 if (_searchResultOutside) ...[
+//                   const SizedBox(height: 4),
+//                   _buildSearchOutsideWarning(),
+//                 ],
+//                 if (_isOutsideBoundary && !_searchResultOutside) ...[
+//                   const SizedBox(height: 4),
+//                   _buildOutsideWarning(),
+//                 ],
+//               ],
+//             ),
+//             const SizedBox(height: 20),
 //             _buildCoordinatesCard(),
 //             const SizedBox(height: 20),
 //             _buildPanelSection('Detected Address', Icons.location_on_rounded),
@@ -1166,11 +1600,10 @@
 //         Text(
 //           title,
 //           style: const TextStyle(
-//             fontSize: 12,
-//             fontWeight: FontWeight.w700,
-//             color: Color(0xFF374151),
-//             letterSpacing: 0.2,
-//           ),
+//               fontSize: 12,
+//               fontWeight: FontWeight.w700,
+//               color: Color(0xFF374151),
+//               letterSpacing: 0.2),
 //         ),
 //       ],
 //     );
@@ -1187,11 +1620,8 @@
 //       ),
 //       child: Row(
 //         children: [
-//           const Icon(
-//             Icons.gps_fixed_rounded,
-//             size: 14,
-//             color: ColorConst.primaryGreen,
-//           ),
+//           const Icon(Icons.gps_fixed_rounded,
+//               size: 14, color: ColorConst.primaryGreen),
 //           const SizedBox(width: 8),
 //           Expanded(
 //             child: Column(
@@ -1200,21 +1630,19 @@
 //                 const Text(
 //                   'COORDINATES',
 //                   style: TextStyle(
-//                     fontSize: 9,
-//                     fontWeight: FontWeight.w800,
-//                     color: Color(0xFF6B7280),
-//                     letterSpacing: 0.8,
-//                   ),
+//                       fontSize: 9,
+//                       fontWeight: FontWeight.w800,
+//                       color: Color(0xFF6B7280),
+//                       letterSpacing: 0.8),
 //                 ),
 //                 const SizedBox(height: 2),
 //                 Text(
 //                   '${_selectedLocation.latitude.toStringAsFixed(6)}, '
 //                       '${_selectedLocation.longitude.toStringAsFixed(6)}',
 //                   style: const TextStyle(
-//                     fontSize: 12,
-//                     fontWeight: FontWeight.w700,
-//                     color: Color(0xFF111827),
-//                   ),
+//                       fontSize: 12,
+//                       fontWeight: FontWeight.w700,
+//                       color: Color(0xFF111827)),
 //                 ),
 //               ],
 //             ),
@@ -1239,15 +1667,11 @@
 //               width: 13,
 //               height: 13,
 //               child: CircularProgressIndicator(
-//                 strokeWidth: 2,
-//                 color: ColorConst.primaryGreen,
-//               ),
+//                   strokeWidth: 2, color: ColorConst.primaryGreen),
 //             ),
 //             SizedBox(width: 10),
-//             Text(
-//               'Fetching address…',
-//               style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
-//             ),
+//             Text('Fetching address…',
+//                 style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
 //           ],
 //         ),
 //       );
@@ -1263,7 +1687,8 @@
 //         ),
 //         child: const Row(
 //           children: [
-//             Icon(Icons.info_outline_rounded, size: 14, color: Color(0xFF9CA3AF)),
+//             Icon(Icons.info_outline_rounded,
+//                 size: 14, color: Color(0xFF9CA3AF)),
 //             SizedBox(width: 8),
 //             Expanded(
 //               child: Text(
@@ -1283,24 +1708,20 @@
 //             children: [
 //               if (_street.isNotEmpty)
 //                 Expanded(
-//                   child: _AddrTile(
-//                     icon: Icons.signpost_rounded,
-//                     color: ColorConst.primaryGreen,
-//                     label: 'Street',
-//                     value: _street,
-//                   ),
-//                 ),
+//                     child: _AddrTile(
+//                         icon: Icons.signpost_rounded,
+//                         color: ColorConst.primaryGreen,
+//                         label: 'Street',
+//                         value: _street)),
 //               if (_street.isNotEmpty && _city.isNotEmpty)
 //                 const SizedBox(width: 8),
 //               if (_city.isNotEmpty)
 //                 Expanded(
-//                   child: _AddrTile(
-//                     icon: Icons.location_city_rounded,
-//                     color: const Color(0xFF2563EB),
-//                     label: 'City',
-//                     value: _city,
-//                   ),
-//                 ),
+//                     child: _AddrTile(
+//                         icon: Icons.location_city_rounded,
+//                         color: const Color(0xFF2563EB),
+//                         label: 'City',
+//                         value: _city)),
 //             ],
 //           ),
 //         if ((_street.isNotEmpty || _city.isNotEmpty) &&
@@ -1311,24 +1732,20 @@
 //             children: [
 //               if (_state.isNotEmpty)
 //                 Expanded(
-//                   child: _AddrTile(
-//                     icon: Icons.map_outlined,
-//                     color: const Color(0xFFD97706),
-//                     label: 'State',
-//                     value: _state,
-//                   ),
-//                 ),
+//                     child: _AddrTile(
+//                         icon: Icons.map_outlined,
+//                         color: const Color(0xFFD97706),
+//                         label: 'State',
+//                         value: _state)),
 //               if (_state.isNotEmpty && _pincode.isNotEmpty)
 //                 const SizedBox(width: 8),
 //               if (_pincode.isNotEmpty)
 //                 Expanded(
-//                   child: _AddrTile(
-//                     icon: Icons.pin_rounded,
-//                     color: const Color(0xFFF472B6),
-//                     label: 'Pincode',
-//                     value: _pincode,
-//                   ),
-//                 ),
+//                     child: _AddrTile(
+//                         icon: Icons.pin_rounded,
+//                         color: const Color(0xFFF472B6),
+//                         label: 'Pincode',
+//                         value: _pincode)),
 //             ],
 //           ),
 //       ],
@@ -1349,9 +1766,8 @@
 //                   overlayColor:
 //                   ColorConst.primaryGreen.withValues(alpha: 0.1),
 //                   trackHeight: 3,
-//                   thumbShape: const RoundSliderThumbShape(
-//                     enabledThumbRadius: 7,
-//                   ),
+//                   thumbShape:
+//                   const RoundSliderThumbShape(enabledThumbRadius: 7),
 //                 ),
 //                 child: Slider(
 //                   value: _hubRadius.clamp(0.5, _cityRadiusKm),
@@ -1369,31 +1785,26 @@
 //               height: 36,
 //               child: TextField(
 //                 controller: _radiusCtrl,
-//                 keyboardType: const TextInputType.numberWithOptions(
-//                   decimal: true,
-//                 ),
+//                 keyboardType:
+//                 const TextInputType.numberWithOptions(decimal: true),
 //                 inputFormatters: [
 //                   FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
 //                 ],
 //                 onChanged: _onRadiusField,
 //                 textAlign: TextAlign.center,
 //                 style: const TextStyle(
-//                   fontSize: 13,
-//                   fontWeight: FontWeight.w700,
-//                   color: ColorConst.primaryGreen,
-//                 ),
+//                     fontSize: 13,
+//                     fontWeight: FontWeight.w700,
+//                     color: ColorConst.primaryGreen),
 //                 decoration: InputDecoration(
 //                   isDense: true,
 //                   contentPadding: const EdgeInsets.symmetric(
-//                     horizontal: 8,
-//                     vertical: 9,
-//                   ),
+//                       horizontal: 8, vertical: 9),
 //                   suffixText: 'km',
 //                   suffixStyle: const TextStyle(
-//                     fontSize: 10,
-//                     color: Color(0xFF9CA3AF),
-//                     fontWeight: FontWeight.w500,
-//                   ),
+//                       fontSize: 10,
+//                       color: Color(0xFF9CA3AF),
+//                       fontWeight: FontWeight.w500),
 //                   filled: true,
 //                   fillColor:
 //                   ColorConst.primaryGreen.withValues(alpha: 0.07),
@@ -1411,15 +1822,11 @@
 //           child: Row(
 //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //             children: [
-//               const Text(
-//                 '0.5 km',
-//                 style: TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
-//               ),
-//               Text(
-//                 '${_cityRadiusKm.toStringAsFixed(1)} km (max)',
-//                 style:
-//                 const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
-//               ),
+//               const Text('0.5 km',
+//                   style: TextStyle(fontSize: 10, color: Color(0xFF9CA3AF))),
+//               Text('${_cityRadiusKm.toStringAsFixed(1)} km (max)',
+//                   style: const TextStyle(
+//                       fontSize: 10, color: Color(0xFF9CA3AF))),
 //             ],
 //           ),
 //         ),
@@ -1441,10 +1848,7 @@
 //         ),
 //         label: Text(
 //           _isOutsideBoundary ? 'Outside Boundary' : 'Confirm Location',
-//           style: const TextStyle(
-//             fontSize: 14,
-//             fontWeight: FontWeight.w700,
-//           ),
+//           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
 //         ),
 //         style: ElevatedButton.styleFrom(
 //           backgroundColor: _isOutsideBoundary
@@ -1454,9 +1858,8 @@
 //           foregroundColor: Colors.white,
 //           disabledForegroundColor: Colors.white,
 //           elevation: 0,
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(14),
-//           ),
+//           shape:
+//           RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
 //         ),
 //       ),
 //     );
@@ -1474,10 +1877,9 @@
 //         border: Border.all(color: const Color(0xFFE5E7EB)),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withValues(alpha: 0.05),
-//             blurRadius: 10,
-//             offset: const Offset(0, 2),
-//           ),
+//               color: Colors.black.withValues(alpha: 0.05),
+//               blurRadius: 10,
+//               offset: const Offset(0, 2)),
 //         ],
 //       ),
 //       child: Row(
@@ -1491,16 +1893,12 @@
 //               width: 15,
 //               height: 15,
 //               child: CircularProgressIndicator(
-//                 strokeWidth: 2,
-//                 color: ColorConst.primaryGreen,
-//               ),
+//                   strokeWidth: 2, color: ColorConst.primaryGreen),
 //             )
-//                 : const Icon(
-//               Icons.search_rounded,
-//               key: ValueKey('icon'),
-//               size: 18,
-//               color: ColorConst.primaryGreen,
-//             ),
+//                 : const Icon(Icons.search_rounded,
+//                 key: ValueKey('icon'),
+//                 size: 18,
+//                 color: ColorConst.primaryGreen),
 //           ),
 //           const SizedBox(width: 10),
 //           Expanded(
@@ -1509,10 +1907,9 @@
 //               focusNode: _searchFocus,
 //               onChanged: _onSearchChanged,
 //               style: const TextStyle(
-//                 fontSize: 13,
-//                 fontWeight: FontWeight.w500,
-//                 color: Color(0xFF111827),
-//               ),
+//                   fontSize: 13,
+//                   fontWeight: FontWeight.w500,
+//                   color: Color(0xFF111827)),
 //               decoration: const InputDecoration(
 //                 hintText: 'Search a place or landmark…',
 //                 hintStyle:
@@ -1526,9 +1923,8 @@
 //             GestureDetector(
 //               onTap: () {
 //                 _searchCtrl.clear();
-//                 _removeDropdownOverlay();
+//                 _closeDropdown();
 //                 setState(() {
-//                   _searchResults = [];
 //                   _searchResultOutside = false;
 //                   _searchOutsideMsg = '';
 //                 });
@@ -1541,11 +1937,8 @@
 //                   color: const Color(0xFFF1F5F9),
 //                   borderRadius: BorderRadius.circular(7),
 //                 ),
-//                 child: const Icon(
-//                   Icons.close_rounded,
-//                   size: 13,
-//                   color: Color(0xFF6B7280),
-//                 ),
+//                 child: const Icon(Icons.close_rounded,
+//                     size: 13, color: Color(0xFF6B7280)),
 //               ),
 //             ),
 //         ],
@@ -1553,9 +1946,49 @@
 //     );
 //   }
 //
-//   // ── Inline dropdown (mobile only) ─────────────────────────────────────────
+//   // ── Inline dropdown (mobile / non-overlay) ────────────────────────────────
 //
-//   Widget _buildSearchDropdown({required Function(String) onSelect}) {
+//   // Widget _buildSearchDropdown(
+//   //     {required Function(String placeId, String description) onSelect}) {
+//   //   return Container(
+//   //     constraints: const BoxConstraints(maxHeight: 200),
+//   //     decoration: BoxDecoration(
+//   //       color: Colors.white,
+//   //       borderRadius: BorderRadius.circular(14),
+//   //       border: Border.all(color: const Color(0xFFE5E7EB)),
+//   //       boxShadow: [
+//   //         BoxShadow(
+//   //             color: Colors.black.withValues(alpha: 0.08),
+//   //             blurRadius: 16,
+//   //             offset: const Offset(0, 4)),
+//   //       ],
+//   //     ),
+//   //     child: ClipRRect(
+//   //       borderRadius: BorderRadius.circular(14),
+//   //       child: ListView.separated(
+//   //         padding: const EdgeInsets.symmetric(vertical: 6),
+//   //         shrinkWrap: true,
+//   //         itemCount: _searchResults.length,
+//   //         separatorBuilder: (_, __) =>
+//   //         const Divider(height: 1, color: Color(0xFFE5E7EB)),
+//   //         itemBuilder: (_, i) {
+//   //           final place = _searchResults[i];
+//   //           final desc = place['description'] as String? ?? '';
+//   //           final parts = desc.split(',');
+//   //           final main = parts.first.trim();
+//   //           final sub =
+//   //           parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
+//   //           return _SearchResultTile(main: main, sub: sub,
+//   //             onTap: () => onSelect(place['place_id'], desc),);
+//   //         },
+//   //       ),
+//   //     ),
+//   //   );
+//   // }
+//
+//   // Replace the _SearchResultTile with ListTile in dropdown
+//   Widget _buildSearchDropdown(
+//       {required Function(String placeId, String description) onSelect}) {
 //     return Container(
 //       constraints: const BoxConstraints(maxHeight: 200),
 //       decoration: BoxDecoration(
@@ -1564,16 +1997,15 @@
 //         border: Border.all(color: const Color(0xFFE5E7EB)),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withValues(alpha: 0.08),
-//             blurRadius: 16,
-//             offset: const Offset(0, 4),
-//           ),
+//               color: Colors.black.withValues(alpha: 0.08),
+//               blurRadius: 16,
+//               offset: const Offset(0, 4)),
 //         ],
 //       ),
 //       child: ClipRRect(
 //         borderRadius: BorderRadius.circular(14),
 //         child: ListView.separated(
-//           padding: const EdgeInsets.symmetric(vertical: 6),
+//           padding: EdgeInsets.zero,
 //           shrinkWrap: true,
 //           itemCount: _searchResults.length,
 //           separatorBuilder: (_, __) =>
@@ -1583,19 +2015,36 @@
 //             final desc = place['description'] as String? ?? '';
 //             final parts = desc.split(',');
 //             final main = parts.first.trim();
-//             final sub = parts.length > 1
-//                 ? parts.sublist(1).join(',').trim()
-//                 : '';
-//             return GestureDetector(
-//               behavior: HitTestBehavior.opaque,
-//               onTap: () {
-//                 _isSelectingFromSearch = true;
-//                 onSelect(place['place_id']);
-//               },
-//               onPanDown: (_) {},
-//               child: Container(
-//                   constraints: const BoxConstraints(maxHeight: 200),
-//                   child: _SearchResultTile(main: main, sub: sub)),
+//             final sub =
+//             parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
+//
+//             return ListTile(
+//               dense: true,
+//               leading: Container(
+//                 width: 32,
+//                 height: 32,
+//                 decoration: BoxDecoration(
+//                   color: ColorConst.primaryGreen.withValues(alpha: 0.08),
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//                 child: const Icon(Icons.location_on_rounded,
+//                     size: 16, color: ColorConst.primaryGreen),
+//               ),
+//               title: Text(main,
+//                   maxLines: 1,
+//                   overflow: TextOverflow.ellipsis,
+//                   style: const TextStyle(
+//                       fontSize: 13,
+//                       fontWeight: FontWeight.w600,
+//                       color: Color(0xFF111827))),
+//               subtitle: sub.isNotEmpty ? Text(sub,
+//                   maxLines: 1,
+//                   overflow: TextOverflow.ellipsis,
+//                   style: const TextStyle(
+//                       fontSize: 11, color: Color(0xFF9CA3AF))) : null,
+//               trailing: const Icon(Icons.north_west_rounded,
+//                   size: 13, color: Color(0xFF9CA3AF)),
+//               onTap: () => onSelect(place['place_id'], desc),
 //             );
 //           },
 //         ),
@@ -1615,16 +2064,16 @@
 //       ),
 //       child: Row(
 //         children: [
-//           Icon(Icons.warning_amber_rounded, size: 16, color: Colors.red.shade600),
+//           Icon(Icons.warning_amber_rounded,
+//               size: 16, color: Colors.red.shade600),
 //           const SizedBox(width: 8),
 //           Expanded(
 //             child: Text(
 //               'Outside city boundary — move pin inside the blue circle.',
 //               style: TextStyle(
-//                 fontSize: 12,
-//                 color: Colors.red.shade700,
-//                 fontWeight: FontWeight.w500,
-//               ),
+//                   fontSize: 12,
+//                   color: Colors.red.shade700,
+//                   fontWeight: FontWeight.w500),
 //             ),
 //           ),
 //           GestureDetector(
@@ -1634,25 +2083,22 @@
 //                 _isOutsideBoundary = false;
 //                 _searchResultOutside = false;
 //               });
-//               _mapController?.animateCamera(
-//                 CameraUpdate.newLatLng(_cityCenter),
-//               );
+//               _mapController
+//                   ?.animateCamera(CameraUpdate.newLatLng(_cityCenter));
 //               await _fetchAddress(_cityCenter);
 //             },
 //             child: Container(
-//               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+//               padding:
+//               const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
 //               decoration: BoxDecoration(
 //                 color: Colors.red.shade100,
 //                 borderRadius: BorderRadius.circular(8),
 //               ),
-//               child: Text(
-//                 'Reset',
-//                 style: TextStyle(
-//                   fontSize: 11,
-//                   fontWeight: FontWeight.w700,
-//                   color: Colors.red.shade700,
-//                 ),
-//               ),
+//               child: Text('Reset',
+//                   style: TextStyle(
+//                       fontSize: 11,
+//                       fontWeight: FontWeight.w700,
+//                       color: Colors.red.shade700)),
 //             ),
 //           ),
 //         ],
@@ -1671,29 +2117,24 @@
 //       child: Row(
 //         crossAxisAlignment: CrossAxisAlignment.start,
 //         children: [
-//           Icon(Icons.location_off_rounded, size: 16, color: Colors.red.shade600),
+//           Icon(Icons.location_off_rounded,
+//               size: 16, color: Colors.red.shade600),
 //           const SizedBox(width: 10),
 //           Expanded(
 //             child: Column(
 //               crossAxisAlignment: CrossAxisAlignment.start,
 //               children: [
-//                 Text(
-//                   'Location Outside City Zone',
-//                   style: TextStyle(
-//                     fontSize: 12,
-//                     fontWeight: FontWeight.w700,
-//                     color: Colors.red.shade800,
-//                   ),
-//                 ),
+//                 Text('Location Outside City Zone',
+//                     style: TextStyle(
+//                         fontSize: 12,
+//                         fontWeight: FontWeight.w700,
+//                         color: Colors.red.shade800)),
 //                 const SizedBox(height: 2),
-//                 Text(
-//                   _searchOutsideMsg,
-//                   style: TextStyle(
-//                     fontSize: 11,
-//                     color: Colors.red.shade700,
-//                     height: 1.4,
-//                   ),
-//                 ),
+//                 Text(_searchOutsideMsg,
+//                     style: TextStyle(
+//                         fontSize: 11,
+//                         color: Colors.red.shade700,
+//                         height: 1.4)),
 //               ],
 //             ),
 //           ),
@@ -1704,26 +2145,24 @@
 //                 _isOutsideBoundary = false;
 //                 _searchResultOutside = false;
 //                 _searchOutsideMsg = '';
+//                 _searchCtrl.clear();
 //               });
-//               _mapController?.animateCamera(
-//                 CameraUpdate.newLatLng(_cityCenter),
-//               );
+//               _mapController
+//                   ?.animateCamera(CameraUpdate.newLatLng(_cityCenter));
 //               await _fetchAddress(_cityCenter);
 //             },
 //             child: Container(
-//               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+//               padding:
+//               const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
 //               decoration: BoxDecoration(
 //                 color: Colors.red.shade600,
 //                 borderRadius: BorderRadius.circular(8),
 //               ),
-//               child: const Text(
-//                 'Reset',
-//                 style: TextStyle(
-//                   fontSize: 11,
-//                   fontWeight: FontWeight.w700,
-//                   color: Colors.white,
-//                 ),
-//               ),
+//               child: const Text('Reset',
+//                   style: TextStyle(
+//                       fontSize: 11,
+//                       fontWeight: FontWeight.w700,
+//                       color: Colors.white)),
 //             ),
 //           ),
 //         ],
@@ -1732,9 +2171,11 @@
 //   }
 // }
 //
+// // ── Web overlay dropdown ──────────────────────────────────────────────────────
+//
 // class _WebSearchDropdownList extends StatelessWidget {
 //   final List<dynamic> results;
-//   final Function(String placeId) onSelect;
+//   final Function(String placeId, String description) onSelect;
 //
 //   const _WebSearchDropdownList({
 //     required this.results,
@@ -1751,10 +2192,9 @@
 //         border: Border.all(color: const Color(0xFFE5E7EB)),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withValues(alpha: 0.14),
-//             blurRadius: 20,
-//             offset: const Offset(0, 6),
-//           ),
+//               color: Colors.black.withValues(alpha: 0.14),
+//               blurRadius: 20,
+//               offset: const Offset(0, 6)),
 //         ],
 //       ),
 //       child: ClipRRect(
@@ -1772,17 +2212,8 @@
 //             final main = parts.first.trim();
 //             final sub =
 //             parts.length > 1 ? parts.sublist(1).join(',').trim() : '';
-//             return MouseRegion(
-//               cursor: SystemMouseCursors.click,
-//               child: GestureDetector(
-//                 behavior: HitTestBehavior.opaque,
-//                 onTap: () {
-//                   // Can't call setState here (it's a StatelessWidget), so pass a wrapper
-//                   onSelect(place['place_id']);
-//                 },
-//                 child: _SearchResultTile(main: main, sub: sub),
-//               ),
-//             );
+//             return _SearchResultTile(main: main, sub: sub,
+//               onTap: () => onSelect(place['place_id'], desc),);
 //           },
 //         ),
 //       ),
@@ -1790,84 +2221,82 @@
 //   }
 // }
 //
-// // ── Shared tile widget ────────────────────────────────────────────────────────
+// // ── Shared tile ───────────────────────────────────────────────────────────────
 //
 // class _SearchResultTile extends StatelessWidget {
 //   final String main;
 //   final String sub;
-//   const _SearchResultTile({required this.main, required this.sub});
+//   final VoidCallback? onTap; // Add onTap callback
+//
+//   const _SearchResultTile({
+//     required this.main,
+//     required this.sub,
+//     this.onTap, // Make it optional for backward compatibility
+//   });
 //
 //   @override
 //   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-//       child: Row(
-//         children: [
-//           Container(
-//             width: 32,
-//             height: 32,
-//             decoration: BoxDecoration(
-//               color: ColorConst.primaryGreen.withValues(alpha: 0.08),
-//               borderRadius: BorderRadius.circular(8),
-//             ),
-//             child: const Icon(
-//               Icons.location_on_rounded,
-//               size: 16,
-//               color: ColorConst.primaryGreen,
-//             ),
-//           ),
-//           const SizedBox(width: 10),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   main,
-//                   maxLines: 1,
-//                   overflow: TextOverflow.ellipsis,
-//                   style: const TextStyle(
-//                     fontSize: 13,
-//                     fontWeight: FontWeight.w600,
-//                     color: Color(0xFF111827),
-//                   ),
+//     return Material(
+//       color: Colors.transparent,
+//       child: InkWell(
+//         onTap: onTap,
+//         child: Padding(
+//           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+//           child: Row(
+//             children: [
+//               Container(
+//                 width: 32,
+//                 height: 32,
+//                 decoration: BoxDecoration(
+//                   color: ColorConst.primaryGreen.withValues(alpha: 0.08),
+//                   borderRadius: BorderRadius.circular(8),
 //                 ),
-//                 if (sub.isNotEmpty)
-//                   Text(
-//                     sub,
-//                     maxLines: 1,
-//                     overflow: TextOverflow.ellipsis,
-//                     style: const TextStyle(
-//                       fontSize: 11,
-//                       color: Color(0xFF9CA3AF),
-//                     ),
-//                   ),
-//               ],
-//             ),
+//                 child: const Icon(Icons.location_on_rounded,
+//                     size: 16, color: ColorConst.primaryGreen),
+//               ),
+//               const SizedBox(width: 10),
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(main,
+//                         maxLines: 1,
+//                         overflow: TextOverflow.ellipsis,
+//                         style: const TextStyle(
+//                             fontSize: 13,
+//                             fontWeight: FontWeight.w600,
+//                             color: Color(0xFF111827))),
+//                     if (sub.isNotEmpty)
+//                       Text(sub,
+//                           maxLines: 1,
+//                           overflow: TextOverflow.ellipsis,
+//                           style: const TextStyle(
+//                               fontSize: 11, color: Color(0xFF9CA3AF))),
+//                   ],
+//                 ),
+//               ),
+//               const Icon(Icons.north_west_rounded,
+//                   size: 13, color: Color(0xFF9CA3AF)),
+//             ],
 //           ),
-//           const Icon(
-//             Icons.north_west_rounded,
-//             size: 13,
-//             color: Color(0xFF9CA3AF),
-//           ),
-//         ],
+//         ),
 //       ),
 //     );
 //   }
 // }
 //
-// // ── Reusable small widgets ────────────────────────────────────────────────────
+// // ── Small reusable widgets ────────────────────────────────────────────────────
 //
 // class _HeaderBtn extends StatelessWidget {
 //   final IconData icon;
 //   final String label;
 //   final Color color;
 //   final VoidCallback onTap;
-//   const _HeaderBtn({
-//     required this.icon,
-//     required this.label,
-//     required this.color,
-//     required this.onTap,
-//   });
+//   const _HeaderBtn(
+//       {required this.icon,
+//         required this.label,
+//         required this.color,
+//         required this.onTap});
 //
 //   @override
 //   Widget build(BuildContext context) {
@@ -1885,14 +2314,11 @@
 //           children: [
 //             Icon(icon, size: 13, color: color),
 //             const SizedBox(width: 5),
-//             Text(
-//               label,
-//               style: TextStyle(
-//                 fontSize: 12,
-//                 fontWeight: FontWeight.w600,
-//                 color: color,
-//               ),
-//             ),
+//             Text(label,
+//                 style: TextStyle(
+//                     fontSize: 12,
+//                     fontWeight: FontWeight.w600,
+//                     color: color)),
 //           ],
 //         ),
 //       ),
@@ -1916,28 +2342,24 @@
 //         border: Border.all(color: color.withValues(alpha: 0.3)),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withValues(alpha: 0.07),
-//             blurRadius: 8,
-//           ),
+//               color: Colors.black.withValues(alpha: 0.07), blurRadius: 8),
 //         ],
 //       ),
 //       child: Row(
 //         mainAxisSize: MainAxisSize.min,
 //         children: [
 //           Icon(
-//             isWarning ? Icons.warning_amber_rounded : Icons.touch_app_rounded,
-//             size: 12,
-//             color: color,
-//           ),
+//               isWarning
+//                   ? Icons.warning_amber_rounded
+//                   : Icons.touch_app_rounded,
+//               size: 12,
+//               color: color),
 //           const SizedBox(width: 5),
-//           Text(
-//             label,
-//             style: TextStyle(
-//               fontSize: 11,
-//               fontWeight: FontWeight.w600,
-//               color: color,
-//             ),
-//           ),
+//           Text(label,
+//               style: TextStyle(
+//                   fontSize: 11,
+//                   fontWeight: FontWeight.w600,
+//                   color: color)),
 //         ],
 //       ),
 //     );
@@ -1958,9 +2380,7 @@
 //         borderRadius: BorderRadius.circular(20),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withValues(alpha: 0.07),
-//             blurRadius: 8,
-//           ),
+//               color: Colors.black.withValues(alpha: 0.07), blurRadius: 8),
 //         ],
 //       ),
 //       child: Row(
@@ -1976,14 +2396,11 @@
 //             ),
 //           ),
 //           const SizedBox(width: 5),
-//           Text(
-//             label,
-//             style: const TextStyle(
-//               fontSize: 10,
-//               fontWeight: FontWeight.w600,
-//               color: Color(0xFF374151),
-//             ),
-//           ),
+//           Text(label,
+//               style: const TextStyle(
+//                   fontSize: 10,
+//                   fontWeight: FontWeight.w600,
+//                   color: Color(0xFF374151))),
 //         ],
 //       ),
 //     );
@@ -2007,10 +2424,9 @@
 //           borderRadius: BorderRadius.circular(10),
 //           boxShadow: [
 //             BoxShadow(
-//               color: Colors.black.withValues(alpha: 0.08),
-//               blurRadius: 8,
-//               offset: const Offset(0, 2),
-//             ),
+//                 color: Colors.black.withValues(alpha: 0.08),
+//                 blurRadius: 8,
+//                 offset: const Offset(0, 2)),
 //           ],
 //         ),
 //         child: Icon(icon, size: 18, color: const Color(0xFF374151)),
@@ -2024,12 +2440,11 @@
 //   final Color color;
 //   final String label;
 //   final String value;
-//   const _AddrTile({
-//     required this.icon,
-//     required this.color,
-//     required this.label,
-//     required this.value,
-//   });
+//   const _AddrTile(
+//       {required this.icon,
+//         required this.color,
+//         required this.label,
+//         required this.value});
 //
 //   @override
 //   Widget build(BuildContext context) {
@@ -2048,25 +2463,19 @@
 //             child: Column(
 //               crossAxisAlignment: CrossAxisAlignment.start,
 //               children: [
-//                 Text(
-//                   label,
-//                   style: TextStyle(
-//                     fontSize: 9,
-//                     fontWeight: FontWeight.w700,
-//                     color: color,
-//                     letterSpacing: 0.5,
-//                   ),
-//                 ),
-//                 Text(
-//                   value,
-//                   maxLines: 1,
-//                   overflow: TextOverflow.ellipsis,
-//                   style: const TextStyle(
-//                     fontSize: 12,
-//                     fontWeight: FontWeight.w600,
-//                     color: Color(0xFF111827),
-//                   ),
-//                 ),
+//                 Text(label,
+//                     style: TextStyle(
+//                         fontSize: 9,
+//                         fontWeight: FontWeight.w700,
+//                         color: color,
+//                         letterSpacing: 0.5)),
+//                 Text(value,
+//                     maxLines: 1,
+//                     overflow: TextOverflow.ellipsis,
+//                     style: const TextStyle(
+//                         fontSize: 12,
+//                         fontWeight: FontWeight.w600,
+//                         color: Color(0xFF111827))),
 //               ],
 //             ),
 //           ),

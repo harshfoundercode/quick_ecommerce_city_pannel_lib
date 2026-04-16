@@ -873,16 +873,16 @@ class _VariantQtyPanel extends StatelessWidget {
                               ),
                             ),
                           // current stock badge
-                          if (v.currentStock != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              'Stock: ${v.currentStock}',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: sel ? Colors.white60 : ColorConst.textGrey,
-                              ),
-                            ),
-                          ],
+                          // if (v.currentStock != null) ...[
+                          //   const SizedBox(height: 2),
+                          //   Text(
+                          //     'Stock: ${v.currentStock}',
+                          //     style: TextStyle(
+                          //       fontSize: 9,
+                          //       color: sel ? Colors.white60 : ColorConst.textGrey,
+                          //     ),
+                          //   ),
+                          // ],
                         ],
                       ),
                     ),
@@ -909,38 +909,38 @@ class _VariantQtyPanel extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               _QtyControl(qty: qty, onChanged: onQtyChange),
-              const Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'Subtotal',
-                    style: TextStyle(fontSize: 10, color: ColorConst.textGrey),
-                  ),
-                  Text(
-                    '₹${((double.tryParse(selVariant!.discountPrice?.toString() ?? '') ?? double.tryParse(selVariant!.price?.toString() ?? '') ?? 0.0) * qty).toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      color: ColorConst.primaryGreen,
-                    ),
-                  ),
-                ],
-              ),
+              // const Spacer(),
+              // Column(
+              //   crossAxisAlignment: CrossAxisAlignment.end,
+              //   children: [
+              //     const Text(
+              //       'Subtotal',
+              //       style: TextStyle(fontSize: 10, color: ColorConst.textGrey),
+              //     ),
+              //     Text(
+              //       '₹${((double.tryParse(selVariant!.discountPrice?.toString() ?? '') ?? double.tryParse(selVariant!.price?.toString() ?? '') ?? 0.0) * qty).toStringAsFixed(0)}',
+              //       style: const TextStyle(
+              //         fontWeight: FontWeight.w900,
+              //         fontSize: 16,
+              //         color: ColorConst.primaryGreen,
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
 
           const SizedBox(height: 14),
-
-          // ── SKU row ──────────────────────────────────────────────────────────
-          if (selVariant!.sku != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                'SKU: ${selVariant!.sku}',
-                style: const TextStyle(fontSize: 11, color: ColorConst.textGrey),
-              ),
-            ),
+          //
+          // // ── SKU row ──────────────────────────────────────────────────────────
+          // if (selVariant!.sku != null)
+          //   Padding(
+          //     padding: const EdgeInsets.only(bottom: 10),
+          //     child: Text(
+          //       'SKU: ${selVariant!.sku}',
+          //       style: const TextStyle(fontSize: 11, color: ColorConst.textGrey),
+          //     ),
+          //   ),
 
           // ── Add to Cart button ────────────────────────────────────────────────
           SizedBox(
@@ -1091,14 +1091,14 @@ class _CartTile extends StatelessWidget {
                   children: [
                     _SmallQty(qty: item.qty, onChanged: onQtyChange),
                     const Spacer(),
-                    Text(
-                      '₹${item.total.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        color: ColorConst.primaryGreen,
-                      ),
-                    ),
+                    // Text(
+                    //   '₹${item.total.toStringAsFixed(0)}',
+                    //   style: const TextStyle(
+                    //     fontWeight: FontWeight.w800,
+                    //     fontSize: 14,
+                    //     color: ColorConst.primaryGreen,
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
