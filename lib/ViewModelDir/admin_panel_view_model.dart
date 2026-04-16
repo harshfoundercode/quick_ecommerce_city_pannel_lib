@@ -111,11 +111,11 @@ class AdminViewModel extends ChangeNotifier {
       title: "Hub Inventory Request",
       screen: HubRequestManagementScreen(),
     ),
-    MenuItem(
-      icon: Icons.disabled_by_default,
-      title: "Hub Dispute Request",
-      screen: DisputePanelScreen(),
-    ),
+    // MenuItem(
+    //   icon: Icons.disabled_by_default,
+    //   title: "Hub Dispute Request",
+    //   screen: DisputePanelScreen(),
+    // ),
   ];
 
   Future<void> performLogout(BuildContext context) async {
