@@ -1013,7 +1013,7 @@ class _TransferRow extends StatelessWidget {
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
-                  '${transfer.hubName}',
+                  '${transfer.hubName} - ${transfer.hubManegerName ?? "N/n"}',
                   style: const TextStyle(
                     color: ColorConst.textPrimary,
                     fontSize: 12,

@@ -114,6 +114,7 @@ class Transfers {
   dynamic hubName;
   dynamic status;
   dynamic createdAt;
+  dynamic hubManegerName;
   List<Variants>? variants;
 
   Transfers(
@@ -122,6 +123,7 @@ class Transfers {
         this.hubName,
         this.status,
         this.createdAt,
+        this.hubManegerName,
         this.variants});
 
   Transfers.fromJson(Map<String, dynamic> json) {
@@ -130,6 +132,7 @@ class Transfers {
     hubName = json['hub_name'];
     status = json['status'];
     createdAt = json['created_at'];
+    hubManegerName = json['hub_maneger_name'];
     if (json['variants'] != null) {
       variants = <Variants>[];
       json['variants'].forEach((v) {
@@ -145,6 +148,7 @@ class Transfers {
     data['hub_name'] = hubName;
     data['status'] = status;
     data['created_at'] = createdAt;
+    data['hub_maneger_name'] = hubManegerName;
     if (variants != null) {
       data['variants'] = variants!.map((v) => v.toJson()).toList();
     }
