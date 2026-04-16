@@ -85,7 +85,7 @@ class AdminViewModel extends ChangeNotifier {
       title: "Hubs",
       subItems: [
         SubMenuItem(title: "All Hubs", screen: AllHubScreen(),),
-        SubMenuItem(title: "Add Hub", screen:  AddHubScreen()),
+        SubMenuItem(title: "Add Hub Zone", screen:  AddHubScreen()),
         SubMenuItem(title: "Add Hub Manager", screen:  AddManagerScreen()),
         SubMenuItem(title: "Hub Performance", screen:  AllHubsPerformanceScreen()),
         SubMenuItem(title: "Hub Zone", screen:  HubZoneMapScreen()),

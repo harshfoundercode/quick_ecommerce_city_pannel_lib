@@ -8,11 +8,13 @@ import 'package:quick_ecommerce_city_panel_redefined/ConstDir/utils/routes/route
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/activity_tracker.dart';
 import 'package:quick_ecommerce_city_panel_redefined/provider_home.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 String? fcmToken;
 
 void main() async {
+  setPathUrlStrategy(); // This also removes the '#'
   WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
   // // 🔹 Get FCM Token

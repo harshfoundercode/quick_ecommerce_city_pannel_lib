@@ -53,6 +53,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   pointer_interceptor:
   cached_network_image:
+  url_strategy: ^0.3.0
 
 dev_dependencies:
   flutter_test:
