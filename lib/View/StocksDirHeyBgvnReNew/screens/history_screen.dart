@@ -988,7 +988,7 @@ class _HubCardState extends State<_HubCard> {
   }
 }
 
-// ── Transfer Row ──────────────────────────────────────────────────────────────
+// ================== Transfer Row ============================================
 class _TransferRow extends StatelessWidget {
   final Transfers transfer;
   const _TransferRow({required this.transfer});
