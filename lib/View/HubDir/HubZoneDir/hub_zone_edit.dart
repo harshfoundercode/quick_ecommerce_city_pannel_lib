@@ -314,8 +314,6 @@ class _HubZoneEditScreenState extends State<HubZoneEditScreen>
   }
 
   Future<void> _fetchPlaceDetails(String placeId) async {
-    print("dewugdi");
-
     setState(() {
       _suggestions = [];
       _searchLoading = true;

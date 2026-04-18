@@ -157,7 +157,7 @@ class _ViewAllOrderSpecificHubState extends State<ViewAllOrderSpecificHub>
 
           // Order count badge
           Consumer<HubPerformanceViewModel>(
-            builder: (_, vm, __) {
+            builder: (_, vm, ii) {
               final total =
                   vm.hubPerformanceOrderListModel?.data?.length ?? 0;
               return Container(

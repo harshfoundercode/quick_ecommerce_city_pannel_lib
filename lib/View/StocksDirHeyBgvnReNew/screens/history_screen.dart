@@ -893,7 +893,7 @@ class _HubCardState extends State<_HubCard> {
                       child: Image.network(
                         '${widget.product.productImg}',
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, ii, iii) => const Icon(
                           Icons.inventory_2_outlined,
                           color: ColorConst.primaryGreen,
                           size: 20,

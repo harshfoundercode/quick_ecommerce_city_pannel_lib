@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -189,7 +188,7 @@ class _AdminIncomingStockScreenState extends State<AdminIncomingStockScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: _statusFilters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, ii) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
           final status = _statusFilters[i];
           final isActive = _selectedStatus == status;
@@ -1009,7 +1008,7 @@ class _AcceptTransferDialogState extends State<_AcceptTransferDialog> {
                   child: Image.network(
                     '${item.productImage}',
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(
+                    errorBuilder: (_, ii, iii) => Icon(
                       Icons.inventory_2_outlined,
                       color: ColorConst.primaryGreen,
                       size: 18,
@@ -1467,7 +1466,7 @@ class _ProductItemCard extends StatelessWidget {
                   child: Image.network(
                     '${item.productImage}',
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                    errorBuilder: (_, ii, iii) => _buildPlaceholder(),
                   ),
                 )
                     : _buildPlaceholder(),
@@ -1677,16 +1676,6 @@ class _VariantRow extends StatelessWidget {
     return value is int ? value : int.tryParse(value.toString()) ?? 0;
   }
 
-  Color _getVariantStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return ColorConst.success;
-      case 'inactive':
-        return ColorConst.danger;
-      default:
-        return ColorConst.textGrey;
-    }
-  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

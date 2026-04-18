@@ -8,7 +8,6 @@ import 'package:quick_ecommerce_city_panel_redefined/View/AddOnDir/UrgentAddOnMo
 import 'package:quick_ecommerce_city_panel_redefined/View/AddOnDir/UrgentAddOnModelDir/main_category_list_model_urgent.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/AddOnDir/UrgentAddOnRepoDir/urgent_add_inventory_repo.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/DashboardDir/dashboard_content.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/ServicesDir/user_view_model.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/admin_panel_view_model.dart';
 
 class UrgentAddOnViewModel with ChangeNotifier {

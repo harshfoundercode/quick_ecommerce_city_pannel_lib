@@ -45,19 +45,7 @@ class HubManagerEditViewModel extends ChangeNotifier {
       "email": email,
       "password": password,
     };
-    print({
-      "id": id,
-      "hubzoneid": hubZoneId,
-      "name": name,
-      "phone": phone,
-      "address": address,
-      "adharno": adharno,
-      "panno": panno,
-      "img": img,
-      "email": email,
-      "password": password,
-    });
-    print("sgdv");
+
     try {
       final response = await _editManagerRepo.hubManagerEditApi(data);
 

@@ -195,7 +195,7 @@ class _RevenueCardState extends State<RevenueCard>
           Expanded(
             child: AnimatedBuilder(
               animation: _barAnim,
-              builder: (_, __) => SingleChildScrollView(
+              builder: (_, ii) => SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -292,7 +292,7 @@ class _RevenueCardState extends State<RevenueCard>
             Expanded(
               child: ListView.separated(
                 itemCount: hubs.length,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, ii) =>
                 const SizedBox(height: 10),
                 itemBuilder: (_, i) {
                   final hub = hubs[i];

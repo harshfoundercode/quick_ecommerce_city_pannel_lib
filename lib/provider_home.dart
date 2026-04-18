@@ -22,27 +22,39 @@ import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/order_view_mod
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/profile_view_model.dart';
 
 
-class ProvidersHome{
-  List<SingleChildWidget> providers= [
-    ChangeNotifierProvider(create: (context) => AdminViewModel()),
-    ChangeNotifierProvider(create: (context) => AllHubViewModel()),
-    ChangeNotifierProvider(create: (context) => AddHubViewModel()),
-    ChangeNotifierProvider(create: (context) => OrderDetailsViewModel()),
-    ChangeNotifierProvider(create: (context) => NotificationViewModel()),
-    ChangeNotifierProvider(create: (context) => LoginViewModel()),
-    ChangeNotifierProvider(create: (context) => ProfileViewModel()),
-    ChangeNotifierProvider(create: (context) => CityZoneListViewModel()),
-    ChangeNotifierProvider(create: (context) => UserViewModel()),
-    ChangeNotifierProvider(create: (context) => HubZoneViewModel()),
-    ChangeNotifierProvider(create: (context) => DashboardViewModel()),
-    ChangeNotifierProvider(create: (context) => HubZoneEditViewModel()),
-    ChangeNotifierProvider(create: (context) => HubManagerEditViewModel()),
-    ChangeNotifierProvider(create: (context) => CityStockViewModel()),
-    ChangeNotifierProvider(create: (context) => HubPerformanceViewModel()),
-    ChangeNotifierProvider(create: (context) => AdminStockListRecieveViewModel()),
-    ChangeNotifierProvider(create: (context) => StockProvider()),
-    ChangeNotifierProvider(create: (context) => AdminIncomingStockNewViewModel()),
-    ChangeNotifierProvider(create: (context) => UrgentAddOnViewModel()),
-    ChangeNotifierProvider(create: (context) => HubReqGetViewModel()),
+class ProvidersHome {
+  List<SingleChildWidget> get providers => [
+
+    /// 🔐 AUTH & USER (load early)
+    ChangeNotifierProvider(create: (_) => LoginViewModel(), lazy: false),
+    ChangeNotifierProvider(create: (_) => UserViewModel()..init(), lazy: false),
+    ChangeNotifierProvider(create: (_) => DashboardViewModel(), lazy: false,),
+    ChangeNotifierProvider(create: (_) => AdminViewModel(),),
+
+    /// HUB MANAGEMENT
+    ChangeNotifierProvider(create: (_) => AllHubViewModel()),
+    ChangeNotifierProvider(create: (_) => AddHubViewModel()),
+    ChangeNotifierProvider(create: (_) => HubZoneViewModel()),
+    ChangeNotifierProvider(create: (_) => HubZoneEditViewModel()),
+    ChangeNotifierProvider(create: (_) => HubManagerEditViewModel()),
+    ChangeNotifierProvider(create: (_) => HubPerformanceViewModel()),
+    ChangeNotifierProvider(create: (_) => HubReqGetViewModel()),
+
+    ///  STOCK MANAGEMENT
+    ChangeNotifierProvider(create: (_) => CityStockViewModel()),
+    ChangeNotifierProvider(create: (_) => AdminStockListRecieveViewModel()),
+    ChangeNotifierProvider(create: (_) => AdminIncomingStockNewViewModel()),
+    ChangeNotifierProvider(create: (_) => StockProvider()),
+
+    ///  ORDERS & ADD-ONS
+    ChangeNotifierProvider(create: (_) => OrderDetailsViewModel()),
+    ChangeNotifierProvider(create: (_) => UrgentAddOnViewModel()),
+
+    /// NOTIFICATIONS & PROFILE
+    ChangeNotifierProvider(create: (_) => NotificationViewModel()),
+    ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+
+    ///  LOCATION / ZONE
+    ChangeNotifierProvider(create: (_) => CityZoneListViewModel()),
   ];
 }

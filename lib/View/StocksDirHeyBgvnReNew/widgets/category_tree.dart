@@ -280,7 +280,7 @@ class _CategoryTreeState extends State<CategoryTree> {
                 width: 20,
                 height: 20,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Icon(
+                errorBuilder: (_, ii, iii) => Icon(
                   Icons.category,
                   color: selected ? ColorConst.primaryGreen : ColorConst.textGrey,
                   size: 18,
@@ -320,7 +320,7 @@ class _CategoryTreeState extends State<CategoryTree> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: selected ? ColorConst.primaryGreen.withOpacity(0.2) : ColorConst.inkLight.withOpacity(0.1),
+                  color: selected ? ColorConst.primaryGreen.withValues(alpha:0.2) : ColorConst.inkLight.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -334,9 +334,7 @@ class _CategoryTreeState extends State<CategoryTree> {
               ),
               const SizedBox(width: 8),
             ],
-
-            // Trailing
-            if (trailing != null) trailing,
+            ?trailing,
           ],
         ),
       ),

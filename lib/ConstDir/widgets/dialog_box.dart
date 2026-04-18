@@ -7,13 +7,13 @@ void openRightDrawer(BuildContext context, Widget child) {
     barrierLabel: "Edit",
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 300),
-    pageBuilder: (_, __, ___) {
+    pageBuilder: (_, ii, iii) {
       return Align(
         alignment: Alignment.centerRight,
         child: child,
       );
     },
-    transitionBuilder: (_, animation, __, child) {
+    transitionBuilder: (_, animation, ii, child) {
       return SlideTransition(
         position: Tween(
           begin: const Offset(1, 0),

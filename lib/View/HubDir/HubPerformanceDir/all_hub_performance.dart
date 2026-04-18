@@ -301,7 +301,7 @@ class _AllHubsPerformanceScreenState extends State<AllHubsPerformanceScreen>
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: displayList.length,
-            separatorBuilder: (_, __) =>
+            separatorBuilder: (_, ii) =>
             const Divider(height: 1, color: Color(0xFFF3F4F6)),
             itemBuilder: (context, i) =>
                 _HubPerformanceRow(hub: displayList[i], context: context),

@@ -320,7 +320,7 @@ class _AnimatedToastState extends State<_AnimatedToast>
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: widget.backgroundColor.withOpacity(0.12),
+                    color: widget.backgroundColor.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

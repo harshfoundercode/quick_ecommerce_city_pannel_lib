@@ -77,7 +77,7 @@ class _OrdersListPanelState extends State<OrdersListPanel> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 8, horizontal: 12),
                 itemCount: vm.orders.length,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, ii) =>
                 const SizedBox(height: 4),
                 itemBuilder: (context, index) {
                   final order = vm.orders[index];

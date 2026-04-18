@@ -27,7 +27,7 @@ class _StockOverviewScreenState extends State<StockOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final _stockProvider = Provider.of<StockProvider>(context,listen: false);
+    final stockProvider = Provider.of<StockProvider>(context,listen: false);
     return Column(
       children: [
         AppHeader(
@@ -36,7 +36,7 @@ class _StockOverviewScreenState extends State<StockOverviewScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.refresh, size: 20),
-              onPressed: () => _stockProvider.refreshData(context),
+              onPressed: () => stockProvider.refreshData(context),
               tooltip: 'Refresh',
             ),
 
@@ -242,7 +242,8 @@ class _StatChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.
+            withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -265,7 +266,7 @@ class _StatChip extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: color.withOpacity(0.7),
+                  color: color.withValues(alpha: 0.7),
                   fontSize: 10,
                   height: 1.1,
                 ),

@@ -33,7 +33,7 @@ class _PremiumBgState extends State<PremiumBg> with TickerProviderStateMixin {
       children: [
         AnimatedBuilder(
           animation: _controller,
-          builder: (_, __) {
+          builder: (_, ii) {
             return Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

@@ -239,7 +239,7 @@ class _BulkRequestScreenState extends State<BulkRequestScreen> {
                           width: 36,
                           height: 36,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _productIcon(),
+                          errorBuilder: (_, ii, iii) => _productIcon(),
                         )
                       : _productIcon(),
                 ),

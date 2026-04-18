@@ -571,7 +571,7 @@ class _HubRequestManagementScreenState extends State<HubRequestManagementScreen>
                     width: 30,
                     height: 30,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _prodIcon(),
+                    errorBuilder: (_, ii, iii) => _prodIcon(),
                   )
                       : _prodIcon(),
                 ),

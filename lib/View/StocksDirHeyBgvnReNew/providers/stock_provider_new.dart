@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/incommin_stock_model.dart' show IncomingStatus, ItemStatus, IncomingStock;
 import 'package:quick_ecommerce_city_panel_redefined/View/StocksDirHeyBgvnReNew/models/transfer_stock_model.dart';
@@ -150,9 +151,12 @@ class StockProvider extends ChangeNotifier {
   Set<String> get selectedProductIds => Set.unmodifiable(_selectedProductIds);
 
   List<Products> get selectedProducts {
-    print('=== selectedProducts getter called ===');
-    print('Selected IDs count: ${_selectedProductIds.length}');
-    print('Selected IDs: $_selectedProductIds');
+    if (kDebugMode) {
+      print('=== selectedProducts getter called ===');
+      print('Selected IDs count: ${_selectedProductIds.length}');
+      print('Selected IDs: $_selectedProductIds');
+    }
+
 
     final allProducts = <Products>[];
     for (var mainCat in mainCategories) {
@@ -169,27 +173,19 @@ class StockProvider extends ChangeNotifier {
         }
       }
     }
-
-    print('Found ${allProducts.length} selected products');
     return allProducts;
   }
 
   void toggleProductSelection(String productId) {
-    print('toggleProductSelection called with: $productId');
 
     // Ensure productId is string
     final id = productId.toString();
 
     if (_selectedProductIds.contains(id)) {
-      print('Removing: $id');
       _selectedProductIds.remove(id);
     } else {
-      print('Adding: $id');
       _selectedProductIds.add(id);
     }
-
-    print('Total selected: ${_selectedProductIds.length}');
-    print('Selected IDs: $_selectedProductIds');
 
     notifyListeners();
   }

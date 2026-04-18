@@ -35,7 +35,7 @@ class _MainScreenState extends State<MainScreen> {
       decoration: BoxDecoration(
         color: ColorConst.white,
         border: Border(top: BorderSide(color: ColorConst.borderColor)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, -3))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.06), blurRadius: 12, offset: const Offset(0, -3))],
       ),
       child: SafeArea(
         child: Padding(

@@ -1,12 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/const_color.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/customTextfield.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/size_const.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/tost_msg/custom_snackbar.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/animated_bg.dart';
-import 'package:quick_ecommerce_city_panel_redefined/ConstDir/widgets/floating_icons.dart';
 import 'package:quick_ecommerce_city_panel_redefined/ViewModelDir/auth_view_model.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -45,13 +42,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 width: cardWidth,
                 padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  color: ColorConst.primaryExtraLightGreen.withOpacity(0.9), // readable
+                  color: ColorConst.primaryExtraLightGreen.withValues(alpha: 0.9), // readable
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: ColorConst.primaryExtraLightGreen.withOpacity(0.3)),
+                  border: Border.all(color: ColorConst.primaryExtraLightGreen.withValues(alpha: 0.3)),
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 30,
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                     )
                   ],
                 ),

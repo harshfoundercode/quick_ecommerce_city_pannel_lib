@@ -289,7 +289,7 @@ class _UrgentAddOnScreenState extends State<UrgentAddOnScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.all(12),
                     itemCount: _cart.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, ii) => const SizedBox(height: 8),
                     itemBuilder: (_, i) => _CartTile(
                       item: _cart[i],
                       onRemove: () => _removeCartItem(i),
@@ -573,7 +573,7 @@ class _MainCategoryGrid extends StatelessWidget {
                       width: 24,
                       height: 24,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(
+                      errorBuilder: (_, ii, iii) => Icon(
                         Icons.category,
                         size: 20,
                         color: sel ? Colors.white : ColorConst.primaryGreen,
@@ -678,7 +678,7 @@ class _ProductGrid extends StatelessWidget {
             duration: const Duration(milliseconds: 160),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: sel ? ColorConst.primaryGreen.withOpacity(0.07) : const Color(0xFFF7F9FC),
+              color: sel ? ColorConst.primaryGreen.withValues(alpha: 0.07) : const Color(0xFFF7F9FC),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: sel ? ColorConst.primaryGreen : ColorConst.borderColor,
@@ -698,7 +698,7 @@ class _ProductGrid extends StatelessWidget {
                           width: 34,
                           height: 34,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
+                          errorBuilder: (_, ii, iii) =>
                               _productPlaceholder(sel),
                         )
                       : _productPlaceholder(sel),
@@ -749,7 +749,7 @@ class _ProductGrid extends StatelessWidget {
     width: 34,
     height: 34,
     decoration: BoxDecoration(
-      color: sel ? ColorConst.primaryGreen.withOpacity(0.15) : ColorConst.bgColor,
+      color: sel ? ColorConst.primaryGreen.withValues(alpha: 0.15) : ColorConst.bgColor,
       borderRadius: BorderRadius.circular(6),
     ),
     child: Icon(Icons.inventory_2_outlined, size: 18, color: sel ? ColorConst.primaryGreen : ColorConst.textGrey),
@@ -821,7 +821,7 @@ class _VariantQtyPanel extends StatelessWidget {
                         boxShadow: sel
                             ? [
                                 BoxShadow(
-                                  color: ColorConst.honey.withOpacity(0.3),
+                                  color: ColorConst.honey.withValues(alpha: 0.3),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -1055,7 +1055,7 @@ class _CartTile extends StatelessWidget {
                     width: 44,
                     height: 44,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _imgFallback(),
+                    errorBuilder: (_, ii, iii) => _imgFallback(),
                   )
                 : _imgFallback(),
           ),
@@ -1135,7 +1135,7 @@ class _CartTile extends StatelessWidget {
   Widget _badge(String label, Color color) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
     decoration: BoxDecoration(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(4),
     ),
     child: Text(
@@ -1197,7 +1197,7 @@ class _SmallQty extends StatelessWidget {
 Widget _panelHeader(String title, Color color) => Container(
   width: double.infinity,
   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  color: color.withOpacity(0.06),
+  color: color.withValues(alpha: 0.06),
   child: Text(
     title,
     style: TextStyle(
