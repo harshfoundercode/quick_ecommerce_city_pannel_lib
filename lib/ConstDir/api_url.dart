@@ -50,6 +50,7 @@ class ApiUrl {
       "https://api.cloudinary.com/v1_1/${cloudName.toString()}/image/upload";
 
   /// CITY PANEL ASK ADMIN TO ADD ON PRODUCT API
+
   static String mainCategoryListUrl = "${configUrl1}main-category-list";
   static String categoryListUrl = "${configUrl1}category-fulllist";
 
@@ -58,8 +59,10 @@ class ApiUrl {
   static String hubGetInventoryAcceptUrl = "${configUrl1}accept-request";
 
   ///============================= MAP APIS ==================================
+
   static String mapPlaceAutoCompleteUrl(String query) =>
       "${configUrl1}place_autocomplete?query=$query";
   static String mapPlaceDetailsUrl(String placeId) =>
       "${configUrl1}place_details?place_id=$placeId";
+
 }
