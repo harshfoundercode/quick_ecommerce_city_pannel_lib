@@ -1,7 +1,8 @@
 class ApiUrl {
   static const String adminVersion = "1.0.0";
   // static const String baseurl = "https://payment.codescarts.com/";
-  static const String baseurl = "https://fasto.siberiancrane.tech/";
+  // static const String baseurl = "https://fasto.siberiancrane.tech/";
+  static const String baseurl = "https://root.fastocatz.com/";
 
   static const String configUrl1 = "${baseurl}api/";
 
